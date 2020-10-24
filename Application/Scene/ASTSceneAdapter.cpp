@@ -2,6 +2,7 @@
 #include "BSpline.h"
 #include "BezierSpline.h"
 #include "Circle.h"
+#include "Sphere.h"
 #include "Environment.h"
 #include "Face.h"
 #include "Funnel.h"
@@ -46,7 +47,8 @@ static const std::unordered_map<std::string, ECommandKind> CommandInfoMap = {
     { "frontfaces", ECommandKind::Dummy },   { "backfaces", ECommandKind::Dummy },
     { "rimfaces", ECommandKind::Dummy },     { "bank", ECommandKind::BankSet },
     { "set", ECommandKind::BankSet },        { "delete", ECommandKind::Instance },
-    { "subdivision", ECommandKind::Dummy },  { "offset", ECommandKind::Dummy }
+    { "subdivision", ECommandKind::Dummy },  { "offset", ECommandKind::Dummy },
+    { "sphere", ECommandKind::Entity }
 };
 
 ECommandKind CASTSceneAdapter::ClassifyCommand(const std::string& cmd)
@@ -62,6 +64,8 @@ CEntity* CASTSceneAdapter::MakeEntity(const std::string& cmd, const std::string&
         return new CBSpline(name);
     else if (cmd == "circle")
         return new CCircle(name);
+    else if (cmd == "sphere")
+        return new CSphere(name);
     else if (cmd == "face")
         return new CFace(name);
     else if (cmd == "funnel")
