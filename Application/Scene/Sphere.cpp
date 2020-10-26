@@ -63,7 +63,7 @@ void CSphere::UpdateEntity()
     }
 
     // Create faces
-    for (int circle = 0; circle < circles - 1)
+    for (int circle = 0; circle < circles - 1; circle++)
     {
         for (int i = 0; i < actualVertices; i++)
         {
@@ -85,17 +85,17 @@ void CSphere::UpdateEntity()
                 };
                 AddFace("f4_" + std::to_string(circle) + "_" + std::to_string(0), lowerFace);
 
-                std::vector<std::string> upperFace = {
+                std::vector<std::string> upperFace2 = {
                     "v2_" + std::to_string(circle) + "_" + std::to_string(i),
                     "v2_" + std::to_string(circle + 1) + "_" + std::to_string(i), "v4_0_0"
                 };
-                AddFace("f3_" + std::to_string(circle) + "_" + std::to_string(i), upperFace);
+                AddFace("f3_" + std::to_string(circle) + "_" + std::to_string(i), upperFace2);
 
-                std::vector<std::string> lowerFace = {
+                std::vector<std::string> lowerFace2 = {
                     "v3_" + std::to_string(circle) + "_" + std::to_string(i),
                     "v3_" + std::to_string(circle + 1) + "_" + std::to_string(i), "v4_0_0"
                 };
-                AddFace("f4_" + std::to_string(circle) + "_" + std::to_string(i), lowerFace);
+                AddFace("f4_" + std::to_string(circle) + "_" + std::to_string(i), lowerFace2);
             }
             else
             {
