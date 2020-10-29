@@ -1,0 +1,2 @@
+sphere sp (100 10 10 6.29318530718) endsphere
+instance sp1 sp scale (10 10 10) endinstance

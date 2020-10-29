@@ -31,28 +31,23 @@ void CSphere::UpdateEntity()
     int actualVertices = 0;
 
     for (int circle = 0; circle < circles; circle++) {
-        float height = (radius * circle) / circles;
+        float height = (radius * (float)circle) / circles;
         for (int i = 0; i < n; i++)
         {
-            float theta = (float)i / n * 2.f * (float)tc::M_PI;
+            float theta = (float)i / (float)n * 2.f * (float)tc::M_PI;
             if (theta > degrees)
             {
                 break;
             }
-            if (circle == 0) {
-                AddVertex("v1_" + std::to_string(circle) + "_" + std::to_string(i),
-                          { radius * cosf(theta), radius * sinf(theta), 0 });
-            }
-            else
-            {
-                float a = sqrt(pow(radius, 2) - pow(height, 2));
-                AddVertex("v2_" + std::to_string(circle) + "_" + std::to_string(i),
-                          { a * cosf(theta), a * sinf(theta), height });
-                AddVertex("v3_" + std::to_string(circle) + "_" + std::to_string(i),
-                          { a * cosf(theta), a * sinf(theta), -height });
-            }
+           
+            float a = sqrt(pow(radius, 2) - pow(height, 2));
+            AddVertex("v2_" + std::to_string(circle) + "_" + std::to_string(i),
+                      { a * cosf(theta), a * sinf(theta), height });
+            AddVertex("v3_" + std::to_string(circle) + "_" + std::to_string(i),
+                      { a * cosf(theta), a * sinf(theta), -height });
             actualVertices++;
         }
+        actualVertices = 0;
     }
     
 
@@ -67,12 +62,8 @@ void CSphere::UpdateEntity()
     {
         for (int i = 0; i < actualVertices; i++)
         {
-            // CCW winding
-            // v1_i v1_next
-            // v2_i v2_next
-            // v3_i v3_next
             int next = (i + 1) % actualVertices;
-            if (actualVertices != n && (i == actualVertices - 1)) {
+            if (actualVertices != n && (i == (actualVertices - 1))) {
                 std::vector<std::string> upperFace = {
                     "v2_" + std::to_string(circle) + "_" + std::to_string(0),
                     "v2_" + std::to_string(circle + 1) + "_" + std::to_string(0), "v4_0_0"
@@ -89,13 +80,13 @@ void CSphere::UpdateEntity()
                     "v2_" + std::to_string(circle) + "_" + std::to_string(i),
                     "v2_" + std::to_string(circle + 1) + "_" + std::to_string(i), "v4_0_0"
                 };
-                AddFace("f3_" + std::to_string(circle) + "_" + std::to_string(i), upperFace2);
+                AddFace("f5_" + std::to_string(circle) + "_" + std::to_string(i), upperFace2);
 
                 std::vector<std::string> lowerFace2 = {
                     "v3_" + std::to_string(circle) + "_" + std::to_string(i),
                     "v3_" + std::to_string(circle + 1) + "_" + std::to_string(i), "v4_0_0"
                 };
-                AddFace("f4_" + std::to_string(circle) + "_" + std::to_string(i), lowerFace2);
+                AddFace("f6_" + std::to_string(circle) + "_" + std::to_string(i), lowerFace2);
             }
             else
             {

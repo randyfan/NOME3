@@ -1,6 +1,8 @@
 version: 3.0.{build}
 image: Visual Studio 2017
-
+cache:
+  - c:\Tools\vcpkg\
+  - C:/projects/nome3/build-appveyor/"
 install:
   - cd %APPVEYOR_BUILD_FOLDER%
   - git submodule update --init --recursive

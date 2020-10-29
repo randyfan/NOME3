@@ -1,0 +1,9 @@
+bank sphere_slider
+  set VerticesPerCircle 100 1 500 1
+  set NumberOfCircles 100 1 200 1
+  set r 20 1 100 1
+  set Degrees 360 0 360 1
+endbank
+
+sphere sp ({expr $sphere_slider.VerticesPerCircle} {expr $sphere_slider.NumberOfCircles} {expr $sphere_slider.r} {expr $sphere_slider.Degrees}) endsphere
+instance sp1 sp scale (10 10 10) endinstance
