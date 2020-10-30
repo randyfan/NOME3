@@ -32,6 +32,7 @@ void CSphere::UpdateEntity()
 
     for (int circle = 0; circle < circles; circle++) {
         float height = (radius * (float)circle) / circles;
+        actualVertices = 0;
         for (int i = 0; i < n; i++)
         {
             float theta = (float)i / (float)n * 2.f * (float)tc::M_PI;
@@ -47,7 +48,6 @@ void CSphere::UpdateEntity()
                       { a * cosf(theta), a * sinf(theta), -height });
             actualVertices++;
         }
-        actualVertices = 0;
     }
     
 
