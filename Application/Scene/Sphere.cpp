@@ -93,7 +93,7 @@ void CSphere::UpdateEntity()
                 std::vector<std::string> upperFace = {
                     "v2_" + std::to_string(circle) + "_" + std::to_string(i),
                     "v2_" + std::to_string(circle + 1) + "_" + std::to_string(i),
-                    "v2_" + std::to_string(circle + 1) + "_" + std::to_string(next)
+                    "v2_" + std::to_string(circle + 1) + "_" + std::to_string(next),
                     "v2_" + std::to_string(circle) + "_" + std::to_string(next)
                 };
                 AddFace("f1_" + std::to_string(circle) + "_" + std::to_string(i), upperFace);
@@ -101,8 +101,8 @@ void CSphere::UpdateEntity()
                 std::vector<std::string> lowerFace = {
                     "v3_" + std::to_string(circle) + "_" + std::to_string(i),
                     "v3_" + std::to_string(circle + 1) + "_" + std::to_string(i),
-                    "v3_" + std::to_string(circle + 1) + "_" + std::to_string(next)
-                    "v3_" + std::to_string(circle) + "_" + std::to_string(next);
+                    "v3_" + std::to_string(circle + 1) + "_" + std::to_string(next),
+                    "v3_" + std::to_string(circle) + "_" + std::to_string(next)
                 };
                 AddFace("f2_" + std::to_string(circle) + "_" + std::to_string(i), lowerFace);
             
