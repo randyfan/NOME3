@@ -35,7 +35,7 @@ void CSphere::UpdateEntity()
         actualVertices = 0;
         for (int i = 0; i < n; i++)
         {
-            float theta = (float)i / (float)n * 2.f * (float)tc::M_PI;
+            float theta = ((float)i / (float)n) * 2.f * (float)tc::M_PI;
             if (theta > degrees)
             {
                 break;
