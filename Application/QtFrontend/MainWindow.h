@@ -87,7 +87,6 @@ private:
     // Slider panel management
     void OnSliderAdded(Scene::CSlider& slider, const std::string& name) override;
     void OnSliderRemoving(Scene::CSlider& slider, const std::string& name) override;
-    void AddSliderDivider() override; // Randy added this on 10/15 for dividers between banks
     Ui::MainWindow* ui;
     std::unique_ptr<CNome3DView> Nome3DView;
     //QLineEdit* InstName; // Randy decided not to use this for now. This was originally intended to allow users to name their added faces/polylines

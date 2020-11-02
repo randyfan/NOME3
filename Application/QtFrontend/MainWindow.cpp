@@ -420,13 +420,6 @@ void CMainWindow::UnloadNomeFile()
     Scene = nullptr;
 }
 
-// Randy added on 10/15 to add slider divider between different banks
-void CMainWindow::AddSliderDivider()
-{
-
-    auto* sliderLayout = new QHBoxLayout();
-    SliderLayout->addRow(tr("&Next bank"), sliderLayout);
-}
     void CMainWindow::OnSliderAdded(Scene::CSlider& slider, const std::string& name) // adding a single widget at a time
 {
     if (!SliderWidget)  // Initialize slider widget if it hasn't been initialized before
