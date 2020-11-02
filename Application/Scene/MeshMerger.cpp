@@ -101,7 +101,7 @@ void CMeshMerger::MergeIn(const CMeshInstance& meshInstance)
     auto meshClass =
         meshInstance.GetSceneTreeNode()->GetOwner()->GetEntity()->GetMetaObject().ClassName();
     if (meshClass == "CPolyline") {
-        std::cout << "yolo" << std::endl;
+        std::cout << "found Polyline entity" << std::endl;
     }
 
     // Copy over all the vertices and check for overlapping

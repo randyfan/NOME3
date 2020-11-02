@@ -35,10 +35,8 @@ CFaceToQGeometry::CFaceToQGeometry(const CMeshImpl& fromMesh,
     CVertexData v0, vPrev, vCurr;
     int faceVCount = 0;
     CMeshImpl::FaceVertexIter fvIter = CMeshImpl::FaceVertexIter(fromMesh, fH);
-   //std::cout << "CHECK IS VALID" << std::endl;
     for (; fvIter.is_valid(); ++fvIter)
     {
-        //std::cout << "FACE VERTEX IS VALID" << std::endl;
         CMeshImpl::VertexHandle faceVert = *fvIter;
         if (faceVCount == 0)
         {
@@ -77,7 +75,6 @@ CFaceToQGeometry::CFaceToQGeometry(const CMeshImpl& fromMesh,
     posAttr->setName(Qt3DRender::QAttribute::defaultPositionAttributeName());
     posAttr->setAttributeType(Qt3DRender::QAttribute::VertexAttribute);
     posAttr->setBuffer(buffer);
-    std::cout << "BUILDER VERTEX COUNT: " + std::to_string(builder.GetVertexCount()) << std::endl;
     posAttr->setCount(builder.GetVertexCount());
     attrPos.FillInQAttribute(posAttr);
     Geometry->addAttribute(posAttr);
@@ -111,10 +108,8 @@ CFaceToQGeometry::CFaceToQGeometry(const CMeshImpl& fromMesh,
             pointBufferData.push_back(color[1] / 255.0f);
             pointBufferData.push_back(color[2] / 255.0f);
             printf("v%d: %d %d %d\n", vertexCount, color[0], color[1], color[2]);
-            std::cout << "IN HERE" << std::endl;
             vertexCount++;
         }
-        std::cout << "OUT HERE" << std::endl;
         QByteArray copyOfBuffer { reinterpret_cast<const char*>(pointBufferData.data()),
                                   static_cast<int>(pointBufferData.size() * sizeof(float)) };
         auto* buffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer, PointGeometry);

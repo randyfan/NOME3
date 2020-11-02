@@ -931,11 +931,6 @@ std::set<CMeshImpl::FaceHandle> CMeshInstance::GetSelectedFaceHandles() // Randy
 
 std::vector<std::string> CMeshInstance::GetFaceVertexNames(std::vector<std::string> facenames) // Randy added on 10/19 to return face vert names
 {
-    std::cout << facenames[0] << std::endl;
-    std::cout << "HEREabove is the selected face name" << std::endl;
-    std::cout << GetSceneTreeNode()->GetPath() << std::endl;
-
-
     // RANDY WORK ON THIS TOMORROW, WHICH IS CHECK MAKE FACENAMES SINGULAR. THEN CHECK IF THE FACENAME CONTAINS THE GETPATH. THEN CAN RETURN VERTNAMES
     for (auto& pair : NameToFace) {
         std::cout << pair.first << std::endl;

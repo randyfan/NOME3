@@ -66,7 +66,6 @@ void CInteractiveMesh::CreateInteractiveFaces() {
                 //facerenderers.push_back(facerenderer);
                 //facematerials.push_back(facematerial);
             }
-            std::cout << "finished creating interactive faces. Total size is: " + std::to_string(interactivefaces.size()) + " for: " + meshInstance->GetName() << std::endl;
         }
         else
         {
@@ -93,10 +92,8 @@ void CInteractiveMesh::UpdatePointGeometries() {
         auto* meshInstance = dynamic_cast<Scene::CMeshInstance*>(entity);
         auto openmesh = meshInstance->GetMeshImpl();
         CMeshToQGeometry meshToQGeometry(meshInstance->GetMeshImpl(), true); // This may be causing bugs Randy 
-                std::cout << "obtained point buffer from meshtoQGeometry" << std::endl;
         if (!PointEntity)
              {
-            std::cout << "setting material" << std::endl;
             PointEntity = new Qt3DCore::QEntity(this);
 
             auto xmlPath = CResourceMgr::Get().Find(
@@ -112,16 +109,12 @@ void CInteractiveMesh::UpdatePointGeometries() {
             delete PointRenderer;
             delete PointGeometry;
         }
-
-
-         std::cout << "creating new point geometry" << std::endl;
         PointGeometry = meshToQGeometry.GetPointGeometry();
         PointGeometry->setParent(PointEntity);
         PointRenderer = new Qt3DRender::QGeometryRenderer(PointEntity);
         PointRenderer->setGeometry(PointGeometry);
         PointRenderer->setPrimitiveType(Qt3DRender::QGeometryRenderer::Points);
         PointEntity->addComponent(PointRenderer);
-        std::cout << "done creating point geometry" << std::endl;
     }
 }
 
@@ -140,10 +133,8 @@ void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
         {
             delete GeometryRenderer; // I don't think is needed? this is not used here
             delete Geometry;  // I dont think this is needed? this is not used here
-            std::cout << "is a mesh instance" << std::endl;
             CMeshImpl::FaceIter fIter, fEnd = openmesh.faces_end();
             int counter = 0;
-            std::cout << openmesh.n_faces() << std::endl;
 
             for (auto facerender : facerenderers) {
                 delete facerender;
@@ -158,8 +149,7 @@ void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
             
             for (fIter = openmesh.faces_sbegin(); fIter != fEnd; ++fIter)
             {
-                std::cout << std::to_string(counter) + " interactive face" << std::endl;
-                std::cout << interactivefaces.size() << std::endl;
+
                 auto interactiveface = interactivefaces[counter];
 
                 // Commenting this out fixed the transform bug? Why is this not needed?
@@ -195,7 +185,6 @@ void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
                     }
                     auto* mat = new CXMLMaterial(QString::fromStdString(xmlPath));
                     interactiveface->addComponent(mat);
-                    std::cout << "found the selected face handle, let's color it green for now" << std::endl; 
                     mat->FindParameterByName("kd")->setValue(QVector3D(0, 1, 0)); 
                 }
                 else // else, use the instanceColor
@@ -305,7 +294,6 @@ void CInteractiveMesh::UpdateGeometry()
 
 void CInteractiveMesh::UpdateMaterial()
 {
-    std::cout << "inside interactive mesh update material!" << std::endl;
     QVector3D instanceColor { 1.0f, 0.5f, 0.1f }; // orange color
     // If the scene tree node is not within a group, then we can directly use its surface color
 
@@ -366,8 +354,7 @@ void CInteractiveMesh::UpdateMaterial()
     //{
     //    auto* interactiveface = new Qt3DCore::QEntity(this);
     //    auto openmesh = mesh->GetMeshImpl();
-    //    std::cout << "Trying to apply color to selected face" << std::endl;
-    //    std::cout << openmesh.has_face_colors() << std::endl;
+
     //    openmesh.set_color(fH, { 0, 0, 255 }); // useless, this color gets overwriten by material color. can be used after it gets fixed
     //    //mat->FindParameterByName("kd")->setValue(QVector3D(255, 0, 0));
     //    NomeFace::CFaceToQGeometry faceToQGeometry( openmesh, fH, false); 
@@ -380,7 +367,7 @@ void CInteractiveMesh::UpdateMaterial()
     //    auto xmlPath = CResourceMgr::Get().Find("WireframeLit.xml");
     //    auto* mat = new CXMLMaterial(QString::fromStdString(xmlPath));
     //    interactiveface->addComponent(mat); 
-    //    mat->FindParameterByName("kd")->setValue(QVector3D(0, 0, 1)); // ISSUE WITH THIS RANDY IS THAT RANDOMLY THIS COLOR OR ORIGINAL WILL APPEAR
+    //    mat->FindParameterByName("kd")->setValue(QVector3D(0, 0, 1)); 
     //}
     
     // Use non-default line color only if the instance has a surface

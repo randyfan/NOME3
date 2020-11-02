@@ -166,7 +166,6 @@ void CMainWindow::on_actionMerge_triggered()
         { // set "auto * mesh" to this entity. Call MergeIn to set merger's vertices based on mesh's
           // vertices. Reminder: an instance identifier is NOT a Mesh, so only real entities get
           // merged.
-            std::cout << "HERE IS mesh class name lol: " + mesh->GetMetaObject().ClassName() << std::endl;
             merger->MergeIn(*mesh);
         }
     });
@@ -201,7 +200,6 @@ void CMainWindow::on_actionSubdivide_triggered()
     Scene->Update();
     tc::TAutoPtr<Scene::CMeshMerger> merger = new Scene::CMeshMerger("globalMerge"); 
     Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
-        std::cout << "Teemo: " + node->GetOwner()->GetName() << std::endl;
         if (node->GetOwner()->GetName() == "globalMergeNode")
         {
             auto* entity = node->GetInstanceEntity(); 
@@ -426,7 +424,6 @@ void CMainWindow::UnloadNomeFile()
 void CMainWindow::AddSliderDivider()
 {
 
-    std::cout << "adding a slider divider" << std::endl;
     auto* sliderLayout = new QHBoxLayout();
     SliderLayout->addRow(tr("&Next bank"), sliderLayout);
 }
@@ -458,22 +455,22 @@ void CMainWindow::AddSliderDivider()
     else
     {
         auto bankname = name.substr(0, name.find_last_of(".") + 1);
-        std::cout << bankname << std::endl;
-        auto alreadyadded = false;
+
+        // Check if bank has already been added 
+        auto alreadyAdded = false;
         for (auto& Pair : SliderNameToWidget) {
-            std::cout << "If this bank hasn't been added yet" << std::endl;
             if (Pair.first.substr(0, Pair.first.find_last_of(".") + 1) == bankname) {
-                alreadyadded = true;
+                alreadyAdded = true;
             }
         }
-        if (!alreadyadded) {
 
+        // If it hasn't been added, add a blank row
+        if (!alreadyAdded) {
             auto* sliderName = new QLabel();
             sliderName->setText(QString::fromStdString(""));
             QFont f("Arial", 13);
             sliderName->setFont(f);
             auto* sliderLayout = new QHBoxLayout();
-
 
             SliderLayout->addRow(sliderName, sliderLayout);
             SliderNameToWidget.emplace(name, sliderLayout);

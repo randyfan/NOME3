@@ -126,7 +126,6 @@ void CNome3DView::PostSceneUpdate()
                     //mesh->UpdateGeometry(); // optimize this to work in the future. right now we can't have two materials on the same face unfortunately 
                     //mesh->UpdateMaterial(); // optimize this to wokr in the future. right now we can't have two materials on the same face unfortunately
                     node->SetEntityUpdated(false);
-                    std::cout << "FINISHed updating everything" << std::endl;
                 }
             }
             else
@@ -225,7 +224,6 @@ void CNome3DView::PickFaceWorldRay(const tc::Ray& ray)
 
     std::vector<std::tuple<float, Scene::CMeshInstance*, std::string>> hits;
     Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
-        std::cout << "Currently in NOME3DView's PickFaceWorldRay. At node: " + node->GetPath() << std::endl;
         // Obtain either an instance entity or a shared entity from the scene node
         auto* entity = node->GetInstanceEntity();
         if (!entity)
@@ -374,56 +372,44 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
                     .Normalized(); // Normalize to fix "scale" error caused by l2w.Inverse()
             auto* meshInst = dynamic_cast<Scene::CMeshInstance*>(entity);
             auto pickResults = meshInst->PickEdges(localRay);
-            std::cout << "got edge pick results" << std::endl;
-            std::cout << pickResults.size() << std::endl;
             for (const auto& [dist, names] : pickResults)
                 hits.emplace_back(dist, meshInst, names);
         }
     });
-    std::cout << "begin marking1" << std::endl;
     std::sort(hits.begin(), hits.end());
     // if (!hits.empty()) {
     //    hits.resize(1); // Force there to be only one face selected. This is more user-friendly.
     //}
-    std::cout << "begin marking2" << std::endl;
     if (hits.size() == 1)
     {
-        std::cout << "begin marking3" << std::endl;
         const auto& [dist, meshInst, edgeVertNames] = hits[0]; // where the edgeVertNames is defined to a vector of two vertex names
         std::vector<std::string>::iterator position1 =
             std::find(SelectedVertices.begin(), SelectedVertices.end(), edgeVertNames[0]);
         std::vector<std::string>::iterator position2 =
             std::find(SelectedVertices.begin(), SelectedVertices.end(), edgeVertNames[1]);
         
-        std::cout << "begin marking4" << std::endl;
         if (position1 == SelectedVertices.end() || position2 == SelectedVertices.end()) // if either vertex has not been selected before, then the edge hasn't been selected
         { // if this edge has not been selected before
-            std::cout << "begin marking5" << std::endl;
             SelectedVertices.push_back(edgeVertNames[0]);
-            std::cout << "begin marking6" << std::endl;
             SelectedVertices.push_back(edgeVertNames[1]);
-            std::cout << "begin marking7" << std::endl;
             GFrtCtx->MainWindow->statusBar()->showMessage(
                 QString::fromStdString("Selected " + edgeVertNames[0] + edgeVertNames[1] + " edge"));
-            std::cout << "begin marking8" << std::endl;
         }
         else // else, this edge has been selected previously
         {
-         /*   std::cout << "tamada1" << std::endl;
+         /*   
             std::string removed;
             if (position1 != SelectedVertices.end())
             {
-                std::cout << "tamada2" << std::endl;
                 SelectedVertices.erase(position1);
                 removed += edgeVertNames[0];
             }
             if (position2 != SelectedVertices.end())
             {
-                std::cout << "tamad3" << std::endl;
                 SelectedVertices.erase(position2);
                 removed += edgeVertNames[1];
             }
-            std::cout << "tamad4" << std::endl*/;
+            ;*/
             GFrtCtx->MainWindow->statusBar()->showMessage(
                 QString::fromStdString("TODO: Unselecte the edge"));
         }
