@@ -38,6 +38,13 @@ void CBankAndSet::AddSlider(const std::string& name, AST::ACommand* cmd, float v
         observer->OnSliderAdded(*slider, name);
 }
 
+// Randy added this to add a divider between the sliders
+void CBankAndSet::AddDivider()
+{
+    for (auto* observer : Observers)
+        observer->AddSliderDivider();
+}
+
 CSlider* CBankAndSet::GetSlider(const std::string& name)
 {
     std::map<std::string, tc::TAutoPtr<CSlider>>::iterator iter;

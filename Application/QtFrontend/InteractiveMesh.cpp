@@ -2,6 +2,7 @@
 #include "FrontendContext.h"
 #include "MaterialParser.h"
 #include "MeshToQGeometry.h"
+#include "FaceToQGeometry.h" // Randy added on 10/12
 #include "Nome3DView.h"
 #include "ResourceMgr.h"
 #include <Matrix3x4.h>
@@ -22,11 +23,214 @@ CInteractiveMesh::CInteractiveMesh(Scene::CSceneTreeNode* node)
     , PointGeometry {}
     , PointRenderer {}
 {
-    UpdateTransform();
-    UpdateGeometry();
-    UpdateMaterial();
+    
+    // UpdateTransform();
+
+    CreateInteractiveFaces(); // Randy added this on 10/12. can use the Mesh's transform for each face
+    UpdateFaceGeometries(true); // currently material logic is in here also
+    UpdatePointGeometries();// Randy added this
+    // UpdateFaceMaterials(); // test this later. default should be gray face
+    // probably don't need InitInteractiosn again?
+
+
+
+ /*   UpdateGeometry();
+    UpdateMaterial();*/
     InitInteractions();
 }
+
+// Randy added this on 10/12
+void CInteractiveMesh::CreateInteractiveFaces() {
+    auto* entity = SceneTreeNode->GetInstanceEntity();
+    if (!entity)
+    {
+        entity = SceneTreeNode->GetOwner()->GetEntity();
+        
+    }
+    if (entity)
+    {
+        auto* meshInstance = dynamic_cast<Scene::CMeshInstance*>(entity);
+        if (meshInstance)
+        {
+            auto openmesh = meshInstance->GetMeshImpl();
+            CMeshImpl::FaceIter fIter, fEnd = openmesh.faces_end();
+
+            for (fIter = openmesh.faces_sbegin(); fIter != fEnd; ++fIter)
+            {
+                auto * interactiveface = new Qt3DCore::QEntity(this); // afternoon change to "this" as root. RANDY THIS CHANGED IT!!!!!!!!!!! ADDING THIS at 2:59 PM PDT HELPED      
+                                                                //auto facegeometry = new Qt3DRender::QGeometry();
+                //auto facerenderer = new Qt3DRender::QGeometryRenderer();
+                //auto facematerial = new Qt3DRender::QMaterial();
+                interactivefaces.push_back(interactiveface);
+                //facegeometries.push_back(facegeometry);
+                //facerenderers.push_back(facerenderer);
+                //facematerials.push_back(facematerial);
+            }
+            std::cout << "finished creating interactive faces. Total size is: " + std::to_string(interactivefaces.size()) + " for: " + meshInstance->GetName() << std::endl;
+        }
+        else
+        {
+            // The entity is not a mesh instance, we don't know how to handle it. For example, if
+            // you try to instanciate a face, it'll generate this placeholder sphere.
+
+        }
+    }
+
+}
+
+
+void CInteractiveMesh::UpdatePointGeometries() { 
+ // Update or create the entity for drawing vertices
+    // Update or create the entity for drawing vertices
+
+    auto* entity = SceneTreeNode->GetInstanceEntity();
+    if (!entity)
+    {
+        entity = SceneTreeNode->GetOwner()->GetEntity();
+    }
+    if (entity)
+    {
+        auto* meshInstance = dynamic_cast<Scene::CMeshInstance*>(entity);
+        auto openmesh = meshInstance->GetMeshImpl();
+        CMeshToQGeometry meshToQGeometry(meshInstance->GetMeshImpl(), true); // This may be causing bugs Randy 
+                std::cout << "obtained point buffer from meshtoQGeometry" << std::endl;
+        if (!PointEntity)
+             {
+            std::cout << "setting material" << std::endl;
+            PointEntity = new Qt3DCore::QEntity(this);
+
+            auto xmlPath = CResourceMgr::Get().Find(
+                "DebugDrawLine.xml"); // this uses instanceColor, and also uses LineShading.frag
+                                      // (which is used for polylines) for final color
+            auto* lineMat = new CXMLMaterial(QString::fromStdString(xmlPath));
+            PointMaterial = lineMat;
+            PointMaterial->setParent(this);
+            PointEntity->addComponent(PointMaterial);
+        }
+        else
+        {
+            delete PointRenderer;
+            delete PointGeometry;
+        }
+
+
+         std::cout << "creating new point geometry" << std::endl;
+        PointGeometry = meshToQGeometry.GetPointGeometry();
+        PointGeometry->setParent(PointEntity);
+        PointRenderer = new Qt3DRender::QGeometryRenderer(PointEntity);
+        PointRenderer->setGeometry(PointGeometry);
+        PointRenderer->setPrimitiveType(Qt3DRender::QGeometryRenderer::Points);
+        PointEntity->addComponent(PointRenderer);
+        std::cout << "done creating point geometry" << std::endl;
+    }
+}
+
+void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
+{
+    std::cout << "inside update face geometries" << std::endl;
+    auto* entity = SceneTreeNode->GetInstanceEntity();
+    if (!entity)
+        entity = SceneTreeNode->GetOwner()->GetEntity();
+
+    if (entity)
+    {
+        auto* meshInstance = dynamic_cast<Scene::CMeshInstance*>(entity);
+        auto openmesh = meshInstance->GetMeshImpl();
+        if (meshInstance)
+        {
+            delete GeometryRenderer; // I don't think is needed? this is not used here
+            delete Geometry;  // I dont think this is needed? this is not used here
+            std::cout << "is a mesh instance" << std::endl;
+            CMeshImpl::FaceIter fIter, fEnd = openmesh.faces_end();
+            int counter = 0;
+            std::cout << openmesh.n_faces() << std::endl;
+
+            for (auto facerender : facerenderers) {
+                delete facerender;
+            }
+            facerenderers.clear();
+            for (auto facegeometry : facegeometries)
+            {
+                delete facegeometry;
+            }
+            facegeometries.clear();
+
+            
+            for (fIter = openmesh.faces_sbegin(); fIter != fEnd; ++fIter)
+            {
+                std::cout << std::to_string(counter) + " interactive face" << std::endl;
+                std::cout << interactivefaces.size() << std::endl;
+                auto interactiveface = interactivefaces[counter];
+
+                // Commenting this out fixed the transform bug? Why is this not needed?
+                //auto * facetransform = new Qt3DCore::QTransform(this); 
+                //interactiveface->addComponent(facetransform);
+                //const auto& tf = SceneTreeNode->L2WTransform.GetValue(tc::Matrix3x4::IDENTITY);
+                //QMatrix4x4 qtf { tf.ToMatrix4().Data() };
+                //facetransform->setMatrix(qtf);
+
+                auto fH = *fIter;
+                auto selectedfacehandles = meshInstance->GetSelectedFaceHandles();
+
+                // If this fH is selected, create a unique material for it
+                if (selectedfacehandles.find(fH) != selectedfacehandles.end()) {
+                    NomeFace::CFaceToQGeometry faceToQGeometry(openmesh, fH, false);// must set to false to avoid generating all mesh points for every face
+                    auto* facegeometry = faceToQGeometry.GetGeometry();
+                    facegeometries.push_back(facegeometry); // Randy added this so can keep track of facegeometry and clear at the end
+                    facegeometry->setParent(interactiveface);
+                    auto* facerender = new Qt3DRender::QGeometryRenderer(interactiveface);
+                    facerenderers.push_back(facerender); // Randy added this so can keep track of
+                                                            // facerenders and clear at the end
+                    facerender->setGeometry(facegeometry);
+                    facerender->setPrimitiveType(Qt3DRender::QGeometryRenderer::Triangles);
+                    interactiveface->addComponent(facerender); // adding geometry data to interactive face
+                    std::string xmlPath;
+                    if (wireframe)
+                    {
+                        xmlPath = CResourceMgr::Get().Find("WireFrameLit.xml");
+                    }
+                    else
+                    {
+                        xmlPath = CResourceMgr::Get().Find("RandyLit.xml");
+                    }
+                    auto* mat = new CXMLMaterial(QString::fromStdString(xmlPath));
+                    interactiveface->addComponent(mat);
+                    std::cout << "found the selected face handle, let's color it green for now" << std::endl; 
+                    mat->FindParameterByName("kd")->setValue(QVector3D(0, 1, 0)); 
+                }
+                else // else, use the instanceColor
+                {
+                    NomeFace::CFaceToQGeometry faceToQGeometry(openmesh, fH, false); // must set to false to avoid generating all mesh points for every face
+                    auto* facegeometry = faceToQGeometry.GetGeometry();
+                    facegeometry->setParent(interactiveface);
+                    auto* facerender = new Qt3DRender::QGeometryRenderer(interactiveface);
+                    facerender->setGeometry(facegeometry);
+                    facerender->setPrimitiveType(Qt3DRender::QGeometryRenderer::Triangles);
+                    interactiveface->addComponent(facerender); // adding geometry data to interactive face
+                    std::string xmlPath;
+                    if (wireframe)
+                    {
+                        xmlPath = CResourceMgr::Get().Find("WireFrameLit.xml");
+                    }
+                    else
+                    {
+                        xmlPath = CResourceMgr::Get().Find("RandyLit.xml");
+                    }
+                    auto* mat = new CXMLMaterial(QString::fromStdString(xmlPath));
+                    interactiveface->addComponent(mat);
+                    mat->FindParameterByName("kd")->setValue(QVector3D(0, 0, 1)); // color rgb ranges from 0 to 1
+                        //mat->FindParameterByName("kd")->setValue(QVector3D(1 - .15 * counter, 0, 0)); // (20*counter, 0, 255*counter));
+                }
+                counter += 1;
+            }
+        }
+    }
+}
+
+
+
+
+
 
 void CInteractiveMesh::UpdateTransform()
 {
@@ -53,24 +257,23 @@ void CInteractiveMesh::UpdateGeometry()
         auto* meshInstance = dynamic_cast<Scene::CMeshInstance*>(entity);
         if (meshInstance)
         {
-            delete GeometryRenderer;
-            delete Geometry;
-
+            delete GeometryRenderer; // Randy note: this may not be needed 
+            delete Geometry; // Randy note: this may not be needed
+            // A Qt3DRender::QGeometry class is used to group a list of Qt3DRender::QAttribute objects together to form a geometric shape Qt3D is able to render using Qt3DRender::QGeometryRenderer. 
             CMeshToQGeometry meshToQGeometry(meshInstance->GetMeshImpl(), true);
             Geometry = meshToQGeometry.GetGeometry();
             Geometry->setParent(this);
-
             GeometryRenderer = new Qt3DRender::QGeometryRenderer(this);
             GeometryRenderer->setGeometry(Geometry);
             GeometryRenderer->setPrimitiveType(Qt3DRender::QGeometryRenderer::Triangles);
-            this->addComponent(GeometryRenderer);
+            this->addComponent(GeometryRenderer); // adding geometry data to interactive mesh
 
             // Update or create the entity for drawing vertices
             if (!PointEntity) 
             {
                 PointEntity = new Qt3DCore::QEntity(this);
 
-                auto xmlPath = CResourceMgr::Get().Find("DebugDrawLine.xml"); //this uses instanceColor, and also uses LineShading.frag for final color
+                auto xmlPath = CResourceMgr::Get().Find("DebugDrawLine.xml"); //this uses instanceColor, and also uses LineShading.frag (which is used for polylines) for final color
                 auto* lineMat = new CXMLMaterial(QString::fromStdString(xmlPath));
                 PointMaterial = lineMat;
                 PointMaterial->setParent(this);
@@ -90,7 +293,7 @@ void CInteractiveMesh::UpdateGeometry()
         }
         else
         {
-            // The entity is not a mesh instance, we don't know how to handle it
+            // The entity is not a mesh instance, we don't know how to handle it. For example, if you try to instanciate a face, it'll generate this placeholder sphere.
             auto* vPlaceholder = new Qt3DExtras::QSphereMesh(this);
             vPlaceholder->setRadius(1.0f);
             vPlaceholder->setRings(16);
@@ -102,9 +305,10 @@ void CInteractiveMesh::UpdateGeometry()
 
 void CInteractiveMesh::UpdateMaterial()
 {
-    QVector3D instanceColor { 1.0f, 0.5f, 0.1f };
-
+    std::cout << "inside interactive mesh update material!" << std::endl;
+    QVector3D instanceColor { 1.0f, 0.5f, 0.1f }; // orange color
     // If the scene tree node is not within a group, then we can directly use its surface color
+
     if (!SceneTreeNode->GetParent()->GetOwner()->IsGroup()) 
     {
         if (auto surface = SceneTreeNode->GetOwner()->GetSurface()) 
@@ -150,8 +354,35 @@ void CInteractiveMesh::UpdateMaterial()
         Material = mat;
     }
     auto* mat = dynamic_cast<CXMLMaterial*>(Material);
-    mat->FindParameterByName("kd")->setValue(instanceColor);
 
+    mat->FindParameterByName("kd")->setValue(instanceColor); 
+
+    // Randy Work in progress: Use original implementation to speed up. It's really slow to create a new material for each face
+
+    //    auto* mesh = dynamic_cast<Scene::CMeshInstance*>(SceneTreeNode->GetInstanceEntity());
+    // auto selectedfacehandles = mesh->GetSelectedFaceHandles();
+    // Kd (the diffuse color) dominates the color. The difficult part with this solution is it undetermined which material will show up when overlapping.
+    //for (auto fH : selectedfacehandles)
+    //{
+    //    auto* interactiveface = new Qt3DCore::QEntity(this);
+    //    auto openmesh = mesh->GetMeshImpl();
+    //    std::cout << "Trying to apply color to selected face" << std::endl;
+    //    std::cout << openmesh.has_face_colors() << std::endl;
+    //    openmesh.set_color(fH, { 0, 0, 255 }); // useless, this color gets overwriten by material color. can be used after it gets fixed
+    //    //mat->FindParameterByName("kd")->setValue(QVector3D(255, 0, 0));
+    //    NomeFace::CFaceToQGeometry faceToQGeometry( openmesh, fH, false); 
+    //    auto* facegeometry = faceToQGeometry.GetGeometry();
+    //    facegeometry->setParent(interactiveface);
+    //    auto* facerender = new Qt3DRender::QGeometryRenderer(interactiveface);
+    //    facerender->setGeometry(facegeometry);
+    //    facerender->setPrimitiveType(Qt3DRender::QGeometryRenderer::Triangles);
+    //    interactiveface->addComponent(facerender); // adding geometry data to interactive face
+    //    auto xmlPath = CResourceMgr::Get().Find("WireframeLit.xml");
+    //    auto* mat = new CXMLMaterial(QString::fromStdString(xmlPath));
+    //    interactiveface->addComponent(mat); 
+    //    mat->FindParameterByName("kd")->setValue(QVector3D(0, 0, 1)); // ISSUE WITH THIS RANDY IS THAT RANDOMLY THIS COLOR OR ORIGINAL WILL APPEAR
+    //}
+    
     // Use non-default line color only if the instance has a surface
     auto surface = SceneTreeNode->GetOwner()->GetSurface();
     if (LineMaterial && surface)
@@ -173,14 +404,21 @@ void CInteractiveMesh::InitInteractions()
     connect(picker, &Qt3DRender::QObjectPicker::pressed, [](Qt3DRender::QPickEvent* pick) {
         if (pick->button() == Qt3DRender::QPickEvent::LeftButton)
         {
-            const auto& wi = pick->worldIntersection();
-            const auto& origin = GFrtCtx->NomeView->camera()->position();
-            auto dir = wi - origin;
+            if (pick->modifiers() & Qt::ShiftModifier)
+            {
+                const auto& wi = pick->worldIntersection();
+                const auto& origin = GFrtCtx->NomeView->camera()->position();
+                auto dir = wi - origin;
 
-            tc::Ray ray({ origin.x(), origin.y(), origin.z() }, { dir.x(), dir.y(), dir.z() });
-            //bool additive = pick->modifiers() & Qt::ShiftModifier;
-            GFrtCtx->NomeView->PickVertexWorldRay(ray); // additive);
-            //GFrtCtx->NomeView->PickFaceWorldRay(ray);  // Randy added on 10/10 for pick face
+                tc::Ray ray({ origin.x(), origin.y(), origin.z() }, { dir.x(), dir.y(), dir.z() });
+
+                GFrtCtx->NomeView->PickEdgeWorldRay(ray); // Randy added on 10/29 for edge selection
+                GFrtCtx->NomeView->PickVertexWorldRay(ray);
+                GFrtCtx->NomeView->PickFaceWorldRay(
+                    ray); // Randy added on 10/10 for face selection. 
+                //Warning, order affects display messages. Fix later.
+            }
+
         }
     });
     this->addComponent(picker);

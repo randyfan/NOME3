@@ -38,9 +38,11 @@ void CFace::SetPointSourceNames(const TAutoPtr<CScene>& scene, std::vector<std::
         Flow::TOutput<CVertexInfo*>* pointOutput = scene->FindPointOutput(point);
         if (!pointOutput)
         {
+            std::cout << "uhh what happened" << std::endl;
             // Uhh what happened?
             continue;
         }
+        std::cout << "found point source name" << std::endl;
         Points.Connect(*pointOutput);
     }
 }

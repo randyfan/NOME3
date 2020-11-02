@@ -3,6 +3,9 @@
         <file>Shaders/Wireframe.vert</file>
         <file>Shaders/Wireframe.geom</file>
         <file>Shaders/Wireframe.frag</file>
+        <file>Shaders/Randy.vert</file>
+        <file>Shaders/Randy.geom</file>
+        <file>Shaders/Randy.frag</file>
         <file>Shaders/ColorFlat.frag</file>
         <file>Shaders/default.vert</file>
         <file>Shaders/PointCloud.geom</file>

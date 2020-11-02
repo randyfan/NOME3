@@ -34,6 +34,7 @@ class ISliderObserver : public tc::FNonCopyable
 public:
     virtual void OnSliderAdded(CSlider& slider, const std::string& name) = 0;
     virtual void OnSliderRemoving(CSlider& slider, const std::string& name) = 0;
+    virtual void AddSliderDivider() = 0; // Randy added this to add a divider between different banks
 
 protected:
     ~ISliderObserver() = default;
@@ -47,6 +48,7 @@ public:
     void AddSlider(const std::string& name, AST::ACommand* cmd, float value, float min, float max,
                    float step);
     CSlider* GetSlider(const std::string& name);
+    void AddDivider(); // Randy added this to add a divider between different banks
 
     // An observer is typically the GUI that is responsible for displaying the sliders
     void AddObserver(ISliderObserver* observer);

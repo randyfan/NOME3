@@ -17,6 +17,11 @@ public:
 
     [[nodiscard]] Scene::CSceneTreeNode* GetSceneTreeNode() const { return SceneTreeNode; }
 
+    
+    void CreateInteractiveFaces(); // Randy added this
+    void UpdateFaceGeometries(bool wireframe); // Randy added this 
+    void UpdatePointGeometries(); // Randy added this
+    void UpdateFaceMaterials(); // Randy added this. NOT USED
     void UpdateTransform();
     void UpdateGeometry();
     void UpdateMaterial();
@@ -36,6 +41,13 @@ private:
     Qt3DRender::QMaterial* PointMaterial;
     Qt3DRender::QGeometry* PointGeometry;
     Qt3DRender::QGeometryRenderer* PointRenderer;
+
+    // Randy TODO: instead of one QMaterial for entire mesh, we should have a Material for each face. This doesn't interfere with the topology and would allow specific face coloring
+    std::vector<Qt3DCore::QEntity*> interactivefaces;
+    std::vector<Qt3DRender::QGeometry*> facegeometries;
+    std::vector<Qt3DRender::QGeometryRenderer*> facerenderers;
+    std::vector<Qt3DRender::QMaterial*> facematerials;
+
 };
 
 }

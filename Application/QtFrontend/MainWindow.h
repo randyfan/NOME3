@@ -1,4 +1,4 @@
-#pragma once
+#pragma once 
 #include <Parsing/SourceManager.h>
 #include <Scene/Scene.h>
 #include <Scene/TemporaryMeshManager.h>
@@ -60,12 +60,15 @@ private slots:
     void on_actionAddFace_triggered();
     void on_actionAddPolyline_triggered(); 
 
-    void on_actionRemoveFace_triggered();
+    void on_actionRemoveFace_triggered(); // Randy added this
+    void on_actionSharpenFace_triggered(); // Randy added this
 
     /* Randy temporarily commenting out due to temporarymeshmanager changes
     void on_actionResetTempMesh_triggered(); */
 
     void on_actionCommitChanges_triggered();
+
+    void on_actionShowFacets_triggered(); // Randy added this
 
 private:
     // Load nome files into the current window, only call one of them
@@ -84,7 +87,7 @@ private:
     // Slider panel management
     void OnSliderAdded(Scene::CSlider& slider, const std::string& name) override;
     void OnSliderRemoving(Scene::CSlider& slider, const std::string& name) override;
-
+    void CMainWindow::AddSliderDivider() override; // Randy added this on 10/15 for dividers between banks
     Ui::MainWindow* ui;
     std::unique_ptr<CNome3DView> Nome3DView;
     //QLineEdit* InstName; // Randy decided not to use this for now. This was originally intended to allow users to name their added faces/polylines

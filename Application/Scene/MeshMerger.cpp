@@ -1,5 +1,5 @@
 #include "MeshMerger.h"
-
+#include "Environment.h" // may be useful in the future to add faces as entities
 #include <unordered_map>
 
 namespace Nome::Scene
@@ -14,6 +14,7 @@ void CMeshMerger::UpdateEntity()
 
     // Update is manual, so this entity has a dummy update method
 
+    std::cout << "Mesh Merger's face size is here: " + std::to_string(Faces.GetSize()) << std::endl;
     CEntity::UpdateEntity();
     SetValid(true);
 }
@@ -59,12 +60,16 @@ void CMeshMerger::Catmull(const CMeshInstance& meshInstance)
             vertMap[*vi] = closestVert;
         }*/
         //else
-        auto vnew = Mesh.add_vertex({ worldPos.x, worldPos.y + (maxY - minY) + 10, worldPos.z}); 
+
+        // TODO: add vert into scene
+
+
+        auto vnew = Mesh.add_vertex({ worldPos.x, worldPos.y , worldPos.z}); // previous:  Mesh.add_vertex({ worldPos.x, worldPos.y + (maxY - minY) + 10, worldPos.z}); 
         vertMap[*vi] = vnew;
         std::string vName = "v" + std::to_string(VertCount); 
         NameToVert.insert({ vName, vnew }); 
+        VertToName.insert({ vnew, vName });
         ++VertCount;
-        
     }
 
     // Add faces
@@ -82,6 +87,7 @@ void CMeshMerger::Catmull(const CMeshInstance& meshInstance)
         NameToFace.insert(
             { fName,
               fnew }); 
+        FaceToName.insert({ fnew, fName });
         FaceCount++;
     }
 }
@@ -90,6 +96,13 @@ void CMeshMerger::MergeIn(const CMeshInstance& meshInstance)
 {
     auto tf = meshInstance.GetSceneTreeNode()->L2WTransform.GetValue(tc::Matrix3x4::IDENTITY); // The transformation matrix is the identity matrix by default
     const auto& otherMesh = meshInstance.GetMeshImpl(); // Getting OpeshMesh implementation of a mesh. This allows us to traverse the mesh's vertices/faces
+
+    std::cout << "mesh class: " + meshInstance.GetSceneTreeNode()->GetOwner()->GetEntity()->GetMetaObject().ClassName() << std::endl;
+    auto meshClass =
+        meshInstance.GetSceneTreeNode()->GetOwner()->GetEntity()->GetMetaObject().ClassName();
+    if (meshClass == "CPolyline") {
+        std::cout << "yolo" << std::endl;
+    }
 
     // Copy over all the vertices and check for overlapping
     std::unordered_map<CMeshImpl::VertexHandle, CMeshImpl::VertexHandle> vertMap;
@@ -106,24 +119,47 @@ void CMeshMerger::MergeIn(const CMeshInstance& meshInstance)
         }
         else // Else, we haven't added a vertex at this location yet. So lets add_vertex to the merger mesh.
         {
-            auto vnew = Mesh.add_vertex({ worldPos.x, worldPos.y, worldPos.z }); // This adds a new vertex. Notice, we are passing in coordinates here, but it actually returns a vertex handle (essentially, a pointer to this vertex.
+            auto vnew = Mesh.add_vertex({ worldPos.x, worldPos.y, worldPos.z });
             vertMap[*vi] = vnew; // Map actual mesh vertex to merged vertex.This dictionary is useful for add face later.
             std::string vName = "v" + std::to_string(VertCount); // we of course need a name for this new vertex handle       
             NameToVert.insert({ vName, vnew }); // Add new merged vertex into NameToVert. This is if there wa sa floating point error above so we need to add an entirely new vertex + position ?
+            VertToName.insert({ vnew, vName }); // Randy added on 10/15
             ++VertCount; // VertCount is an attribute for this merger mesh. Starts at 0.
         }
     }
 
-    // Add faces
+    // Add faces and create a face mesh for each 
     for (auto fi = otherMesh.faces_begin(); fi != otherMesh.faces_end(); ++fi) //Iterate through all the faces in the mesh (that is, the non-merger mesh, aka the one you're trying to copy faces from)
     {
+      // Need to add vertices to scene. PAUSED HERE
+        //auto newface = new CFace("placeholder" + fi.handle().idx());  // TODO: may be useful in the future to add faces as entities
+        //GEnv.Scene->AddEntity(newface);  // TODO: may be useful in the future to add faces as entities
+        //Faces.Connect(newface->Face); // TODO: may be useful in the future to add faces as entities
+
         std::vector<CMeshImpl::VertexHandle> verts;
         for (auto vert : otherMesh.fv_range(*fi)) // iterate through all the vertices on this face 
-            verts.emplace_back(vertMap[vert]); // Add the vertice handles from above. In most cases, it will match the actual mesh's? Unless there is a floating point precision error?
+            verts.emplace_back(vertMap[vert]); // Add the vertex handles 
         auto fnew = Mesh.add_face(verts); // add_face processes the merger vertex handles and adds the face into the merger mesh (Mesh refers to the merger mesh here)
         std::string fName = "v" + std::to_string(FaceCount);
         NameToFace.insert({ fName, fnew }); // We add a new face in the same location as the actual mesh's face. This means if we adjust the actual mesh's parameters using a slider, you'll see the merger mesh in the actual mesh's original location
+        FaceToName.insert({ fnew, fName });
+        FaceVertsToFace.insert({ verts, fnew }); // This DS is directly used  for face selection
+        FaceToFaceVerts.insert({ fnew, verts });
         FaceCount++;
+    }
+
+    std::vector<CMeshImpl::VertexHandle> vHandles;;
+    for (auto& Pair : NameToVert) {
+        auto vHandle = Pair.second;
+        std::cout << "timmy " + std::to_string(vHandle.idx()) << std::endl;
+        vHandles.push_back(vHandle);
+    }
+
+    std::cout << "outside add line strip" << std::endl;
+    if (meshClass == "CPolyline")
+    {
+        std::cout << "adding line strip" << std::endl;
+        AddLineStrip("mergedpoly" , vHandles);
     }
 }
 

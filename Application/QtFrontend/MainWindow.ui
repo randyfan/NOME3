@@ -69,9 +69,11 @@
     <addaction name="separator"/>
     <addaction name="actionAddFace"/>
     <addaction name="actionAddPolyline"/>
-    <!--<addaction name="actionRemoveFace"/>-->
+    <addaction name="actionRemoveFace"/>
+     <addaction name="actionSharpenFace"/>
     <!--<addaction name="actionResetTempMesh"/>-->
      <addaction name="actionCommitChanges"/>
+     <addaction name="actionShowFacets"/>
    </widget>
    <addaction name="menuFile"/>
    <!--<addaction name="menuAdd"/>-->
@@ -96,10 +98,12 @@
    </attribute>
    <addaction name="actionAddFace"/>
    <addaction name="actionAddPolyline"/>
-   <!--<addaction name="actionRemoveFace"/>-->
+   <addaction name="actionRemoveFace"/>
+    <addaction name="actionSharpenFace"/>
    <!--<addaction name="actionResetTempMesh"/>
    <addaction name="separator"/>-->
    <addaction name="actionCommitChanges"/>
+    <addaction name="actionShowFacets"/>
   </widget>
   <action name="actionNew">
    <property name="text">
@@ -183,6 +187,11 @@
       <string>Remove Face</string>
     </property>
   </action>
+   <action name="actionSharpenFace">
+     <property name="text">
+       <string>Set Face as "Sharp"</string>
+     </property>
+   </action>
 <!--  <action name="actionResetTempMesh">
    <property name="text">
     <string>Reset Temp Mesh</string>
@@ -193,6 +202,11 @@
     <string>Commit Changes</string>
    </property>
   </action>
+   <action name="actionShowFacets">
+     <property name="text">
+       <string>Show Facets</string>
+     </property>
+   </action>
  </widget>
  <resources/>
  <connections/>

@@ -31,7 +31,7 @@ public:
 
     // Returns whether successful
     bool AddFaceIntoMesh(CMesh* mesh) const;
-
+    bool Preserved = false; // Randy added on 10/16 to preserve a face when doing CC subdivision
     // AST Handling
     AST::ACommand* MakeCommandNode(AST::CASTContext& ctx, AST::ACommand* parent);
 };

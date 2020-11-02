@@ -90,6 +90,10 @@ TAutoPtr<CSceneNode> CScene::FindGroup(const std::string& name) const
 Flow::TOutput<CVertexInfo*>* CScene::FindPointOutput(const std::string& id) const
 {
     auto iter = EntityLibrary.find(id);
+    
+    for (auto& debugpair : EntityLibrary) {
+        std::cout << "entitylibrary find point output: "  + debugpair.first << std::endl;
+    }
     if (iter != EntityLibrary.end())
     {
         TAutoPtr<CEntity> ent = iter->second;
@@ -100,6 +104,7 @@ Flow::TOutput<CVertexInfo*>* CScene::FindPointOutput(const std::string& id) cons
         }
     }
 
+    std::cout << "searching through scene tree now for : " + id << std::endl;
     size_t charsToIgnore = 0;
     if (id[0] == '.')
         charsToIgnore = 1;
@@ -124,7 +129,10 @@ Flow::TOutput<CVertexInfo*>* CScene::FindPointOutput(const std::string& id) cons
                 auto* point =
                     meshInstance->CreateVertexSelector(id.substr(charsToIgnore), idTurnedVertName);
                 if (point)
+                {
+                    std::cout << "found an actual point, not null ptr" << std::endl;
                     return &point->Point;
+                }
                 else
                     return nullptr;
             }

@@ -92,7 +92,9 @@ void CASTSceneAdapter::TraverseFile(AST::AFile* astRoot, CScene& scene)
 {
     assert(CmdTraverseStack.empty());
     for (auto* cmd : astRoot->GetCommands())
+    {
         VisitCommandBankSet(cmd, scene);
+    }
     InstanciateUnder = GEnv.Scene->GetRootNode();
     for (auto* cmd : astRoot->GetCommands())
         VisitCommandSyncScene(cmd, scene, false);
@@ -171,15 +173,12 @@ void CASTSceneAdapter::VisitCommandSyncScene(AST::ACommand* cmd, CScene& scene, 
         auto surface = cmd->GetNamedArgument("surface");
         if (surface)
         {
-            auto surfaceEntityNameExpr = surface->GetArgument(
-                0)[0]; // Returns a casted AExpr that was an AIdent before casting
+            auto surfaceEntityNameExpr = surface->GetArgument(0)[0]; // Returns a casted AExpr that was an AIdent before casting
             auto surfaceIdentifier = static_cast<AST::AIdent*>(&surfaceEntityNameExpr)->ToString(); // Downcast it back to an AIdent
             auto surfaceEntity = GEnv.Scene->FindEntity(surfaceIdentifier);
             if (surfaceEntity)
                 sceneNode->SetSurface(dynamic_cast<CSurface*>(surfaceEntity.Get()));
-            
         }
-
         auto entityName = cmd->GetPositionalIdentAsString(1);
         auto entity = GEnv.Scene->FindEntity(entityName);
         if (entity)

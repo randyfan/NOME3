@@ -7,6 +7,7 @@ namespace Nome::Scene
 
 class CMeshMerger : public CMesh
 {
+
 public:
     using Super = CMesh;
     CMeshMerger() = default;

@@ -1,16 +1,13 @@
-#include "MeshToQGeometry.h"
-
-#include <Qt3DRender/QBuffer>
+#include "FaceToQGeometry.h"
 #include <iostream>
-namespace Nome
+#include <Qt3DRender/QBuffer>
+
+namespace NomeFace // Randy changed this
 {
 
-CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeometry)
+CFaceToQGeometry::CFaceToQGeometry(const CMeshImpl& fromMesh,
+                                   const CMeshImpl::FaceHandle& fH, bool bGenPointGeometry)
 {
-
-    std::cout << "CMESHTOQGEOMETRY NUM FACES AFTER REMOVING: " + std::to_string(fromMesh.n_faces()) << std::endl;
-    std::cout << "CMESHTOQGEOMETRYNUM VERTICES AFTER REMOVING: "
-            + std::to_string(fromMesh.n_vertices());
     // Per face normal, thus no shared vertices between faces
     struct CVertexData
     {
@@ -34,44 +31,43 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeom
     builder.AddAttribute(&attrPos);
     builder.AddAttribute(&attrNor);
 
-    CMeshImpl::FaceIter fIter, fEnd = fromMesh.faces_end();
-    for (fIter = fromMesh.faces_sbegin(); fIter != fEnd; ++fIter)
-    {
-        CVertexData v0, vPrev, vCurr;
-        int faceVCount = 0;
-        CMeshImpl::FaceVertexIter fvIter = CMeshImpl::FaceVertexIter(fromMesh, *fIter);
-        for (; fvIter.is_valid(); ++fvIter)
-        {
-            CMeshImpl::VertexHandle faceVert = *fvIter;
-            if (faceVCount == 0)
-            {
-                const auto& posVec = fromMesh.point(faceVert);
-                v0.Pos = { posVec[0], posVec[1], posVec[2] };
-                const auto& fnVec = fromMesh.normal(*fIter);
-                v0.Normal = { fnVec[0], fnVec[1], fnVec[2] };
-            }
-            else if (faceVCount == 1)
-            {
-                const auto& posVec = fromMesh.point(faceVert);
-                vPrev.Pos = { posVec[0], posVec[1], posVec[2] };
-                const auto& fnVec = fromMesh.normal(*fIter);
-                vPrev.Normal = { fnVec[0], fnVec[1], fnVec[2] };
-            }
-            else
-            {
-                const auto& posVec = fromMesh.point(faceVert);
-                vCurr.Pos = { posVec[0], posVec[1], posVec[2] };
-                const auto& fnVec = fromMesh.normal(*fIter);
-                vCurr.Normal = { fnVec[0], fnVec[1], fnVec[2] };
-                v0.SendToBuilder(builder);
-                vPrev.SendToBuilder(builder);
-                vCurr.SendToBuilder(builder);
-                vPrev = vCurr;
-            }
-            faceVCount++;
-        }
-    }
 
+    CVertexData v0, vPrev, vCurr;
+    int faceVCount = 0;
+    CMeshImpl::FaceVertexIter fvIter = CMeshImpl::FaceVertexIter(fromMesh, fH);
+   //std::cout << "CHECK IS VALID" << std::endl;
+    for (; fvIter.is_valid(); ++fvIter)
+    {
+        //std::cout << "FACE VERTEX IS VALID" << std::endl;
+        CMeshImpl::VertexHandle faceVert = *fvIter;
+        if (faceVCount == 0)
+        {
+            const auto& posVec = fromMesh.point(faceVert);
+            v0.Pos = { posVec[0], posVec[1], posVec[2] };
+            const auto& fnVec = fromMesh.normal(fH);
+            v0.Normal = { fnVec[0], fnVec[1], fnVec[2] };
+        }
+        else if (faceVCount == 1)
+        {
+            const auto& posVec = fromMesh.point(faceVert);
+            vPrev.Pos = { posVec[0], posVec[1], posVec[2] };
+            const auto& fnVec = fromMesh.normal(fH);
+            vPrev.Normal = { fnVec[0], fnVec[1], fnVec[2] };
+        }
+        else
+        {
+            const auto& posVec = fromMesh.point(faceVert);
+            vCurr.Pos = { posVec[0], posVec[1], posVec[2] };
+            const auto& fnVec = fromMesh.normal(fH);
+            vCurr.Normal = { fnVec[0], fnVec[1], fnVec[2] };
+            v0.SendToBuilder(builder);
+            vPrev.SendToBuilder(builder);
+            vCurr.SendToBuilder(builder);
+            vPrev = vCurr;
+        }
+        faceVCount++;
+    }
+    
     Geometry = new Qt3DRender::QGeometry();
 
     auto* buffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer, Geometry);
@@ -81,6 +77,7 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeom
     posAttr->setName(Qt3DRender::QAttribute::defaultPositionAttributeName());
     posAttr->setAttributeType(Qt3DRender::QAttribute::VertexAttribute);
     posAttr->setBuffer(buffer);
+    std::cout << "BUILDER VERTEX COUNT: " + std::to_string(builder.GetVertexCount()) << std::endl;
     posAttr->setCount(builder.GetVertexCount());
     attrPos.FillInQAttribute(posAttr);
     Geometry->addAttribute(posAttr);
@@ -100,6 +97,7 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeom
         std::vector<float> pointBufferData;
         uint32_t vertexCount = 0;
 
+        // Randy this may be a bug. we don't pointgeometry for every single face. That would take freaking forever.
         // this is how the vertex is displayed
         for (const auto& v : fromMesh.vertices())
         {
@@ -112,10 +110,11 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeom
             pointBufferData.push_back(color[0] / 255.0f);
             pointBufferData.push_back(color[1] / 255.0f);
             pointBufferData.push_back(color[2] / 255.0f);
-            printf("testv%d: %d %d %d\n", vertexCount, color[0], color[1], color[2]);
+            printf("v%d: %d %d %d\n", vertexCount, color[0], color[1], color[2]);
+            std::cout << "IN HERE" << std::endl;
             vertexCount++;
         }
-        std::cout << "done displaying all vertices" << std::endl;
+        std::cout << "OUT HERE" << std::endl;
         QByteArray copyOfBuffer { reinterpret_cast<const char*>(pointBufferData.data()),
                                   static_cast<int>(pointBufferData.size() * sizeof(float)) };
         auto* buffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer, PointGeometry);
@@ -145,7 +144,7 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeom
     }
 }
 
-CMeshToQGeometry::~CMeshToQGeometry()
+CFaceToQGeometry::~CFaceToQGeometry()
 {
     if (!Geometry->parent())
         delete Geometry;

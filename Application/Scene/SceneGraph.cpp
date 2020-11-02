@@ -184,9 +184,13 @@ CSceneNode* CSceneNode::FindChildNode(const std::string& name)
 
 CSceneNode* CSceneNode::FindOrCreateChildNode(const std::string& name)
 {
+    std::cout << "find or create child node" << std::endl;
     auto* result = FindChildNode(name);
     if (!result)
+    {
+        std::cout << "create child node" << std::endl;
         return CreateChildNode(name);
+    }
     return result;
 }
 

@@ -15,7 +15,7 @@ uniform vec3 kd;            // Diffuse reflectivity
 uniform vec3 ks;            // Specular reflectivity
 uniform float shininess;    // Specular shininess factor
 
-in WireframeVertex { // these variables are outputted from Wireframe.geom 
+in WireframeVertex { // these variables are outputted from Wireframe.geom
     vec3 position;
     vec3 normal;
     noperspective vec4 edgeA;
@@ -104,5 +104,5 @@ void main()
 {
     // Calculate the color from the phong model
     vec4 color = vec4( adsModel( fs_in.position, normalize( fs_in.normal ) ), 1.0 );
-    fragColor = shadeLine( color );
+    fragColor = color ;
 }
