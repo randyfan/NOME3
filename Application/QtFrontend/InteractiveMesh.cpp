@@ -120,7 +120,6 @@ void CInteractiveMesh::UpdatePointGeometries() {
 
 void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
 {
-    std::cout << "inside update face geometries" << std::endl;
     auto* entity = SceneTreeNode->GetInstanceEntity();
     if (!entity)
         entity = SceneTreeNode->GetOwner()->GetEntity();

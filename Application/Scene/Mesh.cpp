@@ -44,14 +44,11 @@ void CMesh::UpdateEntity()
 
     ClearMesh();
     bool isValid = true;
-    std::cout << "inside mesh's update entity" << std::endl;
-    std::cout << " here is the curr face size: " + std::to_string(Faces.GetSize()) << std::endl;
+    std::cout << "Mesh's curr face size: " + std::to_string(Faces.GetSize()) << std::endl;
     for (size_t i = 0; i < Faces.GetSize(); i++)
     {
         // We assume the nullptr value is never returned, of course
-        std::cout << " trying to get the face " << std::endl;
         auto* face = Faces.GetValue(i, nullptr);
-        std::cout << "got face " << std::endl;
         bool successful = face->AddFaceIntoMesh(this);
         if (!successful)
         {
@@ -238,7 +235,6 @@ void CMeshInstance::UpdateEntity()
     << std::endl;
     for (const std::string& face : FacesToDelete)
     {
-        std::cout << "here is a face we're trying to delete: " + face << std::endl;
         auto iter = NameToFace.find(face);
         if (iter != NameToFace.end())
         {
@@ -560,7 +556,7 @@ std::vector<std::string> CMeshInstance::RemoveFace(const std::vector<std::string
     for (auto fP : faceNames) {
         std::cout << fP << std::endl;
     }
-    std::cout << "JUST ENTERED REMOVE FACE" << std::endl;
+    std::cout << "Entered Remove Face" << std::endl;
 
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
     std::cout << "inst prefix: " + instPrefix << std::endl;
@@ -660,24 +656,6 @@ std::vector<std::string> CMeshInstance::SharpenFace(std::string& faceName) // Ra
     std::cout << "end of remove face" << std::endl;
     return removedVertName;
 
-
-    // old code
-    //auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
-    //std::cout << "here the inst Prefix" + instPrefix << std::endl;
-    //std::cout << "heres the first sleected face: " + facePoints[0] << std::endl;
-    //for (auto& Pair : NameToFace) {
-    //    std::cout << Pair.first << std::endl;
-    //}
-    //for (auto facename : facePoints)
-    //{
-    //    // Rename each face as preserved
-    //    std::string newfacename = "preservedface";
-    //    auto facehandle = NameToFace.at(facename);
-    //    NameToFace.erase(facename);
-    //    NameToFace.emplace(newfacename, facehandle); 
-    //    FaceToName.at(facehandle) = newfacename;
-    //}
-
 }
 
 
@@ -705,13 +683,10 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
         auto thirdpoint = points[2];
 
         const auto& posArr1 = Mesh.point(firstpoint);
-        //std::cout << "a" << std::endl;
         tc::Vector3 pos1 { posArr1[0], posArr1[1], posArr1[2] };
         const auto& posArr2 = Mesh.point(secondpoint);
-        //std::cout << "b" << std::endl;
         tc::Vector3 pos2 { posArr2[0], posArr2[1], posArr2[2] };
         const auto& posArr3 = Mesh.point(thirdpoint);
-        //std::cout << "c" << std::endl;
         tc::Vector3 pos3 { posArr3[0], posArr3[1], posArr3[2] };
         auto testplane = new tc::Plane(pos1, pos2, pos3);
        // tc::Vector3 projected = localRay.Project(pos);
@@ -722,7 +697,6 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
         // WARNING: Doesn't give all combinations. Naive method only works with convex polygons
         std::vector<float> hitdistances;
 
-        std::cout << "dat " + std::to_string(points.size()) << std::endl;
         for (int i = 0; i < points.size(); i++)
         {
             for (int j = i + 1; j < points.size(); j++) {
@@ -888,27 +862,16 @@ std::vector<std::pair<float, std::vector<std::string>>> CMeshInstance::PickEdges
 std::vector<std::pair<float, std::string>> CMeshInstance::PickVertices(const tc::Ray& localRay)
 {
     // Randy look at this for delete face
-    std::cout << "1B" << std::endl;
     std::vector<std::pair<float, std::string>> result;
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
     for (const auto& pair : NameToVert)
     {
-        //std::cout << pair.first << std::endl;
-        //std::cout << pair.second << std::endl;
-        //std::cout << "2B" << std::endl;
-        //std::cout << NameToVert.size() << std::endl;
-        //for (auto test : Mesh.vertices()) {
-        //    std::cout << "Mesh vert" + std::to_string(test.idx()) << std::endl;
-        //}
         const auto& posArr = Mesh.point(pair.second);
-        //std::cout << "2.2B" << std::endl;
         assert(posArr.size() == 3);
         tc::Vector3 pos { posArr[0], posArr[1], posArr[2] };
-        //std::cout << "2.4B" << std::endl;
         tc::Vector3 projected = localRay.Project(pos);
         auto dist = (pos - projected).Length();
         auto t = (localRay.Origin - projected).Length();
-        //std::cout << "3b" << std::endl;
         if (dist < std::min(0.01f * t, 0.25f))
         {
             result.emplace_back(t, instPrefix + pair.first);
@@ -936,8 +899,7 @@ std::vector<std::string> CMeshInstance::GetFaceVertexNames(std::vector<std::stri
         std::cout << pair.first << std::endl;
     }
     std::vector<std::string> vertnames;
-    std::cout << "LOIT: " + GetSceneTreeNode()->GetPath() << std::endl;
-    //if (facenames[0].find(GetSceneTreeNode()->GetPath()) != std::string::npos) // ASSUME FACENAMES IS LENGTH ONE FOR NOW. wait this if statement isn't alwaysa true.
+    //if (facenames[0].find(GetSceneTreeNode()->GetPath()) != std::string::npos) // ASSUME FACENAMES IS LENGTH ONE FOR NOW. 
     //{
         std::cout << "this mesh contains the face that needs to be preserved" << std::endl;
         for (auto facename : facenames)

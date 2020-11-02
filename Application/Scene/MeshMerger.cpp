@@ -151,7 +151,7 @@ void CMeshMerger::MergeIn(const CMeshInstance& meshInstance)
     std::vector<CMeshImpl::VertexHandle> vHandles;;
     for (auto& Pair : NameToVert) {
         auto vHandle = Pair.second;
-        std::cout << "timmy " + std::to_string(vHandle.idx()) << std::endl;
+        std::cout << "Mergein vHandle index: " + std::to_string(vHandle.idx()) << std::endl;
         vHandles.push_back(vHandle);
     }
 

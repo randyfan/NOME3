@@ -409,7 +409,7 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
                 SelectedVertices.erase(position2);
                 removed += edgeVertNames[1];
             }
-            ;*/
+            */
             GFrtCtx->MainWindow->statusBar()->showMessage(
                 QString::fromStdString("TODO: Unselecte the edge"));
         }
@@ -474,21 +474,18 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
                 }
                 else // else, this face has been selected previously
                 {
-        /*            std::cout << "tamad1" << std::endl;
+        /*            
                     std::string removed;
                     if (position1 != SelectedVertices.end())
                     {
-                        std::cout << "tamad2" << std::endl;
                         SelectedVertices.erase(position1);
                         removed += edgeVertNames[0];
                     }
                     if (position2 != SelectedVertices.end())
                     {
-                        std::cout << "tamad3" << std::endl;
                         SelectedVertices.erase(position2);
                         removed += edgeVertNames[1];
-                    }
-                    std::cout << "tamad4" << std::endl;*/
+                    }*/
                     GFrtCtx->MainWindow->statusBar()->showMessage(
                         QString::fromStdString("TODO: Unselect the  edge"));
                 }
@@ -533,27 +530,19 @@ void CNome3DView::PickVertexWorldRay(const tc::Ray& ray)
 
     std::vector<std::tuple<float, Scene::CMeshInstance*, std::string>> hits;
     Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
-        std::cout << "in for each scene tree node for pickvertexworldray" << std::endl;
-        std::cout << node->GetOwner()->GetName() << std::endl;
         // Obtain either an instance entity or a shared entity from the scene node
         auto* entity = node->GetInstanceEntity();
-       // std::cout << "1A" << std::endl;
         if (!entity)
             entity = node->GetOwner()->GetEntity();
-      //  std::cout << "2A" << std::endl;
         if (entity)
         {
-           // std::cout << "3A" << std::endl;
             const auto& l2w = node->L2WTransform.GetValue(tc::Matrix3x4::IDENTITY);
             auto localRay = ray.Transformed(l2w.Inverse());
             localRay.Direction =
                 localRay.Direction
                     .Normalized(); // Normalize to fix "scale" error caused by l2w.Inverse()
-           // std::cout << "4A" << std::endl;
             auto* meshInst = dynamic_cast<Scene::CMeshInstance*>(entity);
-          //  std::cout << "4.5A" << std::endl;
             auto pickResults = meshInst->PickVertices(localRay);
-          //  std::cout << "5A" << std::endl;
             for (const auto& [dist, name] : pickResults)
                 hits.emplace_back(dist, meshInst, name);
         }
@@ -568,7 +557,6 @@ void CNome3DView::PickVertexWorldRay(const tc::Ray& ray)
             std::find(SelectedVertices.begin(), SelectedVertices.end(), vertName);
         if (position == SelectedVertices.end())
         { // if this vertex has not been selected before
-            std::cout << "gilber" + vertName << std::endl;
             SelectedVertices.push_back(vertName); // add vertex to selected vertices
             GFrtCtx->MainWindow->statusBar()->showMessage(
                 QString::fromStdString("Selected " + vertName));

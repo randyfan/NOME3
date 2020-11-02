@@ -82,13 +82,9 @@ void CBSpline::UpdateEntity() {
 
     for (float steps = 0; steps <= n; steps++) {
         float t =  ((steps / Segments.GetValue(8.0f)) * (howMany - order + 1)) + (order - 1);
-        std::cout << t << std::endl;
         Vector3 ret = {0,0,0};
         for (int i = 0; i < howMany; i++) {
             float weight = NFactor(i+1,order,t);
-            std::cout << "weight: " + std::to_string(weight) << std::endl; 
-            std::cout << "t: " + std::to_string(t) << std::endl; 
-            std::cout << "i: " + std::to_string(i) << std::endl;
             ret += weight * ControlPoints.GetValue(i, nullptr)->Position;
   
         }

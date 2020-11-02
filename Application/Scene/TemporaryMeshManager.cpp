@@ -91,7 +91,7 @@ void CTemporaryMeshManager::SharpenFace(const std::vector<std::string>& faceName
                 if (faceVertNames.size() > 0) // if removed a face
                 {
                     for (auto debug : faceVertNames)
-                        std::cout << "herey " + debug << std::endl;
+                        std::cout << "faceVertName: " + debug << std::endl;
                     // AddFace(faceVertNames); works as well, but name is for TempMesh
 
                     const std::string meshName = "Sharp" + std::to_string(FaceCounter);

@@ -8,9 +8,6 @@ namespace Nome
 CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeometry)
 {
 
-    std::cout << "CMESHTOQGEOMETRY NUM FACES AFTER REMOVING: " + std::to_string(fromMesh.n_faces()) << std::endl;
-    std::cout << "CMESHTOQGEOMETRYNUM VERTICES AFTER REMOVING: "
-            + std::to_string(fromMesh.n_vertices());
     // Per face normal, thus no shared vertices between faces
     struct CVertexData
     {
@@ -115,7 +112,6 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeom
             printf("testv%d: %d %d %d\n", vertexCount, color[0], color[1], color[2]);
             vertexCount++;
         }
-        std::cout << "done displaying all vertices" << std::endl;
         QByteArray copyOfBuffer { reinterpret_cast<const char*>(pointBufferData.data()),
                                   static_cast<int>(pointBufferData.size() * sizeof(float)) };
         auto* buffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer, PointGeometry);
