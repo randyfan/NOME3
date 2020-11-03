@@ -125,16 +125,16 @@ public:
 
     void CopyFromGenerator();
 
-    std::vector<std::string> CMeshInstance::RemoveFace(const std::vector<std::string>& faceNames); 
+    std::vector<std::string> RemoveFace(const std::vector<std::string>& faceNames); 
 
-    std::vector<std::string> CMeshInstance::SharpenFace(std::string & faceName);
+    std::vector<std::string> SharpenFace(std::string & faceName);
 
     // I am really not sure whether this is a good interface or not
     const CMeshImpl& GetMeshImpl() const { return Mesh; }
 
     std::vector<std::pair<float, std::string>> PickVertices(const tc::Ray& localRay);
     std::vector<std::pair<float, std::string>> PickFaces(const tc::Ray& localRay); // Randy added on 10/10 for face selection
-    std::vector<std::pair<float, std::vector<std::string>>> CMeshInstance::PickEdges(const tc::Ray& localRay); // Randy added on 10/29 for edge selection
+    std::vector<std::pair<float, std::vector<std::string>>> PickEdges(const tc::Ray& localRay); // Randy added on 10/29 for edge selection
     void MarkAsSelected(const std::set<std::string>& vertNames, bool bSel);
     void MarkFaceAsSelected(const std::set<std::string>& faceNames, bool bSel); // Randy added on 10/10 for face selection
     void MarkEdgeAsSelected(const std::set<std::string>& edgeNames, bool bSel); // Randy added on 10/29 for edge selection. TODO: not used yet

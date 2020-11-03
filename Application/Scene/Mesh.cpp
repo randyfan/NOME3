@@ -222,12 +222,12 @@ void CMeshInstance::UpdateEntity()
     Mesh.request_vertex_colors();
     Mesh.request_edge_status();
     Mesh.request_face_status();
-    Mesh.request_face_colors(); // Randy added on 10/10 for face selection
+    Mesh.request_face_colors(); // Randy added on 10/10 for face selection. May be useful in the future for flat coloring.
     for (auto vH : Mesh.vertices())
     {
         Mesh.set_color(vH, { VERT_COLOR });
     }
-    // don't need to set face color because it gets overwritten by material's instancecolor
+    // don't need to set face color because it gets overwritten by material's instancecolor (shader)
 
     std::cout
         << "Inside Mesh update entity, right before faces to delete. We are in this instance: "
