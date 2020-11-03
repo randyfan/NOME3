@@ -661,9 +661,7 @@ std::vector<std::string> CMeshInstance::SharpenFace(std::string& faceName) // Ra
 
 std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ray& localRay) {
 
-
     std::vector<std::pair<float, std::string>> result;
-
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
     for (const auto& pair : FaceVertsToFace)
     {

@@ -109,16 +109,11 @@ void CTemporaryMeshManager::SharpenFace(const std::vector<std::string>& faceName
                     addedSceneNodes.push_back(sceneNode);
                     addedMeshes.push_back(dummyMesh);
                     FaceCounter += 1;
-                    // node->GetOwner()->SetEntity(nullptr); // added on 10/22 to remove the merger
-                    // face. NVM THIS WAS CAUSING A BUG. IT WAS OF COURSE REMOVING THE ENTIRE
-                    // MERGEDMESH
                     mesh->RemoveFace(faceNames); // added on 10/22 after above bug. Trying to remove
                                                  // the face that overlaps
                 }
                 std::cout << "inside temp mesh maanger, finished call to Sharpen face."
                           << std::endl;
-                // TODO: also need to remove corresponding interactivemesh. This can be done by
-                // removing the node
             }
         }
     });
