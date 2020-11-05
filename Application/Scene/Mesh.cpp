@@ -612,53 +612,6 @@ std::vector<std::string> CMeshInstance::RemoveFace(const std::vector<std::string
 
 }
 
-
-std::vector<std::string> CMeshInstance::SharpenFace(std::string& faceName) // Randy added
-{
-    std::vector<std::string> removedVertName;
-    std::cout << "JUST ENTERED REMOVE FACE" << std::endl;
-
-    auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
-    std::cout << "inst prefix: " + instPrefix << std::endl;
-
-    // Below for loop is for debugging, can remove in the future
-    for (const auto& myPair :
-         NameToFace) // mesh vert name to vert handle. The issue is they all have the exact same
-                     // mesh vert name and vert handle. Transformation is applied to each
-    {
-        auto test = myPair.first;
-        std::cout << "example mesh face name: " + test << std::endl;
-    }
-        // if faceName contains instPrefix, then the face is a part of this mesh instance
-        if (faceName.find(instPrefix) != std::string::npos)
-        {
-            // the mesh's face name is the faceName - instprefix
-            auto start_position_to_erase = faceName.find(instPrefix);
-            auto meshfaceName = faceName.erase(start_position_to_erase, instPrefix.length());
-            std::cout << meshfaceName << std::endl;
-
-            // if meshfaceName is actually a face within this mesh
-            if (NameToFace.find(meshfaceName) != NameToFace.end())
-            {
-                std::cout << "found match, we are preserving it (Renaming) but not deleting " + meshfaceName << std::endl;
-                std::vector<std::string> temp;
-                temp.push_back(meshfaceName);
-                auto temp2 = GetFaceVertexNames(temp);
-                for (auto debug : temp2)
-                {
-                    std::cout << "yuti prserve: " + debug << std::endl;
-                }
-                removedVertName.insert(removedVertName.end(), temp2.begin(), temp2.end());
-            }
-        }
-    GetSceneTreeNode()->SetEntityUpdated(
-        true); // Randy added this on 10/18. Didn't seem to fix bug?
-    std::cout << "end of remove face" << std::endl;
-    return removedVertName;
-
-}
-
-
 std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ray& localRay) {
 
     std::vector<std::pair<float, std::string>> result;
@@ -892,43 +845,42 @@ std::set<CMeshImpl::FaceHandle> CMeshInstance::GetSelectedFaceHandles() // Randy
 
 std::vector<std::string> CMeshInstance::GetFaceVertexNames(std::vector<std::string> facenames) // Randy added on 10/19 to return face vert names
 {
-    // RANDY WORK ON THIS TOMORROW, WHICH IS CHECK MAKE FACENAMES SINGULAR. THEN CHECK IF THE FACENAME CONTAINS THE GETPATH. THEN CAN RETURN VERTNAMES
+
     for (auto& pair : NameToFace) {
         std::cout << pair.first << std::endl;
     }
     std::vector<std::string> vertnames;
-    //if (facenames[0].find(GetSceneTreeNode()->GetPath()) != std::string::npos) // ASSUME FACENAMES IS LENGTH ONE FOR NOW. 
-    //{
-        std::cout << "this mesh contains the face that needs to be preserved" << std::endl;
-        for (auto facename : facenames)
+
+    std::cout << "this mesh contains the face that needs to be preserved" << std::endl;
+    for (auto facename : facenames)
+    {
+        // auto suffix = facename.substr(facename.find_last_of('.')+1);
+        // std::cout << "here is the suffix: " + suffix + ", which is hopefully the face name" << std::endl; // wrong, this shouldnt need to suffix unless you're passing in instPRefix + facename
+        if (NameToFace.find(facename) != NameToFace.end())
         {
-           // auto suffix = facename.substr(facename.find_last_of('.')+1);
-           // std::cout << "here is the suffix: " + suffix + ", which is hopefully the face name" << std::endl; // wrong, this shouldnt need to suffix unless you're passing in instPRefix + facename
-            if (NameToFace.find(facename) != NameToFace.end())
+            std::cout << "found the face handle, now lets store its verts" << std::endl;
+            auto tempfh = NameToFace[facename];
+            std::cout <<tempfh.idx() << std::endl;
+            auto temp1 = FaceToFaceVerts[tempfh];
+            std::cout << temp1.size() << std::endl;
+            std::vector<std::string> temp2;
+            for (auto vert : temp1)
             {
-                std::cout << "found the face handle, now lets store its verts" << std::endl;
-                auto tempfh = NameToFace[facename];
-                std::cout <<tempfh.idx() << std::endl;
-                auto temp1 = FaceToFaceVerts[tempfh];
-                std::cout << temp1.size() << std::endl;
-                std::vector<std::string> temp2;
-                for (auto vert : temp1)
-                {
-                    std::cout << "Storing vert: " + VertToName[vert] << std::endl;
-                    auto vertname = VertToName[vert];
-                    auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
-                    auto instVertName = instPrefix + vertname;
-                    temp2.push_back(instVertName);
-                }
-                vertnames.insert(vertnames.end(), temp2.begin(), temp2.end());
+                std::cout << "Storing vert: " + VertToName[vert] << std::endl;
+                auto vertname = VertToName[vert];
+                auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
+                auto instVertName = instPrefix + vertname;
+                temp2.push_back(instVertName);
             }
-            else
-            {
-                vertnames.clear();
-                return vertnames;
-            }
+            vertnames.insert(vertnames.end(), temp2.begin(), temp2.end());
         }
-    //}
+        else
+        {
+            vertnames.clear();
+            return vertnames;
+        }
+    }
+    
     return vertnames;
 }
 

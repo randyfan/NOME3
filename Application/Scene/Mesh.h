@@ -127,8 +127,6 @@ public:
 
     std::vector<std::string> RemoveFace(const std::vector<std::string>& faceNames); 
 
-    std::vector<std::string> SharpenFace(std::string & faceName);
-
     // I am really not sure whether this is a good interface or not
     const CMeshImpl& GetMeshImpl() const { return Mesh; }
 

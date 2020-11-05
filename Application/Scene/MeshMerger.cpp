@@ -52,7 +52,7 @@ void CMeshMerger::Catmull(const CMeshInstance& meshInstance)
         Vector3 localPos = Vector3(posArray[0], posArray[1],
                                    posArray[2]);
         Vector3 worldPos = tf * localPos; 
-        /* Dont need since merged nodes have no overlapping vertices
+        /* Dont need since merged nodes have no overlapping vertices by construction from MergeIn
         auto [closestVert, distance] = FindClosestVertex(
             worldPos); 
         if (distance < Epsilon)
