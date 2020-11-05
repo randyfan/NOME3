@@ -189,7 +189,8 @@ void CMainWindow::on_actionMerge_triggered()
 void CMainWindow::on_actionSharpenFace_triggered()
 {
     const auto& faces = Nome3DView->GetSelectedFaces();
-    TemporaryMeshManager->SharpenFace(faces);
+    // TODO: Add option to sharpen face 
+    // Commented out. I removed the SharpenFace function because it was incorrectly implemented. TemporaryMeshManager->SharpenFace(faces);
     Nome3DView->ClearSelectedFaces(); 
 }
 

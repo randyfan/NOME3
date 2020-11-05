@@ -70,55 +70,6 @@ void CTemporaryMeshManager::RemoveFace(const std::vector<std::string>& faceNames
 
 }
 
-// Randy note: probably not good to place removeface here
-void CTemporaryMeshManager::SharpenFace(const std::vector<std::string>& faceNames)
-{
-    Scene->Update();
-    Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
-        auto* entity = node->GetInstanceEntity(); 
-        if (!entity)
-            entity = node->GetOwner()->GetEntity();
-        if (auto* mesh = dynamic_cast<Scene::CMeshInstance*>(entity))
-        {
-            for (auto faceName : faceNames)
-            {
-                auto faceVertNames =
-                    mesh->SharpenFace(faceName); // silently do nothing if there is no face with
-                                                   // those corresponding facepoints
-
-                // DEBUG WHY THE FACEVERTNAMES ARE DIFFERENT THAN THE FACENAMES . it's because
-                // BSline and sweep points aren't added into entitylibrary
-                if (faceVertNames.size() > 0) // if removed a face
-                {
-                    for (auto debug : faceVertNames)
-                        std::cout << "faceVertName: " + debug << std::endl;
-                    // AddFace(faceVertNames); works as well, but name is for TempMesh
-
-                    const std::string meshName = "Sharp" + std::to_string(FaceCounter);
-                    const std::string faceName = meshName + "." + "new" + std::to_string(FaceCounter);
-                    TAutoPtr<CFace> face = new CFace(faceName);
-                    Scene->AddEntity(tc::static_pointer_cast<CEntity>(face));
-                    face->SetPointSourceNames(
-                        Scene, faceVertNames); // this is the point before any transformations
-                    TAutoPtr<CMesh> dummyMesh = new CMesh(meshName);
-                    dummyMesh->Faces.Connect(face->Face);
-                    Scene->AddEntity(tc::static_pointer_cast<CEntity>(dummyMesh));
-                    auto sceneNode = Scene->GetRootNode()->CreateChildNode("inst" + meshName);
-                    auto entity = Scene->FindEntity(meshName);
-                    sceneNode->SetEntity(entity);
-                    addedSceneNodes.push_back(sceneNode);
-                    addedMeshes.push_back(dummyMesh);
-                    FaceCounter += 1;
-                    mesh->RemoveFace(faceNames); // added on 10/22 after above bug. Trying to remove
-                                                 // the face that overlaps
-                }
-                std::cout << "inside temp mesh maanger, finished call to Sharpen face."
-                          << std::endl;
-            }
-        }
-    });
-}
-
  // This function should roughly mirror the structure of CASTSceneBuilder::VisitFace
 void CTemporaryMeshManager::AddFace(const std::vector<std::string>& facePoints)
 {

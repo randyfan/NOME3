@@ -618,12 +618,6 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
     for (const auto& pair : FaceVertsToFace)
     {
-        /// Construct from 3 vertices.
-        /*Plane(const Vector3& v0, const Vector3& v1, const Vector3& v2) noexcept
-        {
-            Define(v0, v1, v2);
-        }*/
-
         auto points = pair.first;
 
         std::string facename = FaceToName.at(pair.second);
@@ -641,7 +635,6 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
         tc::Vector3 pos3 { posArr3[0], posArr3[1], posArr3[2] };
         auto testplane = new tc::Plane(pos1, pos2, pos3);
        // tc::Vector3 projected = localRay.Project(pos);
-        std::cout << "OVERHERE" << std::endl;
         // Randy note: They all have the same position because the local ray is transformed differently
         auto testdist = localRay.HitDistance(*testplane);
 
@@ -677,7 +670,7 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
     //std::sort(result.begin(), result.end());
     for (const auto& sel : result)
     {
-        std::cout << "added" << std::endl;
+        std::cout << "face added to pick list" << std::endl;
         printf("t=%.3f v=%s\n", sel.first, sel.second.c_str());
     }
     return result;
@@ -689,7 +682,6 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
 // Pick edges return a vector containing hit distance and the pair of edge vertex names
 std::vector<std::pair<float, std::vector<std::string>>> CMeshInstance::PickEdges(const tc::Ray& localRay)
 {
-    
     std::vector<std::pair<float, std::vector<std::string>>> result;
 
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
@@ -704,8 +696,6 @@ std::vector<std::pair<float, std::vector<std::string>>> CMeshInstance::PickEdges
 
         // WARNING: Doesn't give all combinations. Naive method only works with convex polygons
         std::vector<float> hitdistances;
-
-        std::cout << "dat " + std::to_string(points.size()) << std::endl;
         std::map<float, std::vector<std::string>> distToNames;
         // find which edge is intersected
         for (int i = 0; i < points.size(); i++)
