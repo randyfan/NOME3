@@ -184,7 +184,7 @@ void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
                     }
                     auto* mat = new CXMLMaterial(QString::fromStdString(xmlPath));
                     interactiveface->addComponent(mat);
-                    mat->FindParameterByName("kd")->setValue(QVector3D(0, 1, 0)); 
+                    mat->FindParameterByName("kd")->setValue(QVector3D(1, 0, 1)); 
                 }
                 else // else, use the instanceColor
                 {
@@ -390,20 +390,23 @@ void CInteractiveMesh::InitInteractions()
     connect(picker, &Qt3DRender::QObjectPicker::pressed, [](Qt3DRender::QPickEvent* pick) {
         if (pick->button() == Qt3DRender::QPickEvent::LeftButton)
         {
-            if (pick->modifiers() & Qt::ShiftModifier)
-            {
+            //if (pick->modifiers() & Qt::ShiftModifier)
+            //{
                 const auto& wi = pick->worldIntersection();
                 const auto& origin = GFrtCtx->NomeView->camera()->position();
                 auto dir = wi - origin;
 
                 tc::Ray ray({ origin.x(), origin.y(), origin.z() }, { dir.x(), dir.y(), dir.z() });
-
-                GFrtCtx->NomeView->PickEdgeWorldRay(ray); // Randy added on 10/29 for edge selection
-                GFrtCtx->NomeView->PickVertexWorldRay(ray);
-                GFrtCtx->NomeView->PickFaceWorldRay(
+     
+                if (GFrtCtx->NomeView->PickVertexBool)
+                    GFrtCtx->NomeView->PickVertexWorldRay(ray);
+                if (GFrtCtx->NomeView->PickEdgeBool)
+                    GFrtCtx->NomeView->PickEdgeWorldRay(ray); // Randy added on 10/29 for edge selection
+                if (GFrtCtx->NomeView->PickFaceBool)
+                    GFrtCtx->NomeView->PickFaceWorldRay(
                     ray); // Randy added on 10/10 for face selection. 
                 //Warning, order affects display messages. Fix later.
-            }
+            //}
 
         }
     });

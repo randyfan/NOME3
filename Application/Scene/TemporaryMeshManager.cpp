@@ -126,13 +126,13 @@ void CTemporaryMeshManager::AddFace(const std::vector<std::string>& facePoints)
     }
 }
 
-void CTemporaryMeshManager::AddPolyline(const std::vector<std::string>& facePoints)
+void CTemporaryMeshManager::AddPolyline(const std::vector<std::string>& points)
 {
     const std::string polyName = "TempPoly" + std::to_string(num_polylines);
     //std::vector<std::string> currPoints =  std::vector<std::string>(facePoints.begin() + polyline_prev_num_points, facePoints.end());
     TAutoPtr<CPolyline> polyline = new CPolyline(polyName);
-    polyline->SetClosed(false); // Hardcoding the closed bool to true. Change in the future.
-    polyline->SetPointSourceNames(Scene, facePoints);
+    polyline->SetClosed(false); // Hardcoding the closed bool to false. Change in the future.
+    polyline->SetPointSourceNames(Scene, points);
     Scene->AddEntity(tc::static_pointer_cast<CEntity>(polyline));
     auto sceneNode = Scene->GetRootNode()->CreateChildNode("inst" + polyName);
     auto entity = Scene->FindEntity(polyName);
@@ -143,22 +143,85 @@ void CTemporaryMeshManager::AddPolyline(const std::vector<std::string>& facePoin
     num_polylines += 1;
 }
 
+// Highlight selected edge by adding temp polyline 
+void CTemporaryMeshManager::SelectOrDeselectPolyline(const std::vector<std::string>& points)
+{
+    std::cout << points[0] << std::endl;
+    std::cout << " tudo " << std::endl;
+
+    auto searchpoint0 = points[0].substr(0, points[0].find("._"));
+    auto searchpoint1 = points[0].substr(0, points[0].find("._"));
+    std::cout << searchpoint0 << std::endl;
+    std::cout << searchpoint1 << std::endl;
+    bool alreadySelected = false;
+    std::string removeName;
+    for (auto name : AddedTempPolylineNodeNames)
+    {
+        std::cout << "namey: " + name << std::endl;
+        if (searchpoint0.find(name) != std::string::npos && searchpoint1.find(name) != std::string::npos)
+        {
+            removeName = name;
+            alreadySelected = true;
+        }
+    }
+
+    const std::string polyName = points[0] + points[1]; // name is just the edge vert names concatenated
+
+    // THE ERROR IS BECAUSE WHEN I ADD A POLYLINE, FOR SOME REASON I CAN'T SELECT VIA TO TEXT BOX. It's because edge select only works for meshes
+
+    if (alreadySelected) // Deselect
+    {
+        std::cout << "trying to deselect" << std::endl;
+        //const std::string polyName = points[0] + points[1]; // name is just the edge vert names concatenated
+        //CSceneNode *temp;
+        Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
+            if (node->GetOwner()->GetName() == removeName)
+            { // removeName includes the "inst" as prefix
+                node->GetOwner()->SetEntity(nullptr);
+            }
+        });
+
+        std::cout << "gamba1" << std::endl;
+       // AddedTempPolylineNodeNames.erase(std::find(AddedTempPolylineNodeNames.begin(), AddedTempPolylineNodeNames.end(), removeName));
+        std::cout << "gamba2" << std::endl;
+        //std::cout << AddedTempPolylineNodeNames.size() << std::endl;
+
+    }
+    else // Select
+    {
+        std::cout << "trying to select" << std::endl;
+        TAutoPtr<CPolyline> polyline = new CPolyline(polyName);
+        polyline->SetClosed(false); // Hardcoding the closed bool to false. Change in the future.
+        polyline->SetPointSourceNames(Scene, points); // point names includes entity names for some reason ... it's because these two points  start w/ ".cube1.front.p1.cube1.front.p4" and end with ._ 
+        Scene->AddEntity(tc::static_pointer_cast<CEntity>(polyline));
+        auto sceneNode = Scene->GetRootNode()->CreateChildNode("inst" + polyName);
+        std::cout << "inst" + polyName << std::endl;
+        std::cout << "loopla" << std::endl;
+        AddedTempPolylineNodeNames.push_back("inst" + polyName);
+        auto entity = Scene->FindEntity(polyName);
+        sceneNode->SetEntity(entity);
+    }
+}
+
+
 std::string CTemporaryMeshManager::CommitChanges(AST::CASTContext& ctx)
 {
+    auto* blankLineNode1 =
+        ctx.Make<AST::ACommand>(ctx.MakeToken(" "), ctx.MakeToken(" "));
+    auto* blankLineCmd1 = blankLineNode1;
+    SourceMgr->AppendCmdEndOfFile(blankLineCmd1);
 
+    auto* poundNode = ctx.Make<AST::ACommand>(ctx.MakeToken("###########################"), ctx.MakeToken(" "));
+    auto* dummyPoundCmd = poundNode;
+    SourceMgr->AppendCmdEndOfFile(dummyPoundCmd);
 
-    auto* poundNode =
-        ctx.Make<AST::ACommand>(ctx.MakeToken("###########################"), ctx.MakeToken(" "));
-    //  polylineNode->PushPositionalArgument(
-    //     ctx.MakeIdent(GetName())); // 1st positional arg is name
-    // 2nd positional arg is point ident vector
-    auto* dummypoundCmd = poundNode;
-    SourceMgr->AppendCmdEndOfFile(dummypoundCmd);
-
+    auto* blankLineNode2 = ctx.Make<AST::ACommand>(ctx.MakeToken(" "), ctx.MakeToken(" "));
+    auto* blankLineCmd2 = blankLineNode2;
+    SourceMgr->AppendCmdEndOfFile(blankLineCmd2);
 
     if (!removedfaceNames.empty()) {
         auto* polylineNode =
-            ctx.Make<AST::ACommand>(ctx.MakeToken("REMOVED"), ctx.MakeToken("ENDREMOVED"));
+            ctx.Make<AST::ACommand>(ctx.MakeToken("# REMOVED"), ctx.MakeToken("ENDREMOVED"));
       //  polylineNode->PushPositionalArgument(
        //     ctx.MakeIdent(GetName())); // 1st positional arg is name
         // 2nd positional arg is point ident vector
@@ -186,7 +249,6 @@ std::string CTemporaryMeshManager::CommitChanges(AST::CASTContext& ctx)
         }
         else // else, it's a mesh command
         {
-
             auto* meshCmd = addedMesh->SyncToAST(ctx, true);
             SourceMgr->AppendCmdEndOfFile(meshCmd);
             auto* instanceCmd = addedNode->BuildASTCommand(ctx);

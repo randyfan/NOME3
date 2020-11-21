@@ -137,6 +137,16 @@ public:
         return defaultValue;
     }
 
+    // Randy added on 11/13
+    T ChangeValue(const T& newValue) const
+    {
+        if (ConnectedOutput)
+        {
+            ConnectedOutput->UpdateValue(newValue);
+        }
+        return newValue;
+    }
+
 private:
     CFlowNode* Owner;
     std::function<void()> DirtyNotifyRoutine;

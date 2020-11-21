@@ -72,8 +72,6 @@ void CPolyline::SetClosed(bool closed)
     MarkDirty();
 }
 
-
-//Randy in progress. Used Face's MakeCommandNode for reference
 AST::ACommand* CPolyline::SyncToAST(AST::CASTContext& ctx, bool createNewNode)
 {
     auto* polylineNode = ctx.Make<AST::ACommand>(ctx.MakeToken("polyline"), ctx.MakeToken("endpolyline"));

@@ -170,22 +170,18 @@ void CMainWindow::on_actionMerge_triggered()
         }
     });
 
-    // TODO: 10/22 added. VERY GOOD. these lines work to reset the scene
+    // TODO: 10/22 added.  These lines work to reset the scene
      Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
         if (node->GetOwner()->GetName() != "globalMergeNode") 
           node->GetOwner()->SetEntity(nullptr);
     });
-    // TODO: Next 3 lines are super buggy, but needed to perform Catmull w/ replacement. Often crashes when used on larger scenes.
-    //Scene = new Scene::CScene();
-    //Scene::GEnv.Scene = Scene.Get();
-    //PostloadSetup();
 
     Scene->AddEntity(tc::static_pointer_cast<Scene::CEntity>(merger)); // Merger now has all the vertices set, so we can add it into the scene as a new entity
     auto* sn = Scene->GetRootNode()->FindOrCreateChildNode("globalMergeNode"); //Add it into the Scene Tree by creating a new node called globalMergeNode. Notice, this is the same name everytime you Merge. This means you can only have one merger mesh each time. It will override previous merger meshes with the new vertices. 
     sn->SetEntity(merger.Get()); // Set sn, which is the scene node, to point to entity merger 
-   
 }
 
+/*
 void CMainWindow::on_actionSharpenFace_triggered()
 {
     const auto& faces = Nome3DView->GetSelectedFaces();
@@ -193,7 +189,7 @@ void CMainWindow::on_actionSharpenFace_triggered()
     // TODO: Add option to sharpen face 
     // Commented out. I removed the SharpenFace function because it was incorrectly implemented. TemporaryMeshManager->SharpenFace(faces);
     Nome3DView->ClearSelectedFaces(); 
-}
+}*/
 
 // only subdivide merge nodes
 void CMainWindow::on_actionSubdivide_triggered()
@@ -300,6 +296,23 @@ void CMainWindow::on_actionShowFacets_triggered()
     });
 }
 
+// Toggle on/off Vertex selection
+void CMainWindow::on_actionToggleVertexSelection_triggered()
+{
+    Nome3DView->PickVertexBool = !Nome3DView->PickVertexBool;
+}
+
+// Toggle on/off Edge Selection
+void CMainWindow::on_actionToggleEdgeSelection_triggered()
+{
+    Nome3DView->PickEdgeBool = !Nome3DView->PickEdgeBool;
+}
+
+// Toggle on/off Face Selection
+void CMainWindow::on_actionToggleFaceSelection_triggered()
+{
+    Nome3DView->PickFaceBool = !Nome3DView->PickFaceBool;
+}
 
 void CMainWindow::SetupUI()
 {
@@ -358,7 +371,7 @@ void CMainWindow::LoadNomeFile(const std::string& filePath)
     setWindowFilePath(QString::fromStdString(filePath));
     bIsBlankFile = false;
     SourceMgr = std::make_shared<CSourceManager>(filePath);
-    bool parseSuccess = SourceMgr->ParseMainSource();
+    bool parseSuccess = SourceMgr->ParseMainSource(); // AST is created with this function call. If want to add #include, must combine files
     if (!parseSuccess)
     {
         auto resp = QMessageBox::question(
@@ -406,6 +419,28 @@ void CMainWindow::PostloadSetup()
     connect(SceneUpdateClock, &QTimer::timeout, [this]() {
         Scene->Update();
         Nome3DView->PostSceneUpdate();
+
+        // Randy added this on 11/5 for edge selection
+        if (!Nome3DView->GetSelectedEdgeVertices().empty())
+        {
+            std::cout << "selected edge vertices not empty" << std::endl;
+            std::cout << "Here are the edge vertex names right before creating poly: "
+                    + Nome3DView->GetSelectedEdgeVertices()[0]
+                    + " " + Nome3DView->GetSelectedEdgeVertices()[1]
+                      << std::endl;
+            TemporaryMeshManager->SelectOrDeselectPolyline(Nome3DView->GetSelectedEdgeVertices());
+            //TemporaryMeshManager->AddPolyline(Nome3DView->GetSelectedEdgeVertices());
+            //SelectedEdgeVertices.push_back(Nome3DView->GetSelectedEdgeVertices()) # push back that vector 
+            //AddedTempPolylineNodeNames.push_back()
+                // TODO: 10/22 added.  These lines work to reset the scene
+           // Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
+            //    if (node->GetOwner()->GetName() != "globalMergeNode")
+             //       node->GetOwner()->SetEntity(nullptr);
+            //});
+            Nome3DView->ClearSelectedEdges(); // TODO: This is assuming can only add one edge a time
+            std::cout << "tesri2" << std::endl;
+        }
+            
     });
     SceneUpdateClock->start();
 

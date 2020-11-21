@@ -80,8 +80,6 @@ void CNome3DView::UnloadScene()
     Scene = nullptr;
 }
 
-
-
 void CNome3DView::PostSceneUpdate()
 {
     using namespace Scene;
@@ -164,8 +162,6 @@ void CNome3DView::PostSceneUpdate()
     }
     InteractiveMeshes = std::move(aliveSet);
 
-    
-
     // Kill all entity debug draws that are not alive
     for (auto& iter : EntityDrawData)
     {
@@ -218,6 +214,24 @@ void CNome3DView::ClearSelectedFaces()
         }
     });
 }
+
+// Randy added on 11/5 to clear edge selection
+void CNome3DView::ClearSelectedEdges()
+{
+    SelectedEdgeVertices.clear();
+    Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
+        // Obtain either an instance entity or a shared entity from the scene node
+        auto* entity = node->GetInstanceEntity();
+        if (!entity)
+            entity = node->GetOwner()->GetEntity();
+        if (entity)
+        {
+            auto* meshInst = dynamic_cast<Scene::CMeshInstance*>(entity);
+            meshInst->DeselectAll();
+        }
+    });
+}
+
 
 void CNome3DView::PickFaceWorldRay(const tc::Ray& ray)
 {
@@ -351,11 +365,12 @@ void CNome3DView::PickFaceWorldRay(const tc::Ray& ray)
 
 
 
+
 // Used for picking edges
 void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
 {
-
-    std::vector<std::tuple<float, Scene::CMeshInstance*, std::vector<std::string>>> hits; // note the string is a vector of strings
+    std::vector<std::tuple<float, Scene::CMeshInstance*, std::vector<std::string>>>
+        hits; // note the string is a vector of strings
     Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
         std::cout << "Currently in NOME3DView's PickEdgeWorldRay. At node: " + node->GetPath()
                   << std::endl;
@@ -365,11 +380,15 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
             entity = node->GetOwner()->GetEntity();
         if (entity)
         {
+            std::cout << node->GetPath() + " is an entity" << std::endl;
+            std::cout << node->GetOwner()->GetEntity()->GetMetaObject().ClassName() << std::endl;
+
             const auto& l2w = node->L2WTransform.GetValue(tc::Matrix3x4::IDENTITY);
             auto localRay = ray.Transformed(l2w.Inverse());
-            localRay.Direction =
-                localRay.Direction
-                    .Normalized(); // Normalize to fix "scale" error caused by l2w.Inverse()
+            localRay.Direction = localRay.Direction.Normalized(); // Normalize to fix "scale" error caused by l2w.Inverse()
+
+            //auto classname = node->GetOwner()->GetEntity()->GetMetaObject().ClassName();
+            //if (classname == "CBSpline")
             auto* meshInst = dynamic_cast<Scene::CMeshInstance*>(entity);
             auto pickResults = meshInst->PickEdges(localRay);
             for (const auto& [dist, names] : pickResults)
@@ -377,46 +396,43 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
         }
     });
     std::sort(hits.begin(), hits.end());
-    // if (!hits.empty()) {
-    //    hits.resize(1); // Force there to be only one face selected. This is more user-friendly.
-    //}
+
     if (hits.size() == 1)
     {
-        const auto& [dist, meshInst, edgeVertNames] = hits[0]; // where the edgeVertNames is defined to a vector of two vertex names
+        const auto& [dist, meshInst, edgeVertNames] =
+            hits[0]; // where the edgeVertNames is defined to a vector of two vertex names
         std::vector<std::string>::iterator position1 =
-            std::find(SelectedVertices.begin(), SelectedVertices.end(), edgeVertNames[0]);
+            std::find(SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[0]);
         std::vector<std::string>::iterator position2 =
-            std::find(SelectedVertices.begin(), SelectedVertices.end(), edgeVertNames[1]);
-        
-        if (position1 == SelectedVertices.end() || position2 == SelectedVertices.end()) // if either vertex has not been selected before, then the edge hasn't been selected
+            std::find(SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[1]);
+
+        if (position1 == SelectedEdgeVertices.end()
+            || position2
+                == SelectedEdgeVertices.end()) // if either vertex has not been selected before,
+                                               // then the edge hasn't been selected
         { // if this edge has not been selected before
-            SelectedVertices.push_back(edgeVertNames[0]);
-            SelectedVertices.push_back(edgeVertNames[1]);
-            GFrtCtx->MainWindow->statusBar()->showMessage(
-                QString::fromStdString("Selected " + edgeVertNames[0] + edgeVertNames[1] + " edge"));
+            SelectedEdgeVertices.push_back(edgeVertNames[0]);
+            SelectedEdgeVertices.push_back(edgeVertNames[1]);
+            GFrtCtx->MainWindow->statusBar()->showMessage(QString::fromStdString(
+                "Selected " + edgeVertNames[0] + edgeVertNames[1] + " edge"));
+
+            std::set<std::string> edgeVertNamesSet(edgeVertNames.begin(), edgeVertNames.end());
+            std::cout << "found edge, mark its vertices now" << std::endl;
+            meshInst->MarkEdgeAsSelected(edgeVertNamesSet, true); // here
         }
         else // else, this edge has been selected previously
         {
-         /*   
             std::string removed;
-            if (position1 != SelectedVertices.end())
-            {
-                SelectedVertices.erase(position1);
-                removed += edgeVertNames[0];
-            }
-            if (position2 != SelectedVertices.end())
-            {
-                SelectedVertices.erase(position2);
-                removed += edgeVertNames[1];
-            }
-            */
+            SelectedEdgeVertices.erase(position1);
+            removed += edgeVertNames[0];
+            // Need to refind the position since we deleted something from the vector
+            std::vector<std::string>::iterator position2 = std::find(
+                SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[1]);
+            SelectedEdgeVertices.erase(position2);
+            removed += edgeVertNames[1];
             GFrtCtx->MainWindow->statusBar()->showMessage(
-                QString::fromStdString("TODO: Unselecte the edge"));
+                QString::fromStdString("Unselected " + removed + " edge"));
         }
-        //meshInst->MarkEdgeAsSelected({ edgeVertNames }, true);
-        std::set<std::string> edgeVertNamesSet(edgeVertNames.begin(), edgeVertNames.end());
-        std::cout << "found edge, mark its vertices now" << std::endl;
-        meshInst->MarkAsSelected(edgeVertNamesSet, true);
     }
     else if (!hits.empty())
     {
@@ -442,12 +458,11 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
                 {
                     closenessRank += 1;
                 }
-                // else, closenessRank stay the same as prev as the distance is the same (faces
-                // in same location)
             }
 
             auto* distWidget = new QTableWidgetItem(QString::number(closenessRank));
-            auto* item = new QTableWidgetItem(QString::fromStdString(edgeVertNames[0] + " and " + edgeVertNames[1]));
+            auto* item = new QTableWidgetItem(
+                QString::fromStdString(edgeVertNames[0] + " and " + edgeVertNames[1]));
             table->setItem(i, 0, distWidget); // i is row num, and 0 is col num
             table->setItem(i, 1, item);
         }
@@ -461,33 +476,30 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
             {
                 int row = sel[0]->row();
                 const auto& [dist, meshInst, edgeVertNames] = hits[row];
-                std::vector<std::string>::iterator position1 =
-                    std::find(SelectedVertices.begin(), SelectedVertices.end(), edgeVertNames[0]);
-                std::vector<std::string>::iterator position2 =
-                    std::find(SelectedVertices.begin(), SelectedVertices.end(), edgeVertNames[1]);
-                if (position1 == SelectedVertices.end() || position2 == SelectedVertices.end())
+                std::vector<std::string>::iterator position1 = std::find(
+                    SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[0]);
+                std::vector<std::string>::iterator position2 = std::find(
+                    SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[1]);
+                if (position1 == SelectedEdgeVertices.end()
+                    || position2 == SelectedEdgeVertices.end())
                 { // if this face has not been selected before
-                    SelectedVertices.push_back(edgeVertNames[0]);
-                    SelectedVertices.push_back(edgeVertNames[1]);
+                    SelectedEdgeVertices.push_back(edgeVertNames[0]);
+                    SelectedEdgeVertices.push_back(edgeVertNames[1]);
                     GFrtCtx->MainWindow->statusBar()->showMessage(QString::fromStdString(
                         "Selected " + edgeVertNames[0] + edgeVertNames[1] + " edge"));
                 }
                 else // else, this face has been selected previously
                 {
-        /*            
                     std::string removed;
-                    if (position1 != SelectedVertices.end())
-                    {
-                        SelectedVertices.erase(position1);
-                        removed += edgeVertNames[0];
-                    }
-                    if (position2 != SelectedVertices.end())
-                    {
-                        SelectedVertices.erase(position2);
-                        removed += edgeVertNames[1];
-                    }*/
+                    SelectedEdgeVertices.erase(position1);
+                    removed += edgeVertNames[0];
+                    // Need to refind the position since we deleted something from the vector
+                    std::vector<std::string>::iterator position2 = std::find(
+                        SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[1]);
+                    SelectedEdgeVertices.erase(position2);
+                    removed += edgeVertNames[1];
                     GFrtCtx->MainWindow->statusBar()->showMessage(
-                        QString::fromStdString("TODO: Unselect the  edge"));
+                        QString::fromStdString("Unselected " + removed + " edge"));
                 }
 
                 float selected_dist = round(dist * 100);
@@ -499,11 +511,11 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
                     {
 
                         // temporary solution, add a polyline in that position in the future
-                        //meshInst->MarkEdgeAsSelected({ overlapedgeVertNames }, true);
+                        // meshInst->MarkEdgeAsSelected({ overlapedgeVertNames }, true);
                         std::set<std::string> edgeVertNamesSet(edgeVertNames.begin(),
                                                                edgeVertNames.end());
-                        meshInst->MarkAsSelected(edgeVertNamesSet, true); // mark the two edge vertices as selected
-             
+                        meshInst->MarkEdgeAsSelected(
+                            edgeVertNamesSet, true); // mark the two edge vertices as selected
                     }
                 }
             }
@@ -567,7 +579,7 @@ void CNome3DView::PickVertexWorldRay(const tc::Ray& ray)
             GFrtCtx->MainWindow->statusBar()->showMessage(
                 QString::fromStdString("Unselected " + vertName));
         }
-        meshInst->MarkAsSelected({ vertName }, true);
+        meshInst->MarkVertAsSelected({ vertName }, true);
     }
     else if (!hits.empty())
     {
@@ -634,7 +646,7 @@ void CNome3DView::PickVertexWorldRay(const tc::Ray& ray)
                     const auto& [dist, meshInst, overlapvertName] = hits[i];
                     if (round(dist * 100) == selected_dist)
                     {
-                        meshInst->MarkAsSelected({ overlapvertName }, true);
+                        meshInst->MarkVertAsSelected({ overlapvertName }, true);
                     }
                 }
             }

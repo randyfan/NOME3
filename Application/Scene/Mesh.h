@@ -133,9 +133,9 @@ public:
     std::vector<std::pair<float, std::string>> PickVertices(const tc::Ray& localRay);
     std::vector<std::pair<float, std::string>> PickFaces(const tc::Ray& localRay); // Randy added on 10/10 for face selection
     std::vector<std::pair<float, std::vector<std::string>>> PickEdges(const tc::Ray& localRay); // Randy added on 10/29 for edge selection
-    void MarkAsSelected(const std::set<std::string>& vertNames, bool bSel);
+    void MarkVertAsSelected(const std::set<std::string>& vertNames, bool bSel);
     void MarkFaceAsSelected(const std::set<std::string>& faceNames, bool bSel); // Randy added on 10/10 for face selection
-    void MarkEdgeAsSelected(const std::set<std::string>& edgeNames, bool bSel); // Randy added on 10/29 for edge selection. TODO: not used yet
+    void MarkEdgeAsSelected(const std::set<std::string>& vertNames, bool bSel); // Randy added on 10/29 for edge selection. TODO: rn it takes in the edge's verts as input
 
     std::set<CMeshImpl::FaceHandle> GetSelectedFaceHandles(); // Get selected face handles. Used in InteractiveMesh.cpp.
     std::vector<std::string> GetFaceVertexNames(std::vector<std::string> facenames); // Randy added on 10/19 to return face vert names
@@ -164,12 +164,18 @@ private:
     // std::map<std::string, std::pair<CMeshInstancePoint*, uint32_t>> PickingVerts; Randy commented this out on 10/10 . I dont think it does anything???
     
     // Store selected vertex handles and names
-    std::set<std::string> CurrSelectedVerts; 
     std::set<std::string> CurrSelectedVertNames; 
+    std::set<std::string> CurrSelectedVertNamesWithPrefix; 
+    std::set<CMeshImpl::VertexHandle> CurrSelectedVertHandles; // Randy added on 11/4
 
+    // Store selected edge handles TODO: Create edge names
+    std::set<CMeshImpl::HalfedgeHandle> CurrSelectedHalfEdgeHandles; // Randy added on 11/4. TODO: Should I use HalfedgeHandle or EdgeHandle? Store selected vertex handles and names
+    std::set<std::string> CurrSelectedEdgeVertNames;
+    std::set<std::string> CurrSelectedEdgeVertNamesWithPrefix;
+    std::set<CMeshImpl::VertexHandle> CurrSelectedEdgeVertHandles; // Randy added on 11/4
     // Store selected face handles and names
-    std::set<std::string> CurrSelectedFaces; // face name only
-    std::set<std::string> CurrSelectedFaceNames; // includes prefix (path) and face name
+    std::set<std::string> CurrSelectedFaceNames; // face name only
+    std::set<std::string> CurrSelectedFaceNamesWithPrefix; // includes prefix (path) and face name
     std::set<CMeshImpl::FaceHandle> CurrSelectedFaceHandles; // Randy added on 10/10 for face selection
 };
 
