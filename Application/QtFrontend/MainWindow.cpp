@@ -428,7 +428,7 @@ void CMainWindow::PostloadSetup()
                     + Nome3DView->GetSelectedEdgeVertices()[0]
                     + " " + Nome3DView->GetSelectedEdgeVertices()[1]
                       << std::endl;
-            TemporaryMeshManager->SelectOrDeselectPolyline(Nome3DView->GetSelectedEdgeVertices());
+            TemporaryMeshManager->SelectOrDeselectPolyline(Nome3DView->GetSelectedEdgeVertices()); // error is the selected edge names will differ the second time
             //TemporaryMeshManager->AddPolyline(Nome3DView->GetSelectedEdgeVertices());
             //SelectedEdgeVertices.push_back(Nome3DView->GetSelectedEdgeVertices()) # push back that vector 
             //AddedTempPolylineNodeNames.push_back()

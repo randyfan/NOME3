@@ -165,9 +165,9 @@ void CTemporaryMeshManager::SelectOrDeselectPolyline(const std::vector<std::stri
         }
     }
 
-    const std::string polyName = points[0] + points[1]; // name is just the edge vert names concatenated
+    const std::string polyName = "BERKELEY" + points[0] + points[1]; // name is just the edge vert names concatenated Randyt added Berkeley on 11/21
 
-    // THE ERROR IS BECAUSE WHEN I ADD A POLYLINE, FOR SOME REASON I CAN'T SELECT VIA TO TEXT BOX. It's because edge select only works for meshes
+    // TODO: THE ERROR IS BECAUSE WHEN I ADD A POLYLINE, FOR SOME REASON I CAN'T SELECT VIA TO TEXT BOX. It's because edge select only works for meshes
 
     if (alreadySelected) // Deselect
     {
@@ -177,15 +177,15 @@ void CTemporaryMeshManager::SelectOrDeselectPolyline(const std::vector<std::stri
         Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
             if (node->GetOwner()->GetName() == removeName)
             { // removeName includes the "inst" as prefix
+                std::cout << "found the old polyline, trying to remove " << std::endl;
+                std::cout << removeName << std::endl;
                 node->GetOwner()->SetEntity(nullptr);
             }
         });
-
         std::cout << "gamba1" << std::endl;
        // AddedTempPolylineNodeNames.erase(std::find(AddedTempPolylineNodeNames.begin(), AddedTempPolylineNodeNames.end(), removeName));
         std::cout << "gamba2" << std::endl;
         //std::cout << AddedTempPolylineNodeNames.size() << std::endl;
-
     }
     else // Select
     {

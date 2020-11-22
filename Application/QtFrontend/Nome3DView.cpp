@@ -397,6 +397,21 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
     });
     std::sort(hits.begin(), hits.end());
 
+    // TODO 11/21, If it contains a temp SELECT EDGE polyline, then immediately return that one
+    std::vector<std::tuple<float, Scene::CMeshInstance*, std::vector<std::string>>> temp; 
+    for (auto hit : hits) {
+        auto [dist, meshInst, edgeVertNames] = hit;
+        std::cout << "WOWZER" << std::endl;
+        std::cout << edgeVertNames[0] << std::endl;
+        if (edgeVertNames[0].find("BERKELEY") != std::string::npos) {
+            temp.push_back(hit);
+        }
+
+    }
+    std::cout << "sizeeer" << std::endl;
+    std::cout << temp.size() << std::endl;
+    if (!temp.empty()) 
+        hits = temp;
     if (hits.size() == 1)
     {
         const auto& [dist, meshInst, edgeVertNames] =

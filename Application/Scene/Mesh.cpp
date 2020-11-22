@@ -687,8 +687,36 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
     auto meshClass = GetSceneTreeNode()->GetOwner()->GetEntity()->GetMetaObject().ClassName();
     if (meshClass == "CPolyline")
     {
-        std::cout << "Pick edges in Mesh.cpp: found Polyline entity" << std::endl;
-        std::cout << NameToVert.size() << std::endl;
+    //    std::cout << "Pick edges in Mesh.cpp: found Polyline entity" << std::endl;
+    //    // make sure the polyline is actually colored. Thus, we need to introduce a new surface rather than modify existing.
+    //    // since not all have surfaces
+    //    std::cout << "Changed colors0" << std::endl;
+    //    CSurface * example = new CSurface("test");
+    //    float a = 4.f;
+    //    std::cout << "Changed colors0.25" << std::endl;
+    //    //Flow::TOutput<float>* test = a;
+    //    example->ColorB.GetValue(5);
+    //    //example.ColorB.Connect(test);
+    //    std::cout << "Changed colors0.5" << std::endl;
+    //    std::cout << NameToVert.size() << std::endl;
+    //    auto surfacetest = GetSceneTreeNode()->GetOwner()->GetSurface();
+    //    std::cout << "Changed colors1" << std::endl;
+    //    surfacetest.Get()->ColorB;
+    //    std::cout << "Changed colors1.25" << std::endl;
+    //    std::cout << surfacetest->ColorB.GetValue(13.f) << std::endl;
+
+    //    std::cout << surfacetest->ColorB.IsConnected() << std::endl;
+    //    std::cout << "Changed colors1.5" << std::endl;
+    //    surfacetest.Get()->ColorB.ChangeValue(0.f);
+    //    std::cout << "Changed colors2" << std::endl;
+    //    surfacetest.Get()->ColorR.ChangeValue(0.f);
+    //    surfacetest.Get()->ColorB.ChangeValue(0.f);
+    //    GetSceneTreeNode()->GetOwner()->SetSurface(surfacetest);
+    //    std::cout << "Changed colors3" << std::endl;
+    //    MarkDirty();
+    //    std::cout << IsDirty() << std::endl;
+    //    std::cout << "Changed colors4" << std::endl;
+    //    std::cout << "Changed colors5" << std::endl;
     }
     if (meshClass == "CBSpline")
     {
@@ -798,7 +826,6 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
             // This is outside of the for loop! incorrect!!
             if (mindist < 100)
             {
-
                 std::cout << "adding two hitpoint names" << std::endl;
                 auto hitpointnames = distToNames.at(mindist); // Guaranteed to be two names
                 auto name1withoutinstprefix = hitpointnames[0].substr(instPrefix.length());
