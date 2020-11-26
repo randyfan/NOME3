@@ -442,17 +442,8 @@ void CMainWindow::PostloadSetup()
                     + Nome3DView->GetSelectedEdgeVertices()[0]
                     + " " + Nome3DView->GetSelectedEdgeVertices()[1]
                       << std::endl;
-            TemporaryMeshManager->SelectOrDeselectPolyline(Nome3DView->GetSelectedEdgeVertices()); // error is the selected edge names will differ the second time
-            //TemporaryMeshManager->AddPolyline(Nome3DView->GetSelectedEdgeVertices());
-            //SelectedEdgeVertices.push_back(Nome3DView->GetSelectedEdgeVertices()) # push back that vector 
-            //AddedTempPolylineNodeNames.push_back()
-                // TODO: 10/22 added.  These lines work to reset the scene
-           // Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
-            //    if (node->GetOwner()->GetName() != "globalMergeNode")
-             //       node->GetOwner()->SetEntity(nullptr);
-            //});
+            TemporaryMeshManager->SelectOrDeselectPolyline(Nome3DView->GetSelectedEdgeVertices()); 
             Nome3DView->ClearSelectedEdges(); // TODO: This is assuming can only add one edge a time
-            std::cout << "tesri2" << std::endl;
         }
             
     });

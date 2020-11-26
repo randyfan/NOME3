@@ -405,6 +405,7 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
         auto [dist, meshInst, edgeVertNames] = hit;
         std::cout << "WOWZER" << std::endl;
         std::cout << edgeVertNames[0] << std::endl;
+        std::cout << meshInst->GetName() << std::endl;
         if (edgeVertNames[0].find("SELECTED") != std::string::npos) {
             temp.push_back(hit);
         }
@@ -422,34 +423,34 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
             std::find(SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[0]);
         std::vector<std::string>::iterator position2 =
             std::find(SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[1]);
+        // Commenting this out on 11/25 as MarkEdgeAsSelected handles this behavior
+        //if (position1 == SelectedEdgeVertices.end()
+        //    || position2
+        //        == SelectedEdgeVertices.end()) // if either vertex has not been selected before,
+        //                                       // then the edge hasn't been selected
+        //{ // if this edge has not been selected before
+        SelectedEdgeVertices.push_back(edgeVertNames[0]);
+        SelectedEdgeVertices.push_back(edgeVertNames[1]);
+        GFrtCtx->MainWindow->statusBar()->showMessage(QString::fromStdString(
+            "Selected " + edgeVertNames[0] + edgeVertNames[1] + " edge"));
 
-        if (position1 == SelectedEdgeVertices.end()
-            || position2
-                == SelectedEdgeVertices.end()) // if either vertex has not been selected before,
-                                               // then the edge hasn't been selected
-        { // if this edge has not been selected before
-            SelectedEdgeVertices.push_back(edgeVertNames[0]);
-            SelectedEdgeVertices.push_back(edgeVertNames[1]);
-            GFrtCtx->MainWindow->statusBar()->showMessage(QString::fromStdString(
-                "Selected " + edgeVertNames[0] + edgeVertNames[1] + " edge"));
-
-            std::set<std::string> edgeVertNamesSet(edgeVertNames.begin(), edgeVertNames.end());
-            std::cout << "found edge, mark its vertices now" << std::endl;
-            meshInst->MarkEdgeAsSelected(edgeVertNamesSet, true); // here
-        }
-        else // else, this edge has been selected previously
-        {
-            std::string removed;
-            SelectedEdgeVertices.erase(position1);
-            removed += edgeVertNames[0];
-            // Need to refind the position since we deleted something from the vector
-            std::vector<std::string>::iterator position2 = std::find(
-                SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[1]);
-            SelectedEdgeVertices.erase(position2);
-            removed += edgeVertNames[1];
-            GFrtCtx->MainWindow->statusBar()->showMessage(
-                QString::fromStdString("Unselected " + removed + " edge"));
-        }
+        std::set<std::string> edgeVertNamesSet(edgeVertNames.begin(), edgeVertNames.end());
+        std::cout << "found edge, mark its vertices now" << std::endl;
+        meshInst->MarkEdgeAsSelected(edgeVertNamesSet, true); // here
+        //}
+        //else // else, this edge has been selected previously
+        //{
+        //    std::string removed;
+        //    SelectedEdgeVertices.erase(position1);
+        //    removed += edgeVertNames[0];
+        //    // Need to refind the position since we deleted something from the vector
+        //    std::vector<std::string>::iterator position2 = std::find(
+        //        SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[1]);
+        //    SelectedEdgeVertices.erase(position2);
+        //    removed += edgeVertNames[1];
+        //    GFrtCtx->MainWindow->statusBar()->showMessage(
+        //        QString::fromStdString("Unselected " + removed + " edge"));
+        //}
     }
     else if (!hits.empty())
     {
@@ -528,11 +529,9 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
                     {
 
                         // temporary solution, add a polyline in that position in the future
-                        // meshInst->MarkEdgeAsSelected({ overlapedgeVertNames }, true);
                         std::set<std::string> edgeVertNamesSet(edgeVertNames.begin(),
                                                                edgeVertNames.end());
-                        meshInst->MarkEdgeAsSelected(
-                            edgeVertNamesSet, true); // mark the two edge vertices as selected
+                        meshInst->MarkEdgeAsSelected(edgeVertNamesSet, true); // mark the two edge vertices as selected
                     }
                 }
             }
@@ -584,8 +583,8 @@ void CNome3DView::PickVertexWorldRay(const tc::Ray& ray)
         const auto& [dist, meshInst, vertName] = hits[0];
         std::vector<std::string>::iterator position =
             std::find(SelectedVertices.begin(), SelectedVertices.end(), vertName);
-        if (position == SelectedVertices.end())
-        { // if this vertex has not been selected before
+        if (position == SelectedVertices.end()) // if this vertex has not been selected before
+        { 
             SelectedVertices.push_back(vertName); // add vertex to selected vertices
             GFrtCtx->MainWindow->statusBar()->showMessage(
                 QString::fromStdString("Selected " + vertName));

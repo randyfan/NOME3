@@ -716,8 +716,12 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
     //}
 
     // added on 11/6. TODO: Clean up asap!!!!!! Also, we want to eventually add a separate feature to select all edges on a polyline
-    if (meshClass == "CBSpline" || meshClass == "CPolyline")  {
 
+    auto meshName = GetSceneTreeNode()->GetOwner()->GetName();
+
+    // If it's not a selected edge and is a bspline/polyline
+    if (meshClass == "CBSpline" || meshClass == "CPolyline") {
+        std::cout << "chosen: " + meshName << std::endl;
         auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
 
         std::vector<CMeshImpl::VertexHandle> edgeVertsOnly;
@@ -831,25 +835,22 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
                 ;
 
                 std::cout << mindist << std::endl;
-                //result.emplace_back(mindist, hitpointnames); // Commented this out on 11/22. Purposely don't want to include those results. COmment it back out
+                // result.emplace_back(mindist, hitpointnames); // Commented this out on 11/22.
+                // Purposely don't want to include those results. COmment it back out
 
                 // Randy added this on 11/21. Key to selecting entire polylines and bsplines
                 std::cout << "Pick edges in Mesh.cpp: found entity: " + meshClass << std::endl;
-                
-                // TODO: Add deselection in
-                GetSceneTreeNode()->GetOwner()->SelectNode();
-                MarkDirty();
-                // if it hasn't been selected yet.. for some reason not working. I'm guessing because the original color is lost
-                //if (!GetSceneTreeNode()->GetOwner()->isSelected())
-                //{
-                //    GetSceneTreeNode()->GetOwner()->SelectNode();
-                //    MarkDirty(); // dk if this does anything
-                //}
-                //else
-                //{
-                //    GetSceneTreeNode()->GetOwner()->UnselectNode();
-                //    MarkDirty(); // dk if this does anything
-                //}
+
+                // Add deselection in for polyline and bspline entities (not the recently selected polyline)
+                if (meshName.find("SELECTED") == std::string::npos) { 
+                    GetSceneTreeNode()->GetOwner()->SelectNode();
+                    MarkDirty();
+                }
+                else // this is a temp selection polyline, deselect by adding to results
+                {
+                    result.emplace_back(mindist, hitpointnames);
+                }
+
 
             }
         }
@@ -858,6 +859,14 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
 
     // Else, for entities other than Polyline or BSpline...
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
+    
+    
+    //for (auto ei = Mesh.halfedges_begin(); ei != Mesh.halfedges_end(); ++ei) {
+    //    std::cout << ei.handle().idx() << std::endl;
+    //    std::cout << Mesh.point(Mesh.to_vertex_handle(ei.handle())) << std::endl;
+    //    std::cout << Mesh.to_vertex_handle(ei.handle()) << std::endl;
+    //    std::cout << "clive purely for debugging." << std::endl;
+    //}
     for (const auto& pair : FaceVertsToFace) // if CPolyline or CBspline, this will silently get skipped
     {
         auto points = pair.first;
