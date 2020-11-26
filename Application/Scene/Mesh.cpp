@@ -90,7 +90,8 @@ CMeshImpl::VertexHandle CMesh::AddVertex(const std::string& name, tc::Vector3 po
     CMeshImpl::VertexHandle vertex;
     vertex = Mesh.add_vertex(CMeshImpl::Point(pos.x, pos.y, pos.z));
     NameToVert.emplace(name, vertex);
-    VertToName.emplace(vertex, name); // Randy added on 10/15. This data structure may be useful in the future
+    VertToName.emplace(
+        vertex, name); // Randy added on 10/15. This data structure may be useful in the future
     return vertex;
 }
 
@@ -222,7 +223,8 @@ void CMeshInstance::UpdateEntity()
     Mesh.request_vertex_colors();
     Mesh.request_edge_status();
     Mesh.request_face_status();
-    Mesh.request_face_colors(); // Randy added on 10/10 for face selection. May be useful in the future for flat coloring.
+    Mesh.request_face_colors(); // Randy added on 10/10 for face selection. May be useful in the
+                                // future for flat coloring.
     for (auto vH : Mesh.vertices())
     {
         Mesh.set_color(vH, { VERT_COLOR });
@@ -232,7 +234,7 @@ void CMeshInstance::UpdateEntity()
     std::cout
         << "Inside Mesh update entity, right before faces to delete. We are in this instance: "
             + GetSceneTreeNode()->GetPath()
-    << std::endl;
+        << std::endl;
     for (const std::string& face : FacesToDelete)
     {
         auto iter = NameToFace.find(face);
@@ -242,11 +244,15 @@ void CMeshInstance::UpdateEntity()
             {
                 std::cout << ex.second.idx() << std::endl;
             }
-            std::cout << "NUM FACES BEFORE REMOVING: " + std::to_string(Mesh.n_faces()) << std::endl;
-            std::cout << "NUM VERTICES BEFORE REMOVING: " + std::to_string(Mesh.n_vertices())<< std::endl;
+            std::cout << "NUM FACES BEFORE REMOVING: " + std::to_string(Mesh.n_faces())
+                      << std::endl;
+            std::cout << "NUM VERTICES BEFORE REMOVING: " + std::to_string(Mesh.n_vertices())
+                      << std::endl;
             std::cout << "FOUND FACE IN MESH-> DELETE" << std::endl;
             std::cout << iter->second.idx() << std::endl;
-            Mesh.delete_face(iter->second, true); // TODO: Change to true to remove isolated vertices. But some strange bug, where I can't delete a second mesh face occurs
+            Mesh.delete_face(iter->second,
+                             true); // TODO: Change to true to remove isolated vertices. But some
+                                    // strange bug, where I can't delete a second mesh face occurs
             Mesh.garbage_collection(); // Needed to execute deleting the faces
             std::cout << "NUM FACES AFTER REMOVING: " + std::to_string(Mesh.n_faces()) << std::endl;
             std::cout << "NUM VERTICES AFTER REMOVING: " + std::to_string(Mesh.n_vertices())
@@ -256,39 +262,45 @@ void CMeshInstance::UpdateEntity()
             std::cout << "B" << std::endl;
             auto faceverts = FaceToFaceVerts.at(facehandle);
 
-            // 10/18 WORK ON THIS TMRW MORNING: THE BUG IS THAT THE VERTEX HANDLES GET AUTOMATICALLY RESORTED AND REINDEXED AFTER DELETING. For example, if i delete 2 from 1 , 2, 3. The new list becomes 1,2.
-            // 10/18 This for loop fixed some bugs
-            // make the faceverts decreasing in idx. Then for the first one, replace all th
+            // 10/18 WORK ON THIS TMRW MORNING: THE BUG IS THAT THE VERTEX HANDLES GET AUTOMATICALLY
+            // RESORTED AND REINDEXED AFTER DELETING. For example, if i delete 2 from 1 , 2, 3. The
+            // new list becomes 1,2. 10/18 This for loop fixed some bugs make the faceverts
+            // decreasing in idx. Then for the first one, replace all th
 
             std::vector<int> deleted; // deleted indices
             int originalvertsize = VertToName.size();
 
             // useful for counting number of occurences
             std::vector<CMeshImpl::VertexHandle> vflattened;
-            for (auto & imap : FaceToFaceVerts)
-                vflattened.insert(vflattened.begin(), imap.second.begin(), imap.second.end());// https://stackoverflow.com/questions/313432/c-extend-a-vector-with-another-vector
+            for (auto& imap : FaceToFaceVerts)
+                vflattened.insert(
+                    vflattened.begin(), imap.second.begin(),
+                    imap.second
+                        .end()); // https://stackoverflow.com/questions/313432/c-extend-a-vector-with-another-vector
 
-
-            for (auto facevert : faceverts) { // facevert is not sorted by index
-                std::cout << "deleting face vert of this mesh from DS if it is isolated" << std::endl;
+            for (auto facevert : faceverts)
+            { // facevert is not sorted by index
+                std::cout << "deleting face vert of this mesh from DS if it is isolated"
+                          << std::endl;
                 auto temp = VertToName.at(facevert);
                 std::cout << temp << std::endl;
                 std::cout << facevert << std::endl;
-                bool isolated = std::count(vflattened.begin(), vflattened.end(), facevert) == 1; // if this vertex is not shared by any other face
-                if (isolated) // only delete if there is no other face on the mesh that shares the vertex
+                bool isolated = std::count(vflattened.begin(), vflattened.end(), facevert)
+                    == 1; // if this vertex is not shared by any other face
+                if (isolated) // only delete if there is no other face on the mesh that shares the
+                              // vertex
                 {
                     std::cout << "isolated ,so deleting" << std::endl;
                     deleted.push_back(facevert.idx());
                 }
-                //VertToName.erase(facevert); // 1st DS. No need to delete, handled when we create new temp DS
-                //NameToVert.erase(temp); // 2nd DS. No need to delete, handled when we create new temp DS
-
+                // VertToName.erase(facevert); // 1st DS. No need to delete, handled when we create
+                // new temp DS NameToVert.erase(temp); // 2nd DS. No need to delete, handled when we
+                // create new temp DS
             }
             std::cout << "finished deleting from vert DS" << std::endl;
-      ///////////////////////////////////////////////////////  Fix the Vert DS      
-              std::cout << "begin fixing vert DS for deletions" << std::endl;
+            ///////////////////////////////////////////////////////  Fix the Vert DS
+            std::cout << "begin fixing vert DS for deletions" << std::endl;
             // map for new vert handle index to new vert handle
-           
 
             std::map<int, CMeshImpl::VertexHandle> temp;
             for (auto newverthandle : Mesh.vertices())
@@ -303,36 +315,40 @@ void CMeshInstance::UpdateEntity()
             int displacement = 0;
             std::cout << "begin creating mapping from oldvert to newvert handles" << std::endl;
 
-
-
             // sort nametovert using sorted vector consisting of its key, value pairs
-            std::vector<std::pair<std::string, CMeshImpl::VertexHandle>> v(NameToVert.begin(), NameToVert.end());
+            std::vector<std::pair<std::string, CMeshImpl::VertexHandle>> v(NameToVert.begin(),
+                                                                           NameToVert.end());
 
-            sort(v.begin(), v.end(), [=](std::pair<std::string, CMeshImpl::VertexHandle>& a, std::pair<std::string, CMeshImpl::VertexHandle>& b)
-            {
-                return a.second.idx() < b.second.idx();
-            });
-   
-            for (auto &pair : v) { // THE BUG IS THAT NAMETOVERT IS NOT SORTED
+            sort(v.begin(), v.end(),
+                 [=](std::pair<std::string, CMeshImpl::VertexHandle>& a,
+                     std::pair<std::string, CMeshImpl::VertexHandle>& b) {
+                     return a.second.idx() < b.second.idx();
+                 });
+
+            for (auto& pair : v)
+            { // THE BUG IS THAT NAMETOVERT IS NOT SORTED
                 int i = pair.second.idx();
-                if (std::find(deleted.begin(), deleted.end(), i)== deleted.end() ) 
+                if (std::find(deleted.begin(), deleted.end(), i) == deleted.end())
                 {
                     std::cout << i - displacement << std::endl;
                     auto newhandle = temp.at(i - displacement);
                     tempVertToVert.try_emplace(std::move(pair.second), std::move(newhandle));
                 }
-                else // else,it is one that needs to be deleted. don't add it. but the next index i + 1, should correspond the new vert handle at index i
-                    displacement += 1; // so we need to push vertices back 
+                else // else,it is one that needs to be deleted. don't add it. but the next index i
+                     // + 1, should correspond the new vert handle at index i
+                    displacement += 1; // so we need to push vertices back
             }
             std::cout << "finished creating mapping from oldvert to newvert handles" << std::endl;
 
             // handle both vertoname and nametovert together since they are the same size
             std::map<std::string, CMeshImpl::VertexHandle> newNameToVert;
             std::map<CMeshImpl::VertexHandle, std::string> newVertToName; // Randy added on 10/11
-            
+
             // construct newVertToName
-            for (auto& pair : VertToName) {
-                if (tempVertToVert.find(pair.first) != tempVertToVert.end()) // if this vert is not the one of the deleted ones
+            for (auto& pair : VertToName)
+            {
+                if (tempVertToVert.find(pair.first)
+                    != tempVertToVert.end()) // if this vert is not the one of the deleted ones
                 {
                     auto updatedverthandle = tempVertToVert.at(pair.first);
                     newVertToName.emplace(updatedverthandle, pair.second);
@@ -355,22 +371,19 @@ void CMeshInstance::UpdateEntity()
             {
                 std::cout << pair.first << std::endl;
             }
-        //////////////////////////////////////////////////////////// Done fixing the Vert DS
+            //////////////////////////////////////////////////////////// Done fixing the Vert DS
 
-       
-            //NameToFace.erase(face); // 3rd DS. Handled below by reassigning
-            //FaceToName.erase(facehandle); // 4th DS Handed below by reassigning
+            // NameToFace.erase(face); // 3rd DS. Handled below by reassigning
+            // FaceToName.erase(facehandle); // 4th DS Handed below by reassigning
 
             ////////////////////////////// Fix Face Handle DS
 
             // map for new face handle index to new face handle
             std::cout << "begin fixing face DS for deletions" << std::endl;
 
-
             std::map<int, CMeshImpl::FaceHandle> facetemp;
             for (auto newfacehandle : Mesh.faces())
                 facetemp.try_emplace(newfacehandle.idx(), std::move(newfacehandle));
-
 
             std::vector<std::pair<std::string, CMeshImpl::FaceHandle>> f(NameToFace.begin(),
                                                                          NameToFace.end());
@@ -383,21 +396,22 @@ void CMeshInstance::UpdateEntity()
             std::map<CMeshImpl::FaceHandle, CMeshImpl::FaceHandle> tempFaceToFace;
             int facedisplacement = 0;
             std::cout << "begin creating tempFacetoFace" << std::endl;
-            for (auto ex : f) {
+            for (auto ex : f)
+            {
                 std::cout << ex.second.idx() << std::endl;
             }
             for (auto& pair : f)
             {
-         
+
                 int i = pair.second.idx();
                 std::cout << i << std::endl;
-                if (pair.first !=face) // if the name is not the one that needs to be deleted
+                if (pair.first != face) // if the name is not the one that needs to be deleted
                 {
                     auto newhandle = facetemp.at(i - facedisplacement);
                     tempFaceToFace.try_emplace(pair.second, newhandle);
                 }
-                else  // this pair needs to be deleted, so we can take care of it here
-                    facedisplacement += 1; 
+                else // this pair needs to be deleted, so we can take care of it here
+                    facedisplacement += 1;
             }
             std::cout << "finished  creating tempFacetoFace" << std::endl;
             std::map<std::string, CMeshImpl::FaceHandle> newNameToFace;
@@ -417,10 +431,9 @@ void CMeshInstance::UpdateEntity()
             FaceToName = newFaceToName;
             NameToFace = newNameToFace;
 
-
-
-             std::cout << "Debug FaceToName DS" << std::endl;
-            for (auto& pair : FaceToName) {
+            std::cout << "Debug FaceToName DS" << std::endl;
+            for (auto& pair : FaceToName)
+            {
                 std::cout << pair.second << std::endl;
             }
 
@@ -434,25 +447,28 @@ void CMeshInstance::UpdateEntity()
 
             std::cout << "F" << std::endl;
 
-            ///////////////////////////////////////// Fix the combination DS. 
+            ///////////////////////////////////////// Fix the combination DS.
             std::cout << " begin fixing combination DS for deletions" << std::endl;
-           // std::map<CMeshImpl::FaceHandle, std::vector<CMeshImpl::VertexHandle>> tempFaceToFaceVerts; 
-          //  std::map<std::vector<CMeshImpl::VertexHandle>, CMeshImpl::FaceHandle> tempFaceVertsToFace; 
-               
+            // std::map<CMeshImpl::FaceHandle, std::vector<CMeshImpl::VertexHandle>>
+            // tempFaceToFaceVerts;
+            //  std::map<std::vector<CMeshImpl::VertexHandle>, CMeshImpl::FaceHandle>
+            //  tempFaceVertsToFace;
 
             // Update: Here, since none of them use Name, we can just rebuild it
             FaceToFaceVerts.clear();
             FaceVertsToFace.clear();
-            for (auto& realface : Mesh.faces()) {
+            for (auto& realface : Mesh.faces())
+            {
                 std::vector<CMeshImpl::VertexHandle> realverts;
-                for (auto vert: Mesh.fv_range(realface)) {
+                for (auto vert : Mesh.fv_range(realface))
+                {
                     realverts.push_back(vert);
                 }
                 FaceToFaceVerts.emplace(realface, realverts);
                 FaceVertsToFace.emplace(realverts, realface);
             }
-           // FaceToFaceVerts = tempFaceToFaceVerts;
-           // FaceVertsToFace = tempFaceVertsToFace;
+            // FaceToFaceVerts = tempFaceToFaceVerts;
+            // FaceVertsToFace = tempFaceVertsToFace;
 
             std::cout << " finished fixing combination DS for deletions" << std::endl;
             //////////////////////////////////// Fixed the combination DS
@@ -468,11 +484,11 @@ void CMeshInstance::UpdateEntity()
         MeshGenerator->NameToFace = NameToFace;
         MeshGenerator->FaceToName = FaceToName;
         MeshGenerator->FaceVertsToFace = FaceVertsToFace;
-        MeshGenerator->FaceToFaceVerts = FaceToFaceVerts; 
+        MeshGenerator->FaceToFaceVerts = FaceToFaceVerts;
     }
 
     std::cout << "NUM FACES AFTER REMOVING: " + std::to_string(Mesh.n_faces()) << std::endl;
-    
+
     if (!Mesh.faces_empty())
     {
         Mesh.request_face_normals();
@@ -484,28 +500,28 @@ void CMeshInstance::UpdateEntity()
     else
     {
         std::cout << "no faces left in mesh. handle this else condition in the future" << std::endl;
-        // should probably implement this logic in the future OR else may be further bugs cause this mesh has no faces
-        //GetSceneTreeNode()->GetEntity()->Release();
-        //GetSceneTreeNode()->Release();   
+        // should probably implement this logic in the future OR else may be further bugs cause this
+        // mesh has no faces
+        // GetSceneTreeNode()->GetEntity()->Release();
+        // GetSceneTreeNode()->Release();
     }
     FacesToDelete.clear(); // Randy added this on 10/18. Clear it, we have finished deleting them.
-    
+
     // Since the handle only contains an index, we can just copy
-    
+
     // Randy added this on 10/18 to ensure this gets updated as well
 
-
-    // Randy commented the below section on 10/10. i don't think it does anything ??? 
+    // Randy commented the below section on 10/10. i don't think it does anything ???
     // Construct interactive points
-    //CScene* scene = GetSceneTreeNode()->GetOwner()->GetScene();
-    //for (auto pair : PickingVerts)
+    // CScene* scene = GetSceneTreeNode()->GetOwner()->GetScene();
+    // for (auto pair : PickingVerts)
     //{
     //    scene->GetPickingMgr()->UnregisterObj(pair.second.second);
     //    delete pair.second.first;
     //}
-    //PickingVerts.clear();
+    // PickingVerts.clear();
 
-    //for (const auto& pair : NameToVert)
+    // for (const auto& pair : NameToVert)
     //{
     //    // Create a picking proxy point for each vertex
     //    CMeshInstancePoint* ip = new CMeshInstancePoint(this);
@@ -550,10 +566,12 @@ void CMeshInstance::CopyFromGenerator()
     FaceToFaceVerts = MeshGenerator->FaceToFaceVerts; // Randy added
 }
 
-std::vector<std::string> CMeshInstance::RemoveFace(const std::vector<std::string>& faceNames) // Randy added
+std::vector<std::string>
+CMeshInstance::RemoveFace(const std::vector<std::string>& faceNames) // Randy added
 {
     std::vector<std::string> removedVertName;
-    for (auto fP : faceNames) {
+    for (auto fP : faceNames)
+    {
         std::cout << fP << std::endl;
     }
     std::cout << "Entered Remove Face" << std::endl;
@@ -562,15 +580,15 @@ std::vector<std::string> CMeshInstance::RemoveFace(const std::vector<std::string
     std::cout << "inst prefix: " + instPrefix << std::endl;
 
     // Below for loop is for debugging, can remove in the future
-    for (const auto& myPair :NameToFace) // mesh vert name to vert handle. The issue is they all have the exact same
+    for (const auto& myPair :
+         NameToFace) // mesh vert name to vert handle. The issue is they all have the exact same
                      // mesh vert name and vert handle. Transformation is applied to each
     {
         auto test = myPair.first;
         std::cout << "example mesh face name: " + test << std::endl;
     }
-    // if faceName contains instprefix 
+    // if faceName contains instprefix
 
-  
     for (auto faceName : faceNames)
     {
         // if faceName contains instPrefix, then the face is a part of this mesh instance
@@ -590,29 +608,30 @@ std::vector<std::string> CMeshInstance::RemoveFace(const std::vector<std::string
                 std::vector<std::string> temp;
                 temp.push_back(meshfaceName);
                 auto temp2 = GetFaceVertexNames(temp);
-                for (auto debug : temp2) {
+                for (auto debug : temp2)
+                {
                     std::cout << "yuti: " + debug << std::endl;
                 }
                 removedVertName.insert(removedVertName.end(), temp2.begin(), temp2.end());
-              /*  auto fH = NameToFace.at(meshfaceName);
-                auto fVerts = FaceToFaceVerts.at(fH);
-                for (auto fVert : fVerts) {
-                    auto fVertName = VertToName.at(fVert);
-                    removedVertName.push_back(fVertName);
-                }*/
-                //removed.push_back()
+                /*  auto fH = NameToFace.at(meshfaceName);
+                  auto fVerts = FaceToFaceVerts.at(fH);
+                  for (auto fVert : fVerts) {
+                      auto fVertName = VertToName.at(fVert);
+                      removedVertName.push_back(fVertName);
+                  }*/
+                // removed.push_back()
             }
         }
     }
-    
-    GetSceneTreeNode()->SetEntityUpdated(true);// Randy added this on 10/18. Didn't seem to fix bug?
+
+    GetSceneTreeNode()->SetEntityUpdated(
+        true); // Randy added this on 10/18. Didn't seem to fix bug?
     std::cout << "end of remove face" << std::endl;
     return removedVertName;
-
-
 }
 
-std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ray& localRay) {
+std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ray& localRay)
+{
 
     std::vector<std::pair<float, std::string>> result;
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
@@ -621,7 +640,8 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
         auto points = pair.first;
 
         std::string facename = FaceToName.at(pair.second);
-        std::cout << "We are currently in " + GetSceneTreeNode()->GetPath() + "'s Pick Faces. " << std::endl;
+        std::cout << "We are currently in " + GetSceneTreeNode()->GetPath() + "'s Pick Faces. "
+                  << std::endl;
         std::cout << facename << std::endl;
         auto firstpoint = points[0];
         auto secondpoint = points[1];
@@ -634,8 +654,9 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
         const auto& posArr3 = Mesh.point(thirdpoint);
         tc::Vector3 pos3 { posArr3[0], posArr3[1], posArr3[2] };
         auto testplane = new tc::Plane(pos1, pos2, pos3);
-       // tc::Vector3 projected = localRay.Project(pos);
-        // Randy note: They all have the same position because the local ray is transformed differently
+        // tc::Vector3 projected = localRay.Project(pos);
+        // Randy note: They all have the same position because the local ray is transformed
+        // differently
         auto testdist = localRay.HitDistance(*testplane);
 
         // WARNING: Doesn't give all combinations. Naive method only works with convex polygons
@@ -643,8 +664,10 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
 
         for (int i = 0; i < points.size(); i++)
         {
-            for (int j = i + 1; j < points.size(); j++) {
-                for (int k = j + 1; k < points.size(); k++) { 
+            for (int j = i + 1; j < points.size(); j++)
+            {
+                for (int k = j + 1; k < points.size(); k++)
+                {
                     auto firstpoint = points[i];
                     auto secondpoint = points[j];
                     auto thirdpoint = points[k];
@@ -667,7 +690,7 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
             result.emplace_back(mindist, instPrefix + facename);
         }
     }
-    //std::sort(result.begin(), result.end());
+    // std::sort(result.begin(), result.end());
     for (const auto& sel : result)
     {
         std::cout << "face added to pick list" << std::endl;
@@ -685,45 +708,12 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
             + GetSceneTreeNode()->GetOwner()->GetEntity()->GetMetaObject().ClassName()
               << std::endl;
     auto meshClass = GetSceneTreeNode()->GetOwner()->GetEntity()->GetMetaObject().ClassName();
-    if (meshClass == "CPolyline")
-    {
-    //    std::cout << "Pick edges in Mesh.cpp: found Polyline entity" << std::endl;
-    //    // make sure the polyline is actually colored. Thus, we need to introduce a new surface rather than modify existing.
-    //    // since not all have surfaces
-    //    std::cout << "Changed colors0" << std::endl;
-    //    CSurface * example = new CSurface("test");
-    //    float a = 4.f;
-    //    std::cout << "Changed colors0.25" << std::endl;
-    //    //Flow::TOutput<float>* test = a;
-    //    example->ColorB.GetValue(5);
-    //    //example.ColorB.Connect(test);
-    //    std::cout << "Changed colors0.5" << std::endl;
-    //    std::cout << NameToVert.size() << std::endl;
-    //    auto surfacetest = GetSceneTreeNode()->GetOwner()->GetSurface();
-    //    std::cout << "Changed colors1" << std::endl;
-    //    surfacetest.Get()->ColorB;
-    //    std::cout << "Changed colors1.25" << std::endl;
-    //    std::cout << surfacetest->ColorB.GetValue(13.f) << std::endl;
-
-    //    std::cout << surfacetest->ColorB.IsConnected() << std::endl;
-    //    std::cout << "Changed colors1.5" << std::endl;
-    //    surfacetest.Get()->ColorB.ChangeValue(0.f);
-    //    std::cout << "Changed colors2" << std::endl;
-    //    surfacetest.Get()->ColorR.ChangeValue(0.f);
-    //    surfacetest.Get()->ColorB.ChangeValue(0.f);
-    //    GetSceneTreeNode()->GetOwner()->SetSurface(surfacetest);
-    //    std::cout << "Changed colors3" << std::endl;
+    //if (meshClass == "CPolyline" || meshClass == "CBSpline") // Randy added the second bool on 11/21
+    //{
+    //    std::cout << "Pick edges in Mesh.cpp: found entity: " + meshClass << std::endl;
+    //    GetSceneTreeNode()->GetOwner()->SelectNode();
     //    MarkDirty();
-    //    std::cout << IsDirty() << std::endl;
-    //    std::cout << "Changed colors4" << std::endl;
-    //    std::cout << "Changed colors5" << std::endl;
-    }
-    if (meshClass == "CBSpline")
-    {
-        std::cout << "Pick edges in Mesh.cpp: found BSpline entity" << std::endl;
-        std::cout << NameToVert.size() << std::endl;
-    }
-
+    //}
 
     // added on 11/6. TODO: Clean up asap!!!!!! Also, we want to eventually add a separate feature to select all edges on a polyline
     if (meshClass == "CBSpline" || meshClass == "CPolyline")  {
@@ -841,12 +831,32 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
                 ;
 
                 std::cout << mindist << std::endl;
-                result.emplace_back(mindist, hitpointnames);
-                std::cout << "added two hitpoint names" << std::endl;
+                //result.emplace_back(mindist, hitpointnames); // Commented this out on 11/22. Purposely don't want to include those results. COmment it back out
+
+                // Randy added this on 11/21. Key to selecting entire polylines and bsplines
+                std::cout << "Pick edges in Mesh.cpp: found entity: " + meshClass << std::endl;
+                
+                // TODO: Add deselection in
+                GetSceneTreeNode()->GetOwner()->SelectNode();
+                MarkDirty();
+                // if it hasn't been selected yet.. for some reason not working. I'm guessing because the original color is lost
+                //if (!GetSceneTreeNode()->GetOwner()->isSelected())
+                //{
+                //    GetSceneTreeNode()->GetOwner()->SelectNode();
+                //    MarkDirty(); // dk if this does anything
+                //}
+                //else
+                //{
+                //    GetSceneTreeNode()->GetOwner()->UnselectNode();
+                //    MarkDirty(); // dk if this does anything
+                //}
+
             }
         }
     }
 
+
+    // Else, for entities other than Polyline or BSpline...
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
     for (const auto& pair : FaceVertsToFace) // if CPolyline or CBspline, this will silently get skipped
     {

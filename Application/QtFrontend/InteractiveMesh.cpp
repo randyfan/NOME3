@@ -184,7 +184,7 @@ void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
                     }
                     auto* mat = new CXMLMaterial(QString::fromStdString(xmlPath));
                     interactiveface->addComponent(mat);
-                    mat->FindParameterByName("kd")->setValue(QVector3D(1, 0, 1)); 
+                    mat->FindParameterByName("kd")->setValue(QVector3D(1, 0, 1)); // Pink if selected
                 }
                 else // else, use the instanceColor
                 {
@@ -294,8 +294,8 @@ void CInteractiveMesh::UpdateGeometry()
 void CInteractiveMesh::UpdateMaterial()
 {
     QVector3D instanceColor { 1.0f, 0.5f, 0.1f }; // orange color
-    // If the scene tree node is not within a group, then we can directly use its surface color
 
+    // If the scene tree node is not within a group, then we can directly use its surface color
     if (!SceneTreeNode->GetParent()->GetOwner()->IsGroup()) 
     {
         if (auto surface = SceneTreeNode->GetOwner()->GetSurface()) 
@@ -415,9 +415,10 @@ void CInteractiveMesh::InitInteractions()
 
 void CInteractiveMesh::SetDebugDraw(const CDebugDraw* debugDraw)
 {
+    //std::cout << "inside set debug draw" << std::endl;
     // Check for existing lineEntity and delete
     auto* oldEntity = this->findChild<Qt3DCore::QEntity*>(QStringLiteral("lineEntity"));
-    if (oldEntity)
+    if (oldEntity && !SceneTreeNode->GetOwner()->isSelected()) // Randy added the second boolean on 11/21
     {
         auto* oldRenderer = oldEntity->findChild<Qt3DRender::QGeometryRenderer*>();
         if (oldRenderer && oldRenderer->geometry() == debugDraw->GetLineGeometry())
@@ -430,15 +431,28 @@ void CInteractiveMesh::SetDebugDraw(const CDebugDraw* debugDraw)
     auto* lineEntity = new Qt3DCore::QEntity(this);
     lineEntity->setObjectName(QStringLiteral("lineEntity"));
 
-    if (!LineMaterial)
+    if (!LineMaterial || SceneTreeNode->GetOwner()->isSelected()) // Randy added the second boolean on 11/21 to color polyline/bspline
     {
+        std::cout << "setting line color" << std::endl;
         auto xmlPath = CResourceMgr::Get().Find("DebugDrawLine.xml");
         auto* lineMat = new CXMLMaterial(QString::fromStdString(xmlPath));
         LineMaterial = lineMat;
         LineMaterial->setObjectName(QStringLiteral("lineMaterial"));
         LineMaterial->setParent(this);
         lineEntity->addComponent(LineMaterial); 
-        if (auto surface = SceneTreeNode->GetOwner()->GetSurface())
+        // Randy added this on 11/21
+        if (SceneTreeNode->GetOwner()->isSelected()) {
+            std::cout << "is selected polyline/bspline" << std::endl;
+            QVector3D instanceColor;
+            auto color = SceneTreeNode->GetOwner()->GetSelectSurface();
+            std::cout << color.x + color.y + color.z << std::endl;
+            instanceColor.setX(color.x);
+            instanceColor.setY(color.y);
+            instanceColor.setZ(color.z);
+            lineMat->FindParameterByName("instanceColor")->setValue(instanceColor); 
+            SceneTreeNode->GetOwner()->UnselectNode(); // deselect it so it won't be colored again the next time
+        }
+        else if (auto surface = SceneTreeNode->GetOwner()->GetSurface())
         {
             QVector3D instanceColor;
             instanceColor.setX(surface->ColorR.GetValue(1.0f));

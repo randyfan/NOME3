@@ -165,7 +165,7 @@ void CTemporaryMeshManager::SelectOrDeselectPolyline(const std::vector<std::stri
         }
     }
 
-    const std::string polyName = "BERKELEY" + points[0] + points[1]; // name is just the edge vert names concatenated Randyt added Berkeley on 11/21
+    const std::string polyName = "SELECTED" + points[0] + points[1]; // name is just the edge vert names concatenated Randyt added SELECTED on 11/21
 
     // TODO: THE ERROR IS BECAUSE WHEN I ADD A POLYLINE, FOR SOME REASON I CAN'T SELECT VIA TO TEXT BOX. It's because edge select only works for meshes
 

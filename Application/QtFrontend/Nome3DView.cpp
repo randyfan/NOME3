@@ -391,6 +391,8 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
             //if (classname == "CBSpline")
             auto* meshInst = dynamic_cast<Scene::CMeshInstance*>(entity);
             auto pickResults = meshInst->PickEdges(localRay);
+            // if the meshInst was a CPolyline or CBspline, set the scenetreenode  to Selected
+
             for (const auto& [dist, names] : pickResults)
                 hits.emplace_back(dist, meshInst, names);
         }
@@ -403,7 +405,7 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
         auto [dist, meshInst, edgeVertNames] = hit;
         std::cout << "WOWZER" << std::endl;
         std::cout << edgeVertNames[0] << std::endl;
-        if (edgeVertNames[0].find("BERKELEY") != std::string::npos) {
+        if (edgeVertNames[0].find("SELECTED") != std::string::npos) {
             temp.push_back(hit);
         }
 

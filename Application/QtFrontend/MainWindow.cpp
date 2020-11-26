@@ -368,6 +368,18 @@ void CMainWindow::LoadEmptyNomeFile()
 
 void CMainWindow::LoadNomeFile(const std::string& filePath)
 {
+
+    //auto testSourceMgr = std::make_shared<CSourceManager>("C:/Users/randy/Desktop/Fall2020NOME/sample NOME files/hello_cube.nom");
+    //bool testparseSuccess = testSourceMgr->ParseMainSource();
+    //std::cout << testparseSuccess << std::endl;
+    //std::cout << "opened filePath: " + filePath << std::endl;
+    //auto testScene = new Scene::CScene();
+    //Scene::GEnv.Scene = testScene;
+    //Scene::CASTSceneAdapter testadapter;
+    //testadapter.TraverseFile(testSourceMgr->GetASTContext().GetAstRoot(), *testScene); // creates the scene
+  
+
+
     setWindowFilePath(QString::fromStdString(filePath));
     bIsBlankFile = false;
     SourceMgr = std::make_shared<CSourceManager>(filePath);
@@ -391,6 +403,7 @@ void CMainWindow::LoadNomeFile(const std::string& filePath)
     try
     {
         adapter.TraverseFile(SourceMgr->GetASTContext().GetAstRoot(), *Scene);
+       // adapter.TraverseFile(testSourceMgr->GetASTContext().GetAstRoot(), *Scene);
     }
     catch (const AST::CSemanticError& e)
     {
@@ -404,6 +417,7 @@ void CMainWindow::LoadNomeFile(const std::string& filePath)
             return;
         }
     }
+
 
     PostloadSetup();
 }
