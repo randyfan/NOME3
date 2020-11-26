@@ -364,8 +364,6 @@ void CNome3DView::PickFaceWorldRay(const tc::Ray& ray)
 }
 
 
-
-
 // Used for picking edges
 void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
 {
@@ -387,11 +385,8 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
             auto localRay = ray.Transformed(l2w.Inverse());
             localRay.Direction = localRay.Direction.Normalized(); // Normalize to fix "scale" error caused by l2w.Inverse()
 
-            //auto classname = node->GetOwner()->GetEntity()->GetMetaObject().ClassName();
-            //if (classname == "CBSpline")
             auto* meshInst = dynamic_cast<Scene::CMeshInstance*>(entity);
             auto pickResults = meshInst->PickEdges(localRay);
-            // if the meshInst was a CPolyline or CBspline, set the scenetreenode  to Selected
 
             for (const auto& [dist, names] : pickResults)
                 hits.emplace_back(dist, meshInst, names);
@@ -411,8 +406,7 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
         }
 
     }
-    std::cout << "sizeeer" << std::endl;
-    std::cout << temp.size() << std::endl;
+
     if (!temp.empty()) 
         hits = temp;
     if (hits.size() == 1)
@@ -423,36 +417,20 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
             std::find(SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[0]);
         std::vector<std::string>::iterator position2 =
             std::find(SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[1]);
-        // Commenting this out on 11/25 as MarkEdgeAsSelected handles this behavior
-        //if (position1 == SelectedEdgeVertices.end()
-        //    || position2
-        //        == SelectedEdgeVertices.end()) // if either vertex has not been selected before,
-        //                                       // then the edge hasn't been selected
-        //{ // if this edge has not been selected before
         SelectedEdgeVertices.push_back(edgeVertNames[0]);
         SelectedEdgeVertices.push_back(edgeVertNames[1]);
-        GFrtCtx->MainWindow->statusBar()->showMessage(QString::fromStdString(
-            "Selected " + edgeVertNames[0] + edgeVertNames[1] + " edge"));
 
+        // if the selected edge is not a SELECTED (temp) edge 
+        if (edgeVertNames[0].find("SELECTED") == std::string::npos)
+            GFrtCtx->MainWindow->statusBar()->showMessage(QString::fromStdString("Selected " + edgeVertNames[0] + edgeVertNames[1] + " edge"));
+        else
+        {
+            GFrtCtx->MainWindow->statusBar()->showMessage("Deselected edge");
+        }
         std::set<std::string> edgeVertNamesSet(edgeVertNames.begin(), edgeVertNames.end());
-        std::cout << "found edge, mark its vertices now" << std::endl;
         meshInst->MarkEdgeAsSelected(edgeVertNamesSet, true); // here
-        //}
-        //else // else, this edge has been selected previously
-        //{
-        //    std::string removed;
-        //    SelectedEdgeVertices.erase(position1);
-        //    removed += edgeVertNames[0];
-        //    // Need to refind the position since we deleted something from the vector
-        //    std::vector<std::string>::iterator position2 = std::find(
-        //        SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[1]);
-        //    SelectedEdgeVertices.erase(position2);
-        //    removed += edgeVertNames[1];
-        //    GFrtCtx->MainWindow->statusBar()->showMessage(
-        //        QString::fromStdString("Unselected " + removed + " edge"));
-        //}
     }
-    else if (!hits.empty())
+    else if (!hits.empty()) // more than one edge selected. TODO: is this even possible?
     {
         // Show a dialog for the user to choose one face
         auto* dialog = new QDialog(GFrtCtx->MainWindow);
@@ -473,9 +451,7 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
             {
                 const auto& [prevDist, prevMeshInst, prevedgeVertNames] = hits[i - 1];
                 if (round(dist * 100) != round(prevDist * 100))
-                {
                     closenessRank += 1;
-                }
             }
 
             auto* distWidget = new QTableWidgetItem(QString::number(closenessRank));

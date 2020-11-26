@@ -182,10 +182,6 @@ void CTemporaryMeshManager::SelectOrDeselectPolyline(const std::vector<std::stri
                 node->GetOwner()->SetEntity(nullptr);
             }
         });
-        std::cout << "gamba1" << std::endl;
-       // AddedTempPolylineNodeNames.erase(std::find(AddedTempPolylineNodeNames.begin(), AddedTempPolylineNodeNames.end(), removeName));
-        std::cout << "gamba2" << std::endl;
-        //std::cout << AddedTempPolylineNodeNames.size() << std::endl;
     }
     else // Select
     {

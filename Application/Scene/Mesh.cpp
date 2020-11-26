@@ -1101,7 +1101,7 @@ void CMeshInstance::MarkEdgeAsSelected(const std::set<std::string>& vertNames, b
 {
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
 
-    // TODO 11/5 work on this, make sure the currselected stuff is actually . also, fix Nome3DView edge deselection
+    // TODO 11/5 work on this, make sure the currselected stuff is actually working . also, fix Nome3DView edge deselection
     std::vector<std::string> forEdge(vertNames.begin(), vertNames.end()); 
     auto name1withoutinstprefix = forEdge[0].substr(instPrefix.length());
     auto name2withoutinstprefix = forEdge[1].substr(instPrefix.length());
@@ -1122,18 +1122,13 @@ void CMeshInstance::MarkEdgeAsSelected(const std::set<std::string>& vertNames, b
         const auto& original = Mesh.color(handle);
         printf("Before: %d %d %d\n", original[0], original[1], original[2]);
         if (CurrSelectedEdgeVertNamesWithPrefix.find(name) == CurrSelectedEdgeVertNamesWithPrefix.end())
-        { // if hasn't been selected before
-            //if (bSel)
-            //    Mesh.set_color(handle, { VERT_SEL_COLOR });
-            //else
-            //    Mesh.set_color(handle, { VERT_COLOR });
+        { 
             CurrSelectedEdgeVertNames.insert(name.substr(prefixLen));
             CurrSelectedEdgeVertNamesWithPrefix.insert(name);
             CurrSelectedEdgeVertHandles.insert(handle);
         }
         else // it has already been selected, then deselect
         {
-            //Mesh.set_color(handle, { VERT_COLOR });
             if (CurrSelectedEdgeVertNames.find(name.substr(prefixLen)) != CurrSelectedEdgeVertNames.end())
             { // erase once
                 CurrSelectedEdgeVertNames.erase(name.substr(prefixLen));
