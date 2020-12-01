@@ -46,7 +46,8 @@ static const std::unordered_map<std::string, ECommandKind> CommandInfoMap = {
     { "frontfaces", ECommandKind::Dummy },   { "backfaces", ECommandKind::Dummy },
     { "rimfaces", ECommandKind::Dummy },     { "bank", ECommandKind::BankSet },
     { "set", ECommandKind::BankSet },        { "delete", ECommandKind::Instance },
-    { "subdivision", ECommandKind::Dummy },  { "offset", ECommandKind::Dummy }
+    { "subdivision", ECommandKind::Dummy },  { "offset", ECommandKind::Dummy },
+    { "include", ECommandKind::DocEdit }
 };
 
 ECommandKind CASTSceneAdapter::ClassifyCommand(const std::string& cmd)
@@ -88,9 +89,19 @@ CEntity* CASTSceneAdapter::MakeEntity(const std::string& cmd, const std::string&
     return nullptr;
 }
 
-void CASTSceneAdapter::TraverseFile(AST::AFile* astRoot, CScene& scene)
+// Randy changed on 11/30. TraverseFile returns list of additional file names that need to be parsed 
+std::vector<std::string> CASTSceneAdapter::TraverseFile(AST::AFile* astRoot, CScene& scene)
 {
     assert(CmdTraverseStack.empty());
+
+    std::vector<std::string> includeFileNames;
+
+    for (auto* cmd : astRoot->GetCommands())
+    {
+        auto fileName = VisitInclude(cmd, scene);
+        if (fileName != "")
+            includeFileNames.push_back(fileName);
+    }
     for (auto* cmd : astRoot->GetCommands())
     {
         VisitCommandBankSet(cmd, scene);
@@ -98,6 +109,22 @@ void CASTSceneAdapter::TraverseFile(AST::AFile* astRoot, CScene& scene)
     InstanciateUnder = GEnv.Scene->GetRootNode();
     for (auto* cmd : astRoot->GetCommands())
         VisitCommandSyncScene(cmd, scene, false);
+    return includeFileNames;
+}
+
+std::string CASTSceneAdapter::VisitInclude(AST::ACommand* cmd, CScene& scene)
+{
+    std::string includeFileName = "";
+    CmdTraverseStack.push_back(cmd);
+    auto kind = ClassifyCommand(cmd->GetCommand());
+    if (kind == ECommandKind::DocEdit && cmd->GetCommand() == "include") { 
+    
+        auto name = cmd->GetName();
+        includeFileName = name;
+
+    }
+    CmdTraverseStack.pop_back();
+    return includeFileName;
 }
 
 void CASTSceneAdapter::VisitCommandBankSet(AST::ACommand* cmd, CScene& scene)

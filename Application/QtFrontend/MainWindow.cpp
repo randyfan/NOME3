@@ -300,6 +300,15 @@ void CMainWindow::on_actionShowFacets_triggered()
 void CMainWindow::on_actionToggleVertexSelection_triggered()
 {
     Nome3DView->PickVertexBool = !Nome3DView->PickVertexBool;
+    // mark all mesh instances dirty. Added on 11/26
+    Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
+        auto* entity = node->GetInstanceEntity();
+        if (!entity)
+            entity = node->GetOwner()->GetEntity();
+
+        if (auto* mesh = dynamic_cast<Scene::CMeshInstance*>(entity))
+            mesh->MarkDirty();
+    });
 }
 
 // Toggle on/off Edge Selection
@@ -312,6 +321,15 @@ void CMainWindow::on_actionToggleEdgeSelection_triggered()
 void CMainWindow::on_actionToggleFaceSelection_triggered()
 {
     Nome3DView->PickFaceBool = !Nome3DView->PickFaceBool;
+    // mark all mesh instances dirty. Added on 11/26
+    Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
+        auto* entity = node->GetInstanceEntity();
+        if (!entity)
+            entity = node->GetOwner()->GetEntity();
+
+        if (auto* mesh = dynamic_cast<Scene::CMeshInstance*>(entity))
+            mesh->MarkDirty();
+    });
 }
 
 void CMainWindow::SetupUI()
@@ -366,44 +384,68 @@ void CMainWindow::LoadEmptyNomeFile()
     PostloadSetup();
 }
 
+
 void CMainWindow::LoadNomeFile(const std::string& filePath)
 {
 
-    //auto testSourceMgr = std::make_shared<CSourceManager>("C:/Users/randy/Desktop/Fall2020NOME/sample NOME files/hello_cube.nom");
-    //bool testparseSuccess = testSourceMgr->ParseMainSource();
-    //std::cout << testparseSuccess << std::endl;
-    //std::cout << "opened filePath: " + filePath << std::endl;
-    //auto testScene = new Scene::CScene();
-    //Scene::GEnv.Scene = testScene;
-    //Scene::CASTSceneAdapter testadapter;
-    //testadapter.TraverseFile(testSourceMgr->GetASTContext().GetAstRoot(), *testScene); // creates the scene
-  
-
+ 
+    std::cout << "p1" << std::endl;
 
     setWindowFilePath(QString::fromStdString(filePath));
+    std::cout << "p2" << std::endl;
     bIsBlankFile = false;
+    std::cout << "p3" << std::endl;
     SourceMgr = std::make_shared<CSourceManager>(filePath);
+    std::cout << "p4" << std::endl;
     bool parseSuccess = SourceMgr->ParseMainSource(); // AST is created with this function call. If want to add #include, must combine files
     if (!parseSuccess)
     {
+        std::cout << "p41" << std::endl;
         auto resp = QMessageBox::question(
             this, "Parser error",
             "The file did not completely successfully parse, do you still want "
             "to continue anyway? (See console for more information!)");
+        std::cout << "p42" << std::endl;
         if (resp != QMessageBox::Yes)
         {
             // Does not continue
+            std::cout << "p421" << std::endl;
             LoadEmptyNomeFile();
             return;
         }
+        std::cout << "p43" << std::endl;
     }
+    std::cout << "p5" << std::endl;
     Scene = new Scene::CScene();
+    std::cout << "p6" << std::endl;
     Scene::GEnv.Scene = Scene.Get();
+    std::cout << "p7" << std::endl;
     Scene::CASTSceneAdapter adapter;
+    std::cout << "p8" << std::endl;
     try
     {
-        adapter.TraverseFile(SourceMgr->GetASTContext().GetAstRoot(), *Scene);
-       // adapter.TraverseFile(testSourceMgr->GetASTContext().GetAstRoot(), *Scene);
+        std::cout << "parsing" << std::endl;
+        auto includeFileNames = adapter.TraverseFile(SourceMgr->GetASTContext().GetAstRoot(), *Scene); // randy added includeFileNames variable on 11/30. Currently assumes included file names are in same directory as original
+        std::cout << "done parsing" << std::endl;
+        for (auto fileName : includeFileNames) {
+            std::cout << fileName << std::endl;
+            auto testSourceMgr = std::make_shared<CSourceManager>("C:/Users/randy/Desktop/Fall2020NOME/sample NOME files/" + fileName);
+            bool testparseSuccess = testSourceMgr->ParseMainSource();
+            std::cout << testparseSuccess << std::endl;
+            std::cout << "opened filePath: " + fileName << std::endl;
+            std::cout << "alpaca3" << std::endl;
+            //auto testScene = new Scene::CScene();
+            //Scene::GEnv.Scene = testScene;
+            //Scene::CASTSceneAdapter testadapter;
+            //testadapter.TraverseFile(testSourceMgr->GetASTContext().GetAstRoot(),
+            //                         *testScene); // creates the scene
+
+            adapter.TraverseFile(testSourceMgr->GetASTContext().GetAstRoot(), *Scene);
+            std::cout << "alpaca4" << std::endl;
+  
+        }
+        // TODO: In the future, allow included files to be in different directories
+
     }
     catch (const AST::CSemanticError& e)
     {

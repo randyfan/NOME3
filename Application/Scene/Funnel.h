@@ -10,6 +10,7 @@ class CFunnel : public CMesh
     DEFINE_INPUT(float, Radius) { MarkDirty(); }
     DEFINE_INPUT(float, Height) { MarkDirty(); }
     DEFINE_INPUT(float, Ratio) { MarkDirty(); }
+    //DEFINE_INPUT(std::string, TestParam) { MarkDirty(); }
 
 public:
     DECLARE_META_CLASS(CFunnel, CMesh);

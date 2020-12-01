@@ -13,7 +13,6 @@ typedef struct
     float z;
 } Point;
 
-
 DEFINE_META_OBJECT(CTorusKnot)
 {
     BindPositionalArgument(&CTorusKnot::P_Val, 1, 0);
@@ -30,7 +29,7 @@ void CTorusKnot::UpdateEntity()
     // Clear mesh
     Super::UpdateEntity();
 
-    // Initialize torus knot parameters from document 
+    // Initialize torus knot parameters from document
     int _p = P_Val.GetValue(1.0f);
     int _q = Q_Val.GetValue(1.0f);
     int numPhi = static_cast<int>(VerticesPerRing.GetValue(16.0f));
@@ -41,22 +40,24 @@ void CTorusKnot::UpdateEntity()
     const float dt = (2.0f * (float)tc::M_PI) / (numSegments);
     const float du = (2.0f * (float)tc::M_PI) / numPhi;
 
-    for (int i = 0; i < numSegments; i++) // Create torus knot, creating one cross section at each iteration
+    for (int i = 0; i < numSegments;
+         i++) // Create torus knot, creating one cross section at each iteration
     {
         float t0 = i * dt;
         float r0 = (2 + cosf(_q * t0)) * 0.5;
-        
-        Point p0 = { r0 * cosf(_p * t0), r0 * sinf(_p * t0), -sinf(_q * t0) }; 
-        // Point p0 = { sinf(t0), cos(t0), 0}; // uncomment this to do torus instead    
-        
-        // Below, we'll work on approximating the Frenet frame { T, N, B } for the curve at the current point
+
+        Point p0 = { r0 * cosf(_p * t0), r0 * sinf(_p * t0), -sinf(_q * t0) };
+        // Point p0 = { sinf(t0), cos(t0), 0}; // uncomment this to do torus instead
+
+        // Below, we'll work on approximating the Frenet frame { T, N, B } for the curve at the
+        // current point
 
         float t1 = t0 + epsilon;
         float r1 = (2 + cosf(_q * t1)) * 0.5;
 
         // p1 is p0 advanced infinitesimally along the curve
         Point p1 = { r1 * cosf(_p * t1), r1 * sinf(_p * t1), -sinf(_q * t1) };
-        //Point p1 = { sinf(t1), cos(t1), 0 }; //uncomment this to do torus instead 
+        // Point p1 = { sinf(t1), cos(t1), 0 }; //uncomment this to do torus instead
 
         // compute approximate tangent as vector connecting p0 to p1
         Point T = { p1.x - p0.x, p1.y - p0.y, p1.z - p0.z };
@@ -113,15 +114,14 @@ void CTorusKnot::UpdateEntity()
             int next = (i + 1) % numPhi;
             int next_k = (k + 1) % numSegments;
             std::vector<std::string> upperFace = {
-                "v" + std::to_string(next_k + 1) + "_" + std::to_string(next), 
+                "v" + std::to_string(next_k + 1) + "_" + std::to_string(next),
                 "v" + std::to_string(next_k + 1) + "_" + std::to_string(i),
                 "v" + std::to_string(k + 1) + "_" + std::to_string(i),
                 "v" + std::to_string(k + 1) + "_" + std::to_string(next)
 
             };
-            AddFace("f1_" + std::to_string(i), upperFace);
+            AddFace("f" + std::to_string(k) +"_" + std::to_string(i), upperFace);
         }
     }
-
 }
 }

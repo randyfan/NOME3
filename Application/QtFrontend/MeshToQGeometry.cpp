@@ -109,7 +109,9 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeom
             pointBufferData.push_back(color[0] / 255.0f);
             pointBufferData.push_back(color[1] / 255.0f);
             pointBufferData.push_back(color[2] / 255.0f);
-            printf("testv%d: %d %d %d\n", vertexCount, color[0], color[1], color[2]);
+            // printf("v%d: %d %d %d\n", vertexCount, color[0], color[1], color[2]); // Randy commented this out on 11/26. Printing coordinates more useful
+
+            printf("v%d: %f %f %f\n", v.idx(), point[0], point[1], point[2]);
             vertexCount++;
         }
         QByteArray copyOfBuffer { reinterpret_cast<const char*>(pointBufferData.data()),

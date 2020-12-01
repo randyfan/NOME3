@@ -47,6 +47,7 @@ public:
     void PickEdgeWorldRay(const tc::Ray& ray); // Randy added on 10/29
 
     bool WireFrameMode = false; // Randy added on 10/16 for choose wireframe mode or default mode. Changed to false on 11/21
+
     static Qt3DCore::QEntity* MakeGridEntity(Qt3DCore::QEntity* parent);
 
     bool PickVertexBool = false; // Randy added on 11/5

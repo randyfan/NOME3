@@ -146,9 +146,6 @@ void CTemporaryMeshManager::AddPolyline(const std::vector<std::string>& points)
 // Highlight selected edge by adding temp polyline 
 void CTemporaryMeshManager::SelectOrDeselectPolyline(const std::vector<std::string>& points)
 {
-    std::cout << points[0] << std::endl;
-    std::cout << " tudo " << std::endl;
-
     auto searchpoint0 = points[0].substr(0, points[0].find("._"));
     auto searchpoint1 = points[0].substr(0, points[0].find("._"));
     std::cout << searchpoint0 << std::endl;
@@ -157,7 +154,7 @@ void CTemporaryMeshManager::SelectOrDeselectPolyline(const std::vector<std::stri
     std::string removeName;
     for (auto name : AddedTempPolylineNodeNames)
     {
-        std::cout << "namey: " + name << std::endl;
+        std::cout << "name: " + name << std::endl;
         if (searchpoint0.find(name) != std::string::npos && searchpoint1.find(name) != std::string::npos)
         {
             removeName = name;
@@ -167,7 +164,6 @@ void CTemporaryMeshManager::SelectOrDeselectPolyline(const std::vector<std::stri
 
     const std::string polyName = "SELECTED" + points[0] + points[1]; // name is just the edge vert names concatenated Randyt added SELECTED on 11/21
 
-    // TODO: THE ERROR IS BECAUSE WHEN I ADD A POLYLINE, FOR SOME REASON I CAN'T SELECT VIA TO TEXT BOX. It's because edge select only works for meshes
 
     if (alreadySelected) // Deselect
     {
@@ -192,7 +188,6 @@ void CTemporaryMeshManager::SelectOrDeselectPolyline(const std::vector<std::stri
         Scene->AddEntity(tc::static_pointer_cast<CEntity>(polyline));
         auto sceneNode = Scene->GetRootNode()->CreateChildNode("inst" + polyName);
         std::cout << "inst" + polyName << std::endl;
-        std::cout << "loopla" << std::endl;
         AddedTempPolylineNodeNames.push_back("inst" + polyName);
         auto entity = Scene->FindEntity(polyName);
         sceneNode->SetEntity(entity);

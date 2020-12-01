@@ -112,18 +112,29 @@ void CNome3DView::PostSceneUpdate()
                 {
                     printf("Geom regen for %s\n", node->GetPath().c_str());
                     
-                    mesh->CreateInteractiveFaces(); // Randy added this even alter 10/12 afternoon. Noticed needed for subdivisoin. USE. This was accidently left commented on 10/14, was causing bugs on 10/15
-                    if (WireFrameMode)
-                        mesh->UpdateFaceGeometries(true); // Randy added this on 10/12. USE
-                    else
-                        mesh->UpdateFaceGeometries(false);
-                    mesh->UpdatePointGeometries(); // Randy added this on 10/12 afternoon. Fixed point coloring issue. USE
-                    //mesh->UpdateFaceMaterials(); // Randy added this on 10/12. DONT USE
-                    mesh->InitInteractions(); // Randy added 10/15 night. wait this didnt fix the crash bug... do we still need it?
-                    //TODO: Default should be below, because it's faster. Enable a "Face selection" button that makes it use the above
-                    //mesh->UpdateGeometry(); // optimize this to work in the future. right now we can't have two materials on the same face unfortunately 
-                    //mesh->UpdateMaterial(); // optimize this to wokr in the future. right now we can't have two materials on the same face unfortunately
-                    node->SetEntityUpdated(false);
+                    
+                    if (true)//PickFaceBool) // if we are picking faces, faces need to be colored TODO: 11/26. First, fix face selection
+                    {
+                        mesh->CreateInteractiveFaces(); // Randy added this even alter 10/12
+                                                        // afternoon. Noticed needed for
+                                                        // subdivisoin. USE. This was accidently
+                                                        // left commented on 10/14, was causing bugs
+                                                        // on 10/15
+          
+                        mesh->UpdateFaceGeometries(WireFrameMode); // Randy added this on 10/12. USE
+
+                        mesh->UpdatePointGeometries(PickVertexBool); // Randy added this on 10/12 afternoon. Fixed
+                                                           // point coloring issue. USE
+                        // mesh->UpdateFaceMaterials(); // Randy added this on 10/12. DONT USE
+                        mesh->InitInteractions(); // Randy added 10/15 night. wait this didnt fix the crash bug... do we still need it?
+                        node->SetEntityUpdated(false);
+                    }
+            /*        else
+                    {
+                        mesh->UpdateGeometry();
+                        mesh->UpdateMaterial();
+                        node->SetEntityUpdated(false);
+                    }*/
                 }
             }
             else
@@ -273,7 +284,7 @@ void CNome3DView::PickFaceWorldRay(const tc::Ray& ray)
         {
             SelectedFaces.erase(position);
             GFrtCtx->MainWindow->statusBar()->showMessage(
-                QString::fromStdString("Unselected " + faceName));
+                QString::fromStdString("Deselected " + faceName));
         }
         meshInst->MarkFaceAsSelected({ faceName }, true);
     }
@@ -332,7 +343,7 @@ void CNome3DView::PickFaceWorldRay(const tc::Ray& ray)
                 {
                     SelectedFaces.erase(position);
                     GFrtCtx->MainWindow->statusBar()->showMessage(
-                        QString::fromStdString("Unselected " + faceName));
+                        QString::fromStdString("Deselected " + faceName));
                 }
 
                 float selected_dist = round(dist * 100);
@@ -367,20 +378,15 @@ void CNome3DView::PickFaceWorldRay(const tc::Ray& ray)
 // Used for picking edges
 void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
 {
-    std::vector<std::tuple<float, Scene::CMeshInstance*, std::vector<std::string>>>
-        hits; // note the string is a vector of strings
+    std::vector<std::tuple<float, Scene::CMeshInstance*, std::vector<std::string>>>hits; // note the string is a vector of strings
     Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
-        std::cout << "Currently in NOME3DView's PickEdgeWorldRay. At node: " + node->GetPath()
-                  << std::endl;
+        std::cout << "Currently in NOME3DView's PickEdgeWorldRay. At node: " + node->GetPath()<< std::endl;
         // Obtain either an instance entity or a shared entity from the scene node
         auto* entity = node->GetInstanceEntity();
         if (!entity)
             entity = node->GetOwner()->GetEntity();
         if (entity)
         {
-            std::cout << node->GetPath() + " is an entity" << std::endl;
-            std::cout << node->GetOwner()->GetEntity()->GetMetaObject().ClassName() << std::endl;
-
             const auto& l2w = node->L2WTransform.GetValue(tc::Matrix3x4::IDENTITY);
             auto localRay = ray.Transformed(l2w.Inverse());
             localRay.Direction = localRay.Direction.Normalized(); // Normalize to fix "scale" error caused by l2w.Inverse()
@@ -430,102 +436,9 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
         std::set<std::string> edgeVertNamesSet(edgeVertNames.begin(), edgeVertNames.end());
         meshInst->MarkEdgeAsSelected(edgeVertNamesSet, true); // here
     }
-    else if (!hits.empty()) // more than one edge selected. TODO: is this even possible?
-    {
-        // Show a dialog for the user to choose one face
-        auto* dialog = new QDialog(GFrtCtx->MainWindow);
-        dialog->setModal(true);
-        auto* layout1 = new QHBoxLayout(dialog);
-        auto* table = new QTableWidget();
-        table->setRowCount(hits.size());
-        table->setColumnCount(2);
-        QStringList titles;
-        titles.append(QString::fromStdString("Closeness Rank"));
-        titles.append(QString::fromStdString("Edge Vert Names"));
-        table->setHorizontalHeaderLabels(titles);
-        int closenessRank = 1;
-        for (size_t i = 0; i < hits.size(); i++)
-        {
-            const auto& [dist, meshInst, edgeVertNames] = hits[i];
-            if (i != 0)
-            {
-                const auto& [prevDist, prevMeshInst, prevedgeVertNames] = hits[i - 1];
-                if (round(dist * 100) != round(prevDist * 100))
-                    closenessRank += 1;
-            }
-
-            auto* distWidget = new QTableWidgetItem(QString::number(closenessRank));
-            auto* item = new QTableWidgetItem(
-                QString::fromStdString(edgeVertNames[0] + " and " + edgeVertNames[1]));
-            table->setItem(i, 0, distWidget); // i is row num, and 0 is col num
-            table->setItem(i, 1, item);
-        }
-        layout1->addWidget(table);
-        auto* layout2 = new QVBoxLayout();
-        auto* btnOk = new QPushButton();
-        btnOk->setText("OK");
-        connect(btnOk, &QPushButton::clicked, [this, dialog, table, hits]() {
-            auto sel = table->selectedItems();
-            if (!sel.empty())
-            {
-                int row = sel[0]->row();
-                const auto& [dist, meshInst, edgeVertNames] = hits[row];
-                std::vector<std::string>::iterator position1 = std::find(
-                    SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[0]);
-                std::vector<std::string>::iterator position2 = std::find(
-                    SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[1]);
-                if (position1 == SelectedEdgeVertices.end()
-                    || position2 == SelectedEdgeVertices.end())
-                { // if this face has not been selected before
-                    SelectedEdgeVertices.push_back(edgeVertNames[0]);
-                    SelectedEdgeVertices.push_back(edgeVertNames[1]);
-                    GFrtCtx->MainWindow->statusBar()->showMessage(QString::fromStdString(
-                        "Selected " + edgeVertNames[0] + edgeVertNames[1] + " edge"));
-                }
-                else // else, this face has been selected previously
-                {
-                    std::string removed;
-                    SelectedEdgeVertices.erase(position1);
-                    removed += edgeVertNames[0];
-                    // Need to refind the position since we deleted something from the vector
-                    std::vector<std::string>::iterator position2 = std::find(
-                        SelectedEdgeVertices.begin(), SelectedEdgeVertices.end(), edgeVertNames[1]);
-                    SelectedEdgeVertices.erase(position2);
-                    removed += edgeVertNames[1];
-                    GFrtCtx->MainWindow->statusBar()->showMessage(
-                        QString::fromStdString("Unselected " + removed + " edge"));
-                }
-
-                float selected_dist = round(dist * 100);
-                // mark all those that share the same location
-                for (int i = 0; i < hits.size(); i++)
-                {
-                    const auto& [dist, meshInst, overlapedgeVertNames] = hits[i];
-                    if (round(dist * 100) == selected_dist)
-                    {
-
-                        // temporary solution, add a polyline in that position in the future
-                        std::set<std::string> edgeVertNamesSet(edgeVertNames.begin(),
-                                                               edgeVertNames.end());
-                        meshInst->MarkEdgeAsSelected(edgeVertNamesSet, true); // mark the two edge vertices as selected
-                    }
-                }
-            }
-            dialog->close();
-        });
-        auto* btnCancel = new QPushButton();
-        btnCancel->setText("Cancel");
-        connect(btnCancel, &QPushButton::clicked, dialog, &QWidget::close);
-        layout2->addWidget(btnOk);
-        layout2->addWidget(btnCancel);
-        layout1->addLayout(layout2);
-        dialog->show();
-    }
+    // If you need to implement multiple edge intersection, please see the below line at: https://github.com/randyfan/NOME3/commit/55ab6d81140d09f1725e261ed810c1a15646ab5c
     else
-    {
-
         GFrtCtx->MainWindow->statusBar()->showMessage("No edge hit.");
-    }
 }
 
 
@@ -569,7 +482,7 @@ void CNome3DView::PickVertexWorldRay(const tc::Ray& ray)
         {
             SelectedVertices.erase(position);
             GFrtCtx->MainWindow->statusBar()->showMessage(
-                QString::fromStdString("Unselected " + vertName));
+                QString::fromStdString("Deselected " + vertName));
         }
         meshInst->MarkVertAsSelected({ vertName }, true);
     }
@@ -627,7 +540,7 @@ void CNome3DView::PickVertexWorldRay(const tc::Ray& ray)
                 else // else, this vertex has been selected previously
                 {
                     SelectedVertices.erase(position);
-                    GFrtCtx->MainWindow->statusBar()->showMessage(QString::fromStdString("Unselected " + vertName));
+                    GFrtCtx->MainWindow->statusBar()->showMessage(QString::fromStdString("Deselected " + vertName));
                 }
 
                 float selected_dist = round(dist * 100);

@@ -12,6 +12,7 @@ DEFINE_META_OBJECT(CFunnel)
     BindPositionalArgument(&CFunnel::Radius, 1, 1);
     BindPositionalArgument(&CFunnel::Ratio, 1, 2);
     BindPositionalArgument(&CFunnel::Height, 1, 3);
+   // BindPositionalArgument(&CFunnel::TestParam, 1, 4);
 }
 
 void CFunnel::UpdateEntity()
@@ -26,6 +27,12 @@ void CFunnel::UpdateEntity()
     float radius = Radius.GetValue(1.0f);
     float ratio = Ratio.GetValue(0.0f);
     float height = Height.GetValue(1.0f);
+
+    //std::string testparam = TestParam.GetValue("hi");
+
+    //std::cout << "testparam" << std::endl;
+
+
     float ri = radius * (1 + ratio);
     for (int i = 0; i < n; i++)
     {

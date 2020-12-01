@@ -34,6 +34,19 @@ argHidden : 'hidden' ;
 argSurface : 'surface' ident ;
 argSlices : 'slices' expression ;
 argOrder : 'order' expression ;
+
+string
+    : SINGLE_STRING
+    | DOUBLE_STRING
+    ;
+
+SINGLE_STRING
+    : '\'' ~('\'')+ '\''
+    ;
+    DOUBLE_STRING
+    : '"' ~('"')+ '"'
+    ;
+
 argTransform
    : 'rotate' LPAREN exp1=expression exp2=expression exp3=expression RPAREN LPAREN exp4=expression RPAREN # argTransformTwo
    | 'scale' LPAREN expression expression expression RPAREN # argTransformOne
@@ -71,6 +84,7 @@ command
    | open='delete' deleteFace* end='enddelete' # CmdDelete
    | open='subdivision' name=ident k1='type' v1=ident k2='subdivisions' v2=expression end='endsubdivision' # CmdSubdivision
    | open='offset' name=ident k1='type' v1=ident k2='min' v2=expression k3='max' v3=expression k4='step' v4=expression end='endoffset' # CmdOffset
+   | open='include' name=ident end='endinclude' # CmdInclude
    ;
 
 set : open='set' ident expression expression expression expression ;

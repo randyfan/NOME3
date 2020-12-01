@@ -20,7 +20,7 @@ public:
     
     void CreateInteractiveFaces(); // Randy added this
     void UpdateFaceGeometries(bool wireframe); // Randy added this 
-    void UpdatePointGeometries(); // Randy added this
+    void UpdatePointGeometries(bool PickVertexBool); // Randy added this
     void UpdateFaceMaterials(); // Randy added this. NOT USED
     void UpdateTransform();
     void UpdateGeometry();

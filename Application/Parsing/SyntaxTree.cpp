@@ -58,6 +58,8 @@ std::any AExpr::Accept(IExprVisitor* visitor)
         return visitor->VisitVector(static_cast<AVector*>(this));
     case EKind::WrappedExpr:
         return visitor->VisitWrappedExpr(static_cast<AWrappedExpr*>(this));
+    //case EKind::String: // Randy added this on 11/26
+    //    return visitor->VisitString(static_cast<AString*>(this));
     default:
         break;
     }
@@ -78,6 +80,7 @@ public:
     std::any VisitCall(ACall* sub) override { return Func(sub); }
     std::any VisitVector(AVector* sub) override { return Func(sub); }
     std::any VisitWrappedExpr(AWrappedExpr* sub) override { return Func(sub); }
+    //std::any VisitString(AString* sub) override { return Func(sub); } // Randy added this on 11/26
 
 private:
     TFunc& Func;
@@ -219,6 +222,17 @@ std::string ACommand::GetPositionalIdentAsString(size_t index) const
     }
     return {};
 }
+
+// Randy added this on 11/26. Useful for ASTSceneAdapter, when we are extracting the word from the file
+//std::string ACommand::GetPositionalStringAsString(size_t index) const
+//{
+//    if (!PositionalArguments.empty() && PositionalArguments.at(index)->GetKind() == EKind::String
+//        && PositionalArguments.size() > index)
+//    {
+//        return static_cast<AString*>(PositionalArguments.at(index))->ToString();
+//    }
+//    return {};
+//}
 
 AExpr* ACommand::GetPositionalArgument(size_t index) const
 {

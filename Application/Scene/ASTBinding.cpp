@@ -186,6 +186,26 @@ bool TBindingTranslator<Flow::TInput<float>>::FromASTToValue(AST::ACommand* comm
     return true;
 }
 
+// Randy added this on 11/26
+//template <>
+//bool TBindingTranslator<std::string>::FromASTToValue(AST::ACommand* command,
+//                                                     const CCommandSubpart& subpart,
+//                                                     std::string& value)
+//{
+//    auto* string = subpart.GetExpr(command);
+//    if (string == NULL)
+//    {
+//        return false;
+//    }
+//
+//    if (string->GetKind() != AST::EKind::Ident)
+//        throw AST::CSemanticError("Command is not matched with a String", command);
+//
+//    value = static_cast<const AST::AString*>(string)->ToString();
+//
+//    return true;
+//}
+
 template <>
 bool TBindingTranslator<std::string>::FromASTToValue(AST::ACommand* command,
                                                      const CCommandSubpart& subpart,

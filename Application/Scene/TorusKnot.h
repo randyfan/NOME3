@@ -12,9 +12,7 @@ class CTorusKnot : public CMesh
     DEFINE_INPUT(float, TubeRadius) { MarkDirty(); }
     DEFINE_INPUT(float, Segments) { MarkDirty(); }
 
-
 public:
-
     DECLARE_META_CLASS(CTorusKnot, CMesh);
     CTorusKnot() = default;
     CTorusKnot(const std::string& name)

@@ -28,8 +28,9 @@ CInteractiveMesh::CInteractiveMesh(Scene::CSceneTreeNode* node)
 
     CreateInteractiveFaces(); // Randy added this on 10/12. can use the Mesh's transform for each face
     UpdateFaceGeometries(true); // currently material logic is in here also
-    UpdatePointGeometries();// Randy added this
-    // UpdateFaceMaterials(); // test this later. default should be gray face
+    // UpdatePointGeometries();// Randy added this . // Randy commented out on 11/26 to remove vertices at load
+
+    // // // // / /UpdateFaceMaterials(); // test this later. default should be gray face
     // probably don't need InitInteractiosn again?
 
 
@@ -57,11 +58,11 @@ void CInteractiveMesh::CreateInteractiveFaces() {
 
             for (fIter = openmesh.faces_sbegin(); fIter != fEnd; ++fIter)
             {
-                auto * interactiveface = new Qt3DCore::QEntity(this); // afternoon change to "this" as root. RANDY THIS CHANGED IT!!!!!!!!!!! ADDING THIS at 2:59 PM PDT HELPED      
+                auto * interactiveface = new Qt3DCore::QEntity(this); // change to "this" as root fixed bug 
                                                                 //auto facegeometry = new Qt3DRender::QGeometry();
                 //auto facerenderer = new Qt3DRender::QGeometryRenderer();
                 //auto facematerial = new Qt3DRender::QMaterial();
-                interactivefaces.push_back(interactiveface);
+                interactivefaces.push_back(interactiveface); // need individual faces to allow for face selection
                 //facegeometries.push_back(facegeometry);
                 //facerenderers.push_back(facerenderer);
                 //facematerials.push_back(facematerial);
@@ -78,9 +79,9 @@ void CInteractiveMesh::CreateInteractiveFaces() {
 }
 
 
-void CInteractiveMesh::UpdatePointGeometries() { 
+void CInteractiveMesh::UpdatePointGeometries(bool PickVertexBool) { 
  // Update or create the entity for drawing vertices
-    // Update or create the entity for drawing vertices
+
 
     auto* entity = SceneTreeNode->GetInstanceEntity();
     if (!entity)
@@ -92,13 +93,23 @@ void CInteractiveMesh::UpdatePointGeometries() {
         auto* meshInstance = dynamic_cast<Scene::CMeshInstance*>(entity);
         auto openmesh = meshInstance->GetMeshImpl();
         CMeshToQGeometry meshToQGeometry(meshInstance->GetMeshImpl(), true); // This may be causing bugs Randy 
-        if (!PointEntity)
-             {
+        if (!PointEntity || PickVertexBool)
+        {
+            std::string xmlPath = "";
             PointEntity = new Qt3DCore::QEntity(this);
-
-            auto xmlPath = CResourceMgr::Get().Find(
-                "DebugDrawLine.xml"); // this uses instanceColor, and also uses LineShading.frag
-                                      // (which is used for polylines) for final color
+            if (PickVertexBool)
+            {
+                delete PointRenderer;
+                delete PointGeometry;
+                xmlPath = CResourceMgr::Get().Find(
+                    "DebugDrawLinev2.xml"); // vert box size = 6
+            }
+            else {
+                xmlPath = CResourceMgr::Get().Find(
+                    "DebugDrawLine.xml"); // this uses instanceColor, and also uses
+                                            // LineShading.frag (which is used for polylines) for
+                                            // final color
+            }
             auto* lineMat = new CXMLMaterial(QString::fromStdString(xmlPath));
             PointMaterial = lineMat;
             PointMaterial->setParent(this);
@@ -106,8 +117,19 @@ void CInteractiveMesh::UpdatePointGeometries() {
         }
         else
         {
+            std::string xmlPath = "";
+            PointEntity = new Qt3DCore::QEntity(this);
             delete PointRenderer;
             delete PointGeometry;
+            xmlPath = CResourceMgr::Get().Find(
+                "DebugDrawLine.xml"); // this uses instanceColor, and also uses
+                                      // LineShading.frag (which is used for polylines) for
+                                      // final color
+            auto* lineMat = new CXMLMaterial(QString::fromStdString(xmlPath));
+            PointMaterial = lineMat;
+            PointMaterial->setParent(this);
+            PointEntity->addComponent(PointMaterial);
+
         }
         PointGeometry = meshToQGeometry.GetPointGeometry();
         PointGeometry->setParent(PointEntity);
@@ -135,20 +157,67 @@ void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
             CMeshImpl::FaceIter fIter, fEnd = openmesh.faces_end();
             int counter = 0;
 
-            for (auto facerender : facerenderers) {
+            for (auto facerender : facerenderers)
                 delete facerender;
-            }
             facerenderers.clear();
             for (auto facegeometry : facegeometries)
-            {
                 delete facegeometry;
-            }
+
             facegeometries.clear();
+
+
+
+            //Get face color
+            QVector3D instanceColor {1.0f, 0.5f, 0.0f}; // orange color
+               // If the scene tree node is not within a group, then we can directly use its
+            // surface color
+            if (!SceneTreeNode->GetParent()->GetOwner()->IsGroup())
+            {
+                if (auto surface = SceneTreeNode->GetOwner()->GetSurface())
+                {
+                    instanceColor.setX(surface->ColorR.GetValue(1.0f));
+                    instanceColor.setY(surface->ColorG.GetValue(1.0f));
+                    instanceColor.setZ(surface->ColorB.GetValue(1.0f));
+                }
+            }
+            else // else, the scenetreenode is within a group, and we keep bubbling up from
+                 // where we are (going up the tree) until we get to an instance scene node
+                 // that has a surface color
+            {
+                bool setColor = false;
+                auto currNode = SceneTreeNode;
+                while (currNode->GetParent()->GetOwner()->IsGroup())
+                { // while currNode is within a group
+                    if (auto surface = currNode->GetOwner()->GetSurface())
+                    { // if the currNode itself is assigned a surface color, then this color
+                      // is prioritzed. we set the color and break.
+                        instanceColor.setX(surface->ColorR.GetValue(1.0f));
+                        instanceColor.setY(surface->ColorG.GetValue(1.0f));
+                        instanceColor.setZ(surface->ColorB.GetValue(1.0f));
+                        setColor = true;
+                        break;
+                    }
+                    currNode = currNode->GetParent();
+                }
+
+                if (!setColor) // If the surface color hasn't been set yet
+                {
+                    currNode = currNode->GetParent(); // here, currNode's parent is
+                                                      // guaranteed to be a instance scene
+                                                      // tree node due to previous while loop
+
+                    if (auto surface = currNode->GetOwner()->GetSurface())
+                    {
+                        instanceColor.setX(surface->ColorR.GetValue(1.0f));
+                        instanceColor.setY(surface->ColorG.GetValue(1.0f));
+                        instanceColor.setZ(surface->ColorB.GetValue(1.0f));
+                    }
+                }
+            }
 
             
             for (fIter = openmesh.faces_sbegin(); fIter != fEnd; ++fIter)
             {
-
                 auto interactiveface = interactivefaces[counter];
 
                 // Commenting this out fixed the transform bug? Why is this not needed?
@@ -175,13 +244,9 @@ void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
                     interactiveface->addComponent(facerender); // adding geometry data to interactive face
                     std::string xmlPath;
                     if (wireframe)
-                    {
                         xmlPath = CResourceMgr::Get().Find("WireFrameLit.xml");
-                    }
                     else
-                    {
                         xmlPath = CResourceMgr::Get().Find("RandyLit.xml");
-                    }
                     auto* mat = new CXMLMaterial(QString::fromStdString(xmlPath));
                     interactiveface->addComponent(mat);
                     mat->FindParameterByName("kd")->setValue(QVector3D(1, 0, 1)); // Pink if selected
@@ -206,7 +271,8 @@ void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
                     }
                     auto* mat = new CXMLMaterial(QString::fromStdString(xmlPath));
                     interactiveface->addComponent(mat);
-                    mat->FindParameterByName("kd")->setValue(QVector3D(0, 0, 1)); // color rgb ranges from 0 to 1
+
+                    mat->FindParameterByName("kd")->setValue(instanceColor); // color rgb ranges from 0 to 1
                         //mat->FindParameterByName("kd")->setValue(QVector3D(1 - .15 * counter, 0, 0)); // (20*counter, 0, 255*counter));
                 }
                 counter += 1;
@@ -214,11 +280,6 @@ void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
         }
     }
 }
-
-
-
-
-
 
 void CInteractiveMesh::UpdateTransform()
 {
@@ -433,7 +494,6 @@ void CInteractiveMesh::SetDebugDraw(const CDebugDraw* debugDraw)
 
     if (!LineMaterial || SceneTreeNode->GetOwner()->isSelected()) // Randy added the second boolean on 11/21 to color polyline/bspline
     {
-        std::cout << "setting line color" << std::endl;
         auto xmlPath = CResourceMgr::Get().Find("DebugDrawLine.xml");
         auto* lineMat = new CXMLMaterial(QString::fromStdString(xmlPath));
         LineMaterial = lineMat;
@@ -442,7 +502,7 @@ void CInteractiveMesh::SetDebugDraw(const CDebugDraw* debugDraw)
         lineEntity->addComponent(LineMaterial); 
         // Randy added this on 11/21
         if (SceneTreeNode->GetOwner()->isSelected()) {
-            std::cout << "is selected polyline/bspline" << std::endl;
+            std::cout << "Selected a polyline/bspline" << std::endl;
             QVector3D instanceColor;
             auto color = SceneTreeNode->GetOwner()->GetSelectSurface();
             std::cout << color.x + color.y + color.z << std::endl;

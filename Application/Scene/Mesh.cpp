@@ -654,6 +654,7 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
         const auto& posArr3 = Mesh.point(thirdpoint);
         tc::Vector3 pos3 { posArr3[0], posArr3[1], posArr3[2] };
         auto testplane = new tc::Plane(pos1, pos2, pos3);
+
         // tc::Vector3 projected = localRay.Project(pos);
         // Randy note: They all have the same position because the local ray is transformed
         // differently
@@ -749,17 +750,17 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
 
                 // naive method, extend the plane out of the line in 6 directions a little
                 tc::Vector3 dummy1 = (pos1 + pos2) / 2;
-                dummy1.y += 0.115;
+                dummy1.y += 0.350; // Used to be .115
                 tc::Vector3 dummy2 = (pos1 + pos2) / 2;
-                dummy2.x += 0.115;
+                dummy2.x += 0.350;
                 tc::Vector3 dummy3 = (pos1 + pos2) / 2;
-                dummy3.z += 0.115;
+                dummy3.z += 0.350;
                 tc::Vector3 dummy4 = (pos1 + pos2) / 2;
-                dummy4.y += 0.115;
+                dummy4.y += 0.350;
                 tc::Vector3 dummy5 = (pos1 + pos2) / 2;
-                dummy5.x += 0.115;
+                dummy5.x += 0.350;
                 tc::Vector3 dummy6 = (pos1 + pos2) / 2;
-                dummy6.z += 0.115;
+                dummy6.z += 0.350;
                 auto testdist1 = localRay.HitDistance(pos1, pos2, dummy1);
                 testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy2));
                 testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy3));
@@ -787,17 +788,17 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
 
                 // naive method, extend the plane out of the line in 6 directions a little
                 tc::Vector3 dummy1 = (pos1 + pos2) / 2;
-                dummy1.y += 0.115;
+                dummy1.y += 0.350;
                 tc::Vector3 dummy2 = (pos1 + pos2) / 2;
-                dummy2.x += 0.115;
+                dummy2.x += 0.350;
                 tc::Vector3 dummy3 = (pos1 + pos2) / 2;
-                dummy3.z += 0.115;
+                dummy3.z += 0.350;
                 tc::Vector3 dummy4 = (pos1 + pos2) / 2;
-                dummy4.y += 0.115;
+                dummy4.y += 0.350;
                 tc::Vector3 dummy5 = (pos1 + pos2) / 2;
-                dummy5.x += 0.115;
+                dummy5.x += 0.350;
                 tc::Vector3 dummy6 = (pos1 + pos2) / 2;
-                dummy6.z += 0.115;
+                dummy6.z += 0.350;
                 auto testdist1 = localRay.HitDistance(pos1, pos2, dummy1);
                 testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy2));
                 testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy3));
@@ -892,17 +893,17 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
 
                  // naive method, extend the plane out of the line in 6 directions a little
                  tc::Vector3 dummy1 = (pos1 + pos2) / 2;
-                 dummy1.y += 0.115;
+                 dummy1.y += 0.350; // used to be 0.350
                  tc::Vector3 dummy2 = (pos1 + pos2) / 2;
-                 dummy2.x += 0.115;
+                 dummy2.x += 0.350;
                  tc::Vector3 dummy3 = (pos1 + pos2) / 2;
-                 dummy3.z += 0.115;
+                 dummy3.z += 0.350;
                  tc::Vector3 dummy4 = (pos1 + pos2) / 2;
-                 dummy4.y += 0.115;
+                 dummy4.y += 0.350;
                  tc::Vector3 dummy5 = (pos1 + pos2) / 2;
-                 dummy5.x += 0.115;
+                 dummy5.x += 0.350;
                  tc::Vector3 dummy6 = (pos1 + pos2) / 2;
-                 dummy6.z += 0.115;
+                 dummy6.z += 0.350;
                  auto testdist1 = localRay.HitDistance(pos1, pos2, dummy1); 
                  testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy2));
                  testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy3));
@@ -931,17 +932,17 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
                 
                  // naive method, extend the plane out of the line in 6 directions a little
                 tc::Vector3 dummy1 = (pos1 + pos2) / 2;
-                dummy1.y += 0.115;
+                dummy1.y += 0.350;
                 tc::Vector3 dummy2 = (pos1 + pos2) / 2;
-                dummy2.x += 0.115;
+                dummy2.x += 0.350;
                 tc::Vector3 dummy3 = (pos1 + pos2) / 2;
-                dummy3.z += 0.115;
+                dummy3.z += 0.350;
                 tc::Vector3 dummy4 = (pos1 + pos2) / 2;
-                dummy4.y += 0.115;
+                dummy4.y += 0.350;
                 tc::Vector3 dummy5 = (pos1 + pos2) / 2;
-                dummy5.x += 0.115;
+                dummy5.x += 0.350;
                 tc::Vector3 dummy6 = (pos1 + pos2) / 2;
-                dummy6.z += 0.115;
+                dummy6.z += 0.350;
                 auto testdist1 = localRay.HitDistance(pos1, pos2, dummy1);
                 testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy2));
                 testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy3));
@@ -965,8 +966,6 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
         // This is outside of the for loop! incorrect!!
         if (mindist < 100)
         {
-
-            std::cout << "adding two hitpoint names" << std::endl;
             auto hitpointnames = distToNames.at(mindist); // Guaranteed to be two names
             auto name1withoutinstprefix = hitpointnames[0].substr(instPrefix.length()); 
             auto name2withoutinstprefix = hitpointnames[1].substr(instPrefix.length()); 

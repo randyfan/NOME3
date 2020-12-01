@@ -31,35 +31,38 @@ void CTorus::UpdateEntity()
     // Clear mesh
     Super::UpdateEntity();
 
-    // Initialize torus parameters from document 
+    // Initialize torus parameters from document
     int numPhi = static_cast<int>(VerticesPerRing.GetValue(16.0f));
     float majorRadius = MajorRadius.GetValue(1.0f);
     float minorRadius = MinorRadius.GetValue(1.0f);
     float thetaMax = ThetaMax.GetValue(1.0f);
     // float phiMin = PhiMin.GetValue(1.0f);
-    float phiMax= PhiMax.GetValue(1.0f);
+    float phiMax = PhiMax.GetValue(1.0f);
 
     // number of circles or cross sections
-    int numSegments = Segments.GetValue(1.0f); 
+    int numSegments = Segments.GetValue(1.0f);
 
     const float epsilon = 1e-4;
-    const float dt = (thetaMax*(float)tc::M_PI/180.0f) / (numSegments);
+    const float dt = (thetaMax * (float)tc::M_PI / 180.0f) / (numSegments);
     const float du = (phiMax * (float)tc::M_PI / 180.0f) / numPhi;
 
     // Create torus, creating one cross section at each iteration
-    for (int i = 0; i < numSegments + 1; i++) // numSegments + 1; for some reason numSegments was outputting an off by one torus...
+    for (int i = 0; i < numSegments + 1;
+         i++) // numSegments + 1; for some reason numSegments was outputting an off by one torus...
     {
         float t0 = i * dt;
 
-        Point p0 = {majorRadius*cos(t0), majorRadius*sinf(t0), 0}; 
+        Point p0 = { majorRadius * cos(t0), majorRadius * sinf(t0), 0 };
 
-        // Below, we'll work on approximating the Frenet frame { T, N, B } for the curve at the current point
+        // Below, we'll work on approximating the Frenet frame { T, N, B } for the curve at the
+        // current point
 
         float t1 = t0 + epsilon;
 
         // p1 is p0 advanced infinitesimally along the curve
 
-        Point p1 = {majorRadius*cos(t1), majorRadius*sinf(t1), 0 }; //uncomment this to do torus instead 
+        Point p1 = { majorRadius * cos(t1), majorRadius * sinf(t1),
+                     0 }; // uncomment this to do torus instead
 
         // compute approximate tangent as vector connecting p0 to p1
         Point T = { p1.x - p0.x, p1.y - p0.y, p1.z - p0.z };
@@ -125,7 +128,7 @@ void CTorus::UpdateEntity()
                     "v" + std::to_string(next_k + 1) + "_" + std::to_string(i),
                     "v" + std::to_string(next_k + 1) + "_" + std::to_string(next)*/
 
-                    // CCW 
+                    // CCW
                     "v" + std::to_string(next_k + 1) + "_" + std::to_string(next),
                     "v" + std::to_string(next_k + 1) + "_" + std::to_string(i),
                     "v" + std::to_string(k + 1) + "_" + std::to_string(i),
@@ -137,7 +140,9 @@ void CTorus::UpdateEntity()
     }
     else
     {
-        for (int k = 0; k < numSegments; k++) // numSegments instead of numsegments + 1 because we don't to connect the last segment with the first segment
+        for (int k = 0; k < numSegments;
+             k++) // numSegments instead of numsegments + 1 because we don't to connect the last
+                  // segment with the first segment
         {
             for (int i = 0; i < numPhi; i++)
             {
@@ -150,10 +155,9 @@ void CTorus::UpdateEntity()
                     "v" + std::to_string(k + 1) + "_" + std::to_string(i),
                     "v" + std::to_string(k + 1) + "_" + std::to_string(next)
                 };
-                AddFace("f1_" + std::to_string(i), upperFace);
+                AddFace("f" + std::to_string(k) + "_" + std::to_string(i), upperFace);
             }
         }
     }
-
 }
 }
