@@ -137,20 +137,6 @@ public:
         return defaultValue;
     }
 
-    // Randy added on 11/13
-    T ChangeValue(const T& newValue) const
-    {
-        std::cout << "inside change value" << std::endl;
-        std::cout << ConnectedOutput->GetValue(7.f) << std::endl;
-        if (ConnectedOutput)
-        {
-            std::cout << "trying to update output val" << std::endl;
-            ConnectedOutput->UpdateValue(newValue);
-        }
-        std::cout << "no connected output" << std::endl;
-        return newValue;
-    }
-
 private:
     CFlowNode* Owner;
     std::function<void()> DirtyNotifyRoutine;
