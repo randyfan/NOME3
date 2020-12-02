@@ -91,9 +91,6 @@ Flow::TOutput<CVertexInfo*>* CScene::FindPointOutput(const std::string& id) cons
 {
     auto iter = EntityLibrary.find(id);
     
-    for (auto& debugpair : EntityLibrary) {
-        std::cout << "entitylibrary find point output: "  + debugpair.first << std::endl;
-    }
     if (iter != EntityLibrary.end())
     {
         TAutoPtr<CEntity> ent = iter->second;
@@ -104,7 +101,6 @@ Flow::TOutput<CVertexInfo*>* CScene::FindPointOutput(const std::string& id) cons
         }
     }
 
-    std::cout << "searching through scene tree now for : " + id << std::endl;
     size_t charsToIgnore = 0;
     if (id[0] == '.')
         charsToIgnore = 1;

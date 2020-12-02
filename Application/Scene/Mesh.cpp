@@ -44,7 +44,6 @@ void CMesh::UpdateEntity()
 
     ClearMesh();
     bool isValid = true;
-    std::cout << "Mesh's curr face size: " + std::to_string(Faces.GetSize()) << std::endl;
     for (size_t i = 0; i < Faces.GetSize(); i++)
     {
         // We assume the nullptr value is never returned, of course
@@ -231,10 +230,6 @@ void CMeshInstance::UpdateEntity()
     }
     // don't need to set face color because it gets overwritten by material's instancecolor (shader)
 
-    std::cout
-        << "Inside Mesh update entity, right before faces to delete. We are in this instance: "
-            + GetSceneTreeNode()->GetPath()
-        << std::endl;
     for (const std::string& face : FacesToDelete)
     {
         auto iter = NameToFace.find(face);
@@ -244,28 +239,16 @@ void CMeshInstance::UpdateEntity()
             {
                 std::cout << ex.second.idx() << std::endl;
             }
-            std::cout << "NUM FACES BEFORE REMOVING: " + std::to_string(Mesh.n_faces())
-                      << std::endl;
-            std::cout << "NUM VERTICES BEFORE REMOVING: " + std::to_string(Mesh.n_vertices())
-                      << std::endl;
-            std::cout << "FOUND FACE IN MESH-> DELETE" << std::endl;
-            std::cout << iter->second.idx() << std::endl;
+
             Mesh.delete_face(iter->second,
                              true); // TODO: Change to true to remove isolated vertices. But some
                                     // strange bug, where I can't delete a second mesh face occurs
             Mesh.garbage_collection(); // Needed to execute deleting the faces
-            std::cout << "NUM FACES AFTER REMOVING: " + std::to_string(Mesh.n_faces()) << std::endl;
-            std::cout << "NUM VERTICES AFTER REMOVING: " + std::to_string(Mesh.n_vertices())
-                      << std::endl;
+
             std::cout << "A" << std::endl;
             auto facehandle = NameToFace.at(face);
             std::cout << "B" << std::endl;
             auto faceverts = FaceToFaceVerts.at(facehandle);
-
-            // 10/18 WORK ON THIS TMRW MORNING: THE BUG IS THAT THE VERTEX HANDLES GET AUTOMATICALLY
-            // RESORTED AND REINDEXED AFTER DELETING. For example, if i delete 2 from 1 , 2, 3. The
-            // new list becomes 1,2. 10/18 This for loop fixed some bugs make the faceverts
-            // decreasing in idx. Then for the first one, replace all th
 
             std::vector<int> deleted; // deleted indices
             int originalvertsize = VertToName.size();
@@ -290,7 +273,7 @@ void CMeshInstance::UpdateEntity()
                 if (isolated) // only delete if there is no other face on the mesh that shares the
                               // vertex
                 {
-                    std::cout << "isolated ,so deleting" << std::endl;
+                    std::cout << "isolated, so deleting vert" << std::endl;
                     deleted.push_back(facevert.idx());
                 }
                 // VertToName.erase(facevert); // 1st DS. No need to delete, handled when we create
@@ -299,7 +282,7 @@ void CMeshInstance::UpdateEntity()
             }
             std::cout << "finished deleting from vert DS" << std::endl;
             ///////////////////////////////////////////////////////  Fix the Vert DS
-            std::cout << "begin fixing vert DS for deletions" << std::endl;
+
             // map for new vert handle index to new vert handle
 
             std::map<int, CMeshImpl::VertexHandle> temp;
@@ -487,7 +470,6 @@ void CMeshInstance::UpdateEntity()
         MeshGenerator->FaceToFaceVerts = FaceToFaceVerts;
     }
 
-    std::cout << "NUM FACES AFTER REMOVING: " + std::to_string(Mesh.n_faces()) << std::endl;
 
     if (!Mesh.faces_empty())
     {
@@ -499,7 +481,7 @@ void CMeshInstance::UpdateEntity()
     }
     else
     {
-        std::cout << "no faces left in mesh. handle this else condition in the future" << std::endl;
+        // std::cout << "no faces left in mesh. handle this else condition in the future" << std::endl;
         // should probably implement this logic in the future OR else may be further bugs cause this
         // mesh has no faces
         // GetSceneTreeNode()->GetEntity()->Release();

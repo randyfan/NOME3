@@ -51,15 +51,10 @@ bool CSourceManager::ParseMainSource()
     NomParser parser(&tokens);
     CMyErrorListener errorListener;
     parser.addErrorListener(&errorListener);
-    std::cout << "p1a" << std::endl;
     auto* tree = parser.file();
-    std::cout << "p1b" << std::endl;
     CFileBuilder builder(MainSourceBuffer);
-    std::cout << "p1c" << std::endl;
     ASTRoot = builder.visitFile(tree);
-    std::cout << "p1d" << std::endl;
     ASTContext.SetAstRoot(ASTRoot);
-    std::cout << "p1e" << std::endl;
     std::cout << "====== Debug Print AST ======" << std::endl;
     std::cout << *ASTRoot;
     std::cout << "====== End Debug Print AST ======" << std::endl;

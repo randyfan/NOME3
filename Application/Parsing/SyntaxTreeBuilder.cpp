@@ -6,18 +6,12 @@ namespace Nome
 antlrcpp::Any CFileBuilder::visitFile(NomParser::FileContext* context)
 {
     AST::AFile* file = new AST::AFile();
-    std::cout << " begin visiting file" << std::endl;
     for (auto* command : context->command())
     {
-        std::cout << "start visit cmd1" << std::endl;
         auto a = this->visit(command);
-        std::cout << "start visit cmd2" << std::endl;
         auto b = a.as<AST::ACommand*>(); // THIS IS THE LINE CAUSING THE CRASH
-        std::cout << "start visit cmd3" << std::endl;
         file->AddChild(b);
-        std::cout << "done visit cmd" << std::endl;
     }
-    std::cout << "done visiting file" << std::endl;
     return file;
 }
 
@@ -285,15 +279,10 @@ antlrcpp::Any CFileBuilder::visitScientific(NomParser::ScientificContext* contex
 
 antlrcpp::Any CFileBuilder::visitIdent(NomParser::IdentContext* context)
 {
-    std::cout << "visiting ident1" << std::endl;
     auto a = context->IDENT();
-    std::cout << "visiting ident2" << std::endl;
     auto b = ConvertToken(a);
-    std::cout << "visiting ident3" << std::endl;
     auto c = new AST::AIdent(b);
-    std::cout << "visiting ident4" << std::endl;
     auto d = static_cast<AST::AExpr*>(c);
-    std::cout << "visiting ident5" << std::endl;
     return d;
 }
 
@@ -319,13 +308,9 @@ AST::CToken* CFileBuilder::ConvertToken(antlr4::Token* token)
 
 AST::CToken* CFileBuilder::ConvertToken(antlr4::tree::TerminalNode* token)
 {
-    std::cout << "converting token" << std::endl;
     auto start = token->getSymbol()->getStartIndex();
     auto len = token->getSymbol()->getStopIndex() - start + 1;
-
-    std::cout << token->getText() << std::endl;
     auto a = new AST::CToken(token->getText(), 0, start);
-    std::cout << "ready to get text and return a CToken" << std::endl;
     return a;
 }
 

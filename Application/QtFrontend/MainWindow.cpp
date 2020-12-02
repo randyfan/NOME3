@@ -95,11 +95,6 @@ void CMainWindow::on_actionOpen_triggered()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Nome File"),
                                                     appSettings.value(kDefaultDir).toString(),
                                                     tr("Nome Code (*.nom);;All Files (*)"));
-    std::cout << appSettings.value(kDefaultDir).toString().toStdString() << std::endl;
-    std::cout << fileName.toStdString() << std::endl;
-    std::cout << "tomato" << std::endl;
-    std::cout << fileName.toStdString().substr(0, fileName.toStdString().find_last_of("/") + 1)
-              << std::endl;
     if (fileName.isEmpty())
         return;
 
@@ -394,25 +389,18 @@ void CMainWindow::LoadEmptyNomeFile()
 
 void CMainWindow::LoadNomeFile(const std::string& filePath)
 {
-
- 
-    std::cout << "p1" << std::endl;
-
     setWindowFilePath(QString::fromStdString(filePath));
-    std::cout << "p2" << std::endl;
     bIsBlankFile = false;
-    std::cout << "p3" << std::endl;
     SourceMgr = std::make_shared<CSourceManager>(filePath);
-    std::cout << "p4" << std::endl;
+
     bool parseSuccess = SourceMgr->ParseMainSource(); // AST is created with this function call. If want to add #include, must combine files
     if (!parseSuccess)
     {
-        std::cout << "p41" << std::endl;
         auto resp = QMessageBox::question(
             this, "Parser error",
             "The file did not completely successfully parse, do you still want "
             "to continue anyway? (See console for more information!)");
-        std::cout << "p42" << std::endl;
+
         if (resp != QMessageBox::Yes)
         {
             // Does not continue
@@ -426,25 +414,13 @@ void CMainWindow::LoadNomeFile(const std::string& filePath)
 
     try
     {
-        std::cout << "parsing" << std::endl;
         auto includeFileNames = adapter.TraverseFile(SourceMgr->GetASTContext().GetAstRoot(), *Scene); // randy added includeFileNames variable on 11/30. Currently assumes included file names are in same directory as original
-        std::cout << "done parsing" << std::endl;
-
         for (auto fileName : includeFileNames) {
             auto nofileNamepath = filePath.substr(0, filePath.find_last_of("/") + 1);
             auto testSourceMgr = std::make_shared<CSourceManager>(nofileNamepath + fileName); // TODO: TMRW 12/1, GENERALIZE THIS TO ANY PATH
             bool testparseSuccess = testSourceMgr->ParseMainSource();
-            std::cout << testparseSuccess << std::endl;
-            std::cout << "opened filePath: " + fileName << std::endl;
-            std::cout << "alpaca3" << std::endl;
-            //auto testScene = new Scene::CScene();
-            //Scene::GEnv.Scene = testScene;
-            //Scene::CASTSceneAdapter testadapter;
-            //testadapter.TraverseFile(testSourceMgr->GetASTContext().GetAstRoot(),
-            //                         *testScene); // creates the scene
 
             adapter.TraverseFile(testSourceMgr->GetASTContext().GetAstRoot(), *Scene);
-            std::cout << "alpaca4" << std::endl;
   
         }
         // TODO: In the future, allow included files to be in different directories
