@@ -90,9 +90,16 @@ void CMainWindow::on_actionOpen_triggered()
     QSettings appSettings;
     const QString kDefaultDir("DefaultDir");
 
+
+    // https://doc.qt.io/qt-5/qfiledialog.html#getOpenFileName 
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Nome File"),
                                                     appSettings.value(kDefaultDir).toString(),
                                                     tr("Nome Code (*.nom);;All Files (*)"));
+    std::cout << appSettings.value(kDefaultDir).toString().toStdString() << std::endl;
+    std::cout << fileName.toStdString() << std::endl;
+    std::cout << "tomato" << std::endl;
+    std::cout << fileName.toStdString().substr(0, fileName.toStdString().find_last_of("/") + 1)
+              << std::endl;
     if (fileName.isEmpty())
         return;
 
@@ -409,27 +416,23 @@ void CMainWindow::LoadNomeFile(const std::string& filePath)
         if (resp != QMessageBox::Yes)
         {
             // Does not continue
-            std::cout << "p421" << std::endl;
             LoadEmptyNomeFile();
             return;
         }
-        std::cout << "p43" << std::endl;
     }
-    std::cout << "p5" << std::endl;
     Scene = new Scene::CScene();
-    std::cout << "p6" << std::endl;
     Scene::GEnv.Scene = Scene.Get();
-    std::cout << "p7" << std::endl;
     Scene::CASTSceneAdapter adapter;
-    std::cout << "p8" << std::endl;
+
     try
     {
         std::cout << "parsing" << std::endl;
         auto includeFileNames = adapter.TraverseFile(SourceMgr->GetASTContext().GetAstRoot(), *Scene); // randy added includeFileNames variable on 11/30. Currently assumes included file names are in same directory as original
         std::cout << "done parsing" << std::endl;
+
         for (auto fileName : includeFileNames) {
-            std::cout << fileName << std::endl;
-            auto testSourceMgr = std::make_shared<CSourceManager>("C:/Users/randy/Desktop/Fall2020NOME/sample NOME files/" + fileName);
+            auto nofileNamepath = filePath.substr(0, filePath.find_last_of("/") + 1);
+            auto testSourceMgr = std::make_shared<CSourceManager>(nofileNamepath + fileName); // TODO: TMRW 12/1, GENERALIZE THIS TO ANY PATH
             bool testparseSuccess = testSourceMgr->ParseMainSource();
             std::cout << testparseSuccess << std::endl;
             std::cout << "opened filePath: " + fileName << std::endl;
