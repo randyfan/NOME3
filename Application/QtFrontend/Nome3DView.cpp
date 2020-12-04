@@ -113,7 +113,7 @@ void CNome3DView::PostSceneUpdate()
                     printf("Geom regen for %s\n", node->GetPath().c_str());
                     
                     
-                    if (true)//PickFaceBool) // if we are picking faces, faces need to be colored TODO: 11/26. First, fix face selection
+                    if (false)// Commented out on 12/2. PickFaceBool) // if we are picking faces, faces need to be colored TODO: 11/26. First, fix face selection
                     {
                         mesh->CreateInteractiveFaces(); // Randy added this even alter 10/12
                                                         // afternoon. Noticed needed for
@@ -129,12 +129,12 @@ void CNome3DView::PostSceneUpdate()
                         mesh->InitInteractions(); // Randy added 10/15 night. wait this didnt fix the crash bug... do we still need it?
                         node->SetEntityUpdated(false);
                     }
-            /*        else
+                    else
                     {
                         mesh->UpdateGeometry();
                         mesh->UpdateMaterial();
                         node->SetEntityUpdated(false);
-                    }*/
+                    }
                 }
             }
             else

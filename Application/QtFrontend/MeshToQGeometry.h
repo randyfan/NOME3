@@ -74,6 +74,25 @@ public:
         AdvanceIndices();
     }
 
+    void IngestInt(int x) {
+        auto* target = Attributes[CurrAttrIndex];
+
+        // Type check for target
+        assert(target->Type == Qt3DRender::QAttribute::Int);
+        assert(target->Size == 1);
+
+        // Append the buffer pointed to by target
+        const int byteLen = sizeof(int) * 1;
+        int begOffset = target->GetAbsByteOffset(CurrVertexIndex);
+        if (target->Buffer.size() < begOffset + byteLen)
+            target->Buffer.resize(begOffset + byteLen);
+        auto* beg = &*target->Buffer.begin() + begOffset;
+        auto* p = reinterpret_cast<float*>(beg);
+        *p++ = x;
+
+        AdvanceIndices();
+    }
+
     [[nodiscard]] uint32_t GetVertexCount() const { return CurrVertexIndex; }
 
 protected:

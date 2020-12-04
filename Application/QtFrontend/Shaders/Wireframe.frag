@@ -15,12 +15,13 @@ uniform vec3 kd;            // Diffuse reflectivity
 uniform vec3 ks;            // Specular reflectivity
 uniform float shininess;    // Specular shininess factor
 
-in WireframeVertex { // these variables are outputted from Wireframe.geom 
+in WireframeVertex { // these variables are outputted from Wireframe.geom
     vec3 position;
     vec3 normal;
     noperspective vec4 edgeA;
     noperspective vec4 edgeB;
     flat int configuration;
+    flat int colorSelected; // Randy added this on 12/3  Also note that integer types are never interpolated. You must declare them as flat in any case. https://stackoverflow.com/questions/27581271/flat-qualifier-in-glsl
 } fs_in;
 
 out vec4 fragColor;
@@ -104,5 +105,11 @@ void main()
 {
     // Calculate the color from the phong model
     vec4 color = vec4( adsModel( fs_in.position, normalize( fs_in.normal ) ), 1.0 );
-    fragColor = shadeLine( color );
+    if (fs_in.colorSelected == 0) { // Randy added this on 12/3
+      fragColor = shadeLine( color );
+    }
+    else { // Randy added this on 12/3
+      vec4 selectedCol = vec4(1.0, 0.0, 1.0, 1.0);
+      fragColor = selectedCol; // Randy added this on 12/3
+    } // Randy added this on 12/3
 }

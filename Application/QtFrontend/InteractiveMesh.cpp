@@ -26,8 +26,8 @@ CInteractiveMesh::CInteractiveMesh(Scene::CSceneTreeNode* node)
     
     // UpdateTransform();
 
-    CreateInteractiveFaces(); // Randy added this on 10/12. can use the Mesh's transform for each face
-    UpdateFaceGeometries(true); // currently material logic is in here also
+    //CreateInteractiveFaces(); // Randy added this on 10/12. can use the Mesh's transform for each face. Commented out on 12/2
+    //UpdateFaceGeometries(true); // currently material logic is in here also. Commented out on 12/2. Too laggy
     // UpdatePointGeometries();// Randy added this . // Randy commented out on 11/26 to remove vertices at load
 
     // // // // / /UpdateFaceMaterials(); // test this later. default should be gray face
@@ -35,8 +35,8 @@ CInteractiveMesh::CInteractiveMesh(Scene::CSceneTreeNode* node)
 
 
 
- /*   UpdateGeometry();
-    UpdateMaterial();*/
+    UpdateGeometry();
+    UpdateMaterial();
     InitInteractions();
 }
 

@@ -235,11 +235,6 @@ void CMeshInstance::UpdateEntity()
         auto iter = NameToFace.find(face);
         if (iter != NameToFace.end())
         {
-            for (auto ex : NameToFace)
-            {
-                std::cout << ex.second.idx() << std::endl;
-            }
-
             Mesh.delete_face(iter->second,
                              true); // TODO: Change to true to remove isolated vertices. But some
                                     // strange bug, where I can't delete a second mesh face occurs
@@ -263,8 +258,6 @@ void CMeshInstance::UpdateEntity()
 
             for (auto facevert : faceverts)
             { // facevert is not sorted by index
-                std::cout << "deleting face vert of this mesh from DS if it is isolated"
-                          << std::endl;
                 auto temp = VertToName.at(facevert);
                 std::cout << temp << std::endl;
                 std::cout << facevert << std::endl;
@@ -276,12 +269,7 @@ void CMeshInstance::UpdateEntity()
                     std::cout << "isolated, so deleting vert" << std::endl;
                     deleted.push_back(facevert.idx());
                 }
-                // VertToName.erase(facevert); // 1st DS. No need to delete, handled when we create
-                // new temp DS NameToVert.erase(temp); // 2nd DS. No need to delete, handled when we
-                // create new temp DS
             }
-            std::cout << "finished deleting from vert DS" << std::endl;
-            ///////////////////////////////////////////////////////  Fix the Vert DS
 
             // map for new vert handle index to new vert handle
 
@@ -292,11 +280,9 @@ void CMeshInstance::UpdateEntity()
                 std::cout << newindex << std::endl;
                 temp.try_emplace(newindex, std::move(newverthandle));
             }
-            std::cout << "finished storing new vert handles into temp" << std::endl;
             // need a new map mapping old VertHandles to new verthandles
             std::map<CMeshImpl::VertexHandle, CMeshImpl::VertexHandle> tempVertToVert;
             int displacement = 0;
-            std::cout << "begin creating mapping from oldvert to newvert handles" << std::endl;
 
             // sort nametovert using sorted vector consisting of its key, value pairs
             std::vector<std::pair<std::string, CMeshImpl::VertexHandle>> v(NameToVert.begin(),
@@ -342,27 +328,13 @@ void CMeshInstance::UpdateEntity()
 
             VertToName = newVertToName;
             NameToVert = newNameToVert;
-            std::cout << "finished fixing vert DS for deletions" << std::endl;
-            std::cout << "Debug VertToName DS" << std::endl;
+
             for (auto& pair : VertToName)
             {
                 std::cout << pair.second << std::endl;
             }
 
-            std::cout << "Debug NameToVert DS" << std::endl;
-            for (auto& pair : NameToVert)
-            {
-                std::cout << pair.first << std::endl;
-            }
-            //////////////////////////////////////////////////////////// Done fixing the Vert DS
-
-            // NameToFace.erase(face); // 3rd DS. Handled below by reassigning
-            // FaceToName.erase(facehandle); // 4th DS Handed below by reassigning
-
-            ////////////////////////////// Fix Face Handle DS
-
             // map for new face handle index to new face handle
-            std::cout << "begin fixing face DS for deletions" << std::endl;
 
             std::map<int, CMeshImpl::FaceHandle> facetemp;
             for (auto newfacehandle : Mesh.faces())
@@ -378,7 +350,7 @@ void CMeshInstance::UpdateEntity()
                  });
             std::map<CMeshImpl::FaceHandle, CMeshImpl::FaceHandle> tempFaceToFace;
             int facedisplacement = 0;
-            std::cout << "begin creating tempFacetoFace" << std::endl;
+
             for (auto ex : f)
             {
                 std::cout << ex.second.idx() << std::endl;
@@ -396,11 +368,11 @@ void CMeshInstance::UpdateEntity()
                 else // this pair needs to be deleted, so we can take care of it here
                     facedisplacement += 1;
             }
-            std::cout << "finished  creating tempFacetoFace" << std::endl;
+
             std::map<std::string, CMeshImpl::FaceHandle> newNameToFace;
             std::map<CMeshImpl::FaceHandle, std::string> newFaceToName; // Randy added on 10/11
 
-            std::cout << "create new face DS" << std::endl;
+
             for (auto& pair : FaceToName)
             {
                 if (pair.second != face) // if this face is not that one we want to delete
@@ -414,24 +386,6 @@ void CMeshInstance::UpdateEntity()
             FaceToName = newFaceToName;
             NameToFace = newNameToFace;
 
-            std::cout << "Debug FaceToName DS" << std::endl;
-            for (auto& pair : FaceToName)
-            {
-                std::cout << pair.second << std::endl;
-            }
-
-            std::cout << "Debug NameToFace DS" << std::endl;
-            for (auto& pair : NameToFace)
-            {
-                std::cout << pair.first << std::endl;
-            }
-            std::cout << " finished fixing face DS for deletions" << std::endl;
-            ///////////////////////////// Fixed the Face DS
-
-            std::cout << "F" << std::endl;
-
-            ///////////////////////////////////////// Fix the combination DS.
-            std::cout << " begin fixing combination DS for deletions" << std::endl;
             // std::map<CMeshImpl::FaceHandle, std::vector<CMeshImpl::VertexHandle>>
             // tempFaceToFaceVerts;
             //  std::map<std::vector<CMeshImpl::VertexHandle>, CMeshImpl::FaceHandle>
@@ -450,11 +404,6 @@ void CMeshInstance::UpdateEntity()
                 FaceToFaceVerts.emplace(realface, realverts);
                 FaceVertsToFace.emplace(realverts, realface);
             }
-            // FaceToFaceVerts = tempFaceToFaceVerts;
-            // FaceVertsToFace = tempFaceVertsToFace;
-
-            std::cout << " finished fixing combination DS for deletions" << std::endl;
-            //////////////////////////////////// Fixed the combination DS
         }
         else
         {

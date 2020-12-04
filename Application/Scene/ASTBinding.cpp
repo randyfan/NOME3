@@ -1,10 +1,11 @@
 #include "ASTBinding.h"
+#include "BSpline.h"
 #include "Environment.h"
 #include "Point.h"
-#include "SweepPath.h"
 #include "Polyline.h"
-#include "BSpline.h"
 #include "SweepControlPoint.h"
+#include "SweepPath.h"
+#include "TorusKnot.h" // Check with Zachary
 #include <Flow/FlowNode.h>
 #include <Flow/FlowNodeArray.h>
 #include <Parsing/SyntaxTree.h>
@@ -186,26 +187,6 @@ bool TBindingTranslator<Flow::TInput<float>>::FromASTToValue(AST::ACommand* comm
     return true;
 }
 
-// Randy added this on 11/26
-//template <>
-//bool TBindingTranslator<std::string>::FromASTToValue(AST::ACommand* command,
-//                                                     const CCommandSubpart& subpart,
-//                                                     std::string& value)
-//{
-//    auto* string = subpart.GetExpr(command);
-//    if (string == NULL)
-//    {
-//        return false;
-//    }
-//
-//    if (string->GetKind() != AST::EKind::Ident)
-//        throw AST::CSemanticError("Command is not matched with a String", command);
-//
-//    value = static_cast<const AST::AString*>(string)->ToString();
-//
-//    return true;
-//}
-
 template <>
 bool TBindingTranslator<std::string>::FromASTToValue(AST::ACommand* command,
                                                      const CCommandSubpart& subpart,
@@ -277,8 +258,8 @@ bool TBindingTranslator<Flow::TInput<CSweepPathInfo*>>::FromASTToValue(
     CSweepPath* path = dynamic_cast<CSweepPath*>(entity.Get());
     if (!path)
     {
-        throw AST::CSemanticError(tc::StringPrintf("Entity %s is not a sweep path", identVal.c_str()),
-                                  ident);
+        throw AST::CSemanticError(
+            tc::StringPrintf("Entity %s is not a sweep path", identVal.c_str()), ident);
     }
 
     auto& e = *entity.Get();
@@ -291,10 +272,16 @@ bool TBindingTranslator<Flow::TInput<CSweepPathInfo*>>::FromASTToValue(
     {
         CBSpline* bspline = dynamic_cast<CBSpline*>(path);
         value.Connect(bspline->BSpline);
-    } else
+    }
+    else if (typeid(e) == typeid(CTorusKnot))
     {
-        throw AST::CSemanticError(tc::StringPrintf("Entity %s is not a sweep path", identVal.c_str()),
-                                  ident);
+        CTorusKnot* torusknot = dynamic_cast<CTorusKnot*>(path);
+        value.Connect(torusknot->TorusKnot);
+    }
+    else
+    {
+        throw AST::CSemanticError(
+            tc::StringPrintf("Entity %s is not a sweep path", identVal.c_str()), ident);
     }
     return true;
 }
