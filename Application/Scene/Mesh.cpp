@@ -240,9 +240,7 @@ void CMeshInstance::UpdateEntity()
                                     // strange bug, where I can't delete a second mesh face occurs
             Mesh.garbage_collection(); // Needed to execute deleting the faces
 
-            std::cout << "A" << std::endl;
             auto facehandle = NameToFace.at(face);
-            std::cout << "B" << std::endl;
             auto faceverts = FaceToFaceVerts.at(facehandle);
 
             std::vector<int> deleted; // deleted indices
@@ -307,7 +305,6 @@ void CMeshInstance::UpdateEntity()
                      // + 1, should correspond the new vert handle at index i
                     displacement += 1; // so we need to push vertices back
             }
-            std::cout << "finished creating mapping from oldvert to newvert handles" << std::endl;
 
             // handle both vertoname and nametovert together since they are the same size
             std::map<std::string, CMeshImpl::VertexHandle> newNameToVert;

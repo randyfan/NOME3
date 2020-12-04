@@ -35,18 +35,6 @@ argSurface : 'surface' ident ;
 argSlices : 'slices' expression ;
 argOrder : 'order' expression ;
 
-string
-    : SINGLE_STRING
-    | DOUBLE_STRING
-    ;
-
-SINGLE_STRING
-    : '\'' ~('\'')+ '\''
-    ;
-    DOUBLE_STRING
-    : '"' ~('"')+ '"'
-    ;
-
 argTransform
    : 'rotate' LPAREN exp1=expression exp2=expression exp3=expression RPAREN LPAREN exp4=expression RPAREN # argTransformTwo
    | 'scale' LPAREN expression expression expression RPAREN # argTransformOne
