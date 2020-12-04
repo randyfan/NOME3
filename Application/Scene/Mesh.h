@@ -137,7 +137,7 @@ public:
     void MarkFaceAsSelected(const std::set<std::string>& faceNames, bool bSel); // Randy added on 10/10 for face selection
     void MarkEdgeAsSelected(const std::set<std::string>& vertNames, bool bSel); // Randy added on 10/29 for edge selection. TODO: rn it takes in the edge's verts as input
 
-    std::set<CMeshImpl::FaceHandle> GetSelectedFaceHandles(); // Get selected face handles. Used in InteractiveMesh.cpp.
+    std::vector<CMeshImpl::FaceHandle> GetSelectedFaceHandles(); // Get selected face handles. Used in InteractiveMesh.cpp.
     std::vector<std::string> GetFaceVertexNames(std::vector<std::string> facenames); // Randy added on 10/19 to return face vert names
 
 
@@ -164,19 +164,19 @@ private:
     // std::map<std::string, std::pair<CMeshInstancePoint*, uint32_t>> PickingVerts; Randy commented this out on 10/10 . I dont think it does anything???
     
     // Store selected vertex handles and names
-    std::set<std::string> CurrSelectedVertNames; 
-    std::set<std::string> CurrSelectedVertNamesWithPrefix; 
-    std::set<CMeshImpl::VertexHandle> CurrSelectedVertHandles; // Randy added on 11/4
+    std::vector<std::string> CurrSelectedVertNames; 
+    std::vector<std::string> CurrSelectedVertNamesWithPrefix; 
+    std::vector<CMeshImpl::VertexHandle> CurrSelectedVertHandles; // Randy added on 11/4
 
     // Store selected edge handles TODO: Create edge names
-    std::set<CMeshImpl::HalfedgeHandle> CurrSelectedHalfEdgeHandles; // Randy added on 11/4. TODO: Should I use HalfedgeHandle or EdgeHandle? Store selected vertex handles and names
-    std::set<std::string> CurrSelectedEdgeVertNames;
-    std::set<std::string> CurrSelectedEdgeVertNamesWithPrefix;
-    std::set<CMeshImpl::VertexHandle> CurrSelectedEdgeVertHandles; // Randy added on 11/4
+    std::vector<CMeshImpl::HalfedgeHandle> CurrSelectedHalfEdgeHandles; // Randy added on 11/4. TODO: Should I use HalfedgeHandle or EdgeHandle? Store selected vertex handles and names
+    std::vector<std::string> CurrSelectedEdgeVertNames;
+    std::vector<std::string> CurrSelectedEdgeVertNamesWithPrefix;
+    std::vector<CMeshImpl::VertexHandle> CurrSelectedEdgeVertHandles; // Randy added on 11/4
     // Store selected face handles and names
-    std::set<std::string> CurrSelectedFaceNames; // face name only
-    std::set<std::string> CurrSelectedFaceNamesWithPrefix; // includes prefix (path) and face name
-    std::set<CMeshImpl::FaceHandle> CurrSelectedFaceHandles; // Randy added on 10/10 for face selection
+    std::vector<std::string> CurrSelectedFaceNames; // face name only
+    std::vector<std::string> CurrSelectedFaceNamesWithPrefix; // includes prefix (path) and face name
+    std::vector<CMeshImpl::FaceHandle> CurrSelectedFaceHandles; // Randy added on 10/10 for face selection
 };
 
 class CVertexSelector : public Flow::CFlowNode

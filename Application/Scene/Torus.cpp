@@ -139,7 +139,7 @@ void CTorus::UpdateEntity()
                     "v" + std::to_string(k + 1) + "_" + std::to_string(i),
                     "v" + std::to_string(k + 1) + "_" + std::to_string(next),
                 };
-                AddFace("f1_" + std::to_string(i), upperFace);
+                AddFace("f" + std::to_string(k) + "_" + std::to_string(i), upperFace);
             }
         }
     }

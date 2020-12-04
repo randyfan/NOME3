@@ -946,7 +946,7 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickVertices(const tc:
 }
 
 
-std::set<CMeshImpl::FaceHandle> CMeshInstance::GetSelectedFaceHandles() // Randy added on 10/11 to assist with face coloring after selection
+std::vector<CMeshImpl::FaceHandle> CMeshInstance::GetSelectedFaceHandles() // Randy added on 10/11 to assist with face coloring after selection
 { 
     return CurrSelectedFaceHandles;
 }
@@ -1005,17 +1005,25 @@ void CMeshInstance::MarkFaceAsSelected(const std::set<std::string>& faceNames, b
         auto handle = iter->second;
         const auto& original = Mesh.color(handle);
         printf("Before: %d %d %d\n", original[0], original[1], original[2]);
-        if (CurrSelectedFaceNamesWithPrefix.find(name) == CurrSelectedFaceNamesWithPrefix.end())
+        auto iter0 = std::find(CurrSelectedFaceNamesWithPrefix.begin(), CurrSelectedFaceNamesWithPrefix.end(),
+                  name);
+        if (iter0 == CurrSelectedFaceNamesWithPrefix.end())
         { 
-            CurrSelectedFaceNames.insert(name.substr(prefixLen));
-            CurrSelectedFaceNamesWithPrefix.insert(name);
-            CurrSelectedFaceHandles.insert(handle); // Randy added on 10/11 for face selection
+
+            CurrSelectedFaceNames.push_back(name.substr(prefixLen));
+            CurrSelectedFaceNamesWithPrefix.push_back(name);
+            CurrSelectedFaceHandles.push_back(handle); // Randy added on 10/11 for face selection
         }
         else // it has already been selected, then deselect
         {
-            CurrSelectedFaceNames.erase(name.substr(prefixLen)); // Randy added this on 10/15
-            CurrSelectedFaceNamesWithPrefix.erase(name);
-            CurrSelectedFaceHandles.erase(handle); // Randy added on 10/11 for face selection
+            auto iter1 = std::find(CurrSelectedFaceNames.begin(), CurrSelectedFaceNames.end(), name.substr(prefixLen));
+            CurrSelectedFaceNames.erase(iter1); // Randy added this on 10/15
+            auto iter2 = std::find(CurrSelectedFaceNamesWithPrefix.begin(), CurrSelectedFaceNamesWithPrefix.end(),
+                                   name);
+            CurrSelectedFaceNamesWithPrefix.erase(iter2);
+            auto iter3 = std::find(CurrSelectedFaceHandles.begin(),
+                                   CurrSelectedFaceHandles.end(), handle);
+            CurrSelectedFaceHandles.erase(iter3); // Randy added on 10/11 for face selection
         }
     }
     GetSceneTreeNode()->SetEntityUpdated(true);
@@ -1035,7 +1043,7 @@ void CMeshInstance::MarkEdgeAsSelected(const std::set<std::string>& vertNames, b
     auto point1 = NameToVert.at(name1withoutinstprefix);
     auto point2 = NameToVert.at(name2withoutinstprefix);
     //https://stackoverflow.com/questions/64243444/openmesh-find-edge-connecting-two-vertices
-   CurrSelectedHalfEdgeHandles.insert(Mesh.find_halfedge(point1, point2)); // not used yet, but can be used for sharpening edges
+   CurrSelectedHalfEdgeHandles.push_back(Mesh.find_halfedge(point1, point2)); // not used yet, but can be used for sharpening edges
    ///////////////////////////////////////////////////////////////////
 
     size_t prefixLen = instPrefix.length();
@@ -1048,20 +1056,29 @@ void CMeshInstance::MarkEdgeAsSelected(const std::set<std::string>& vertNames, b
         auto handle = iter->second;
         const auto& original = Mesh.color(handle);
         printf("Before: %d %d %d\n", original[0], original[1], original[2]);
-        if (CurrSelectedEdgeVertNamesWithPrefix.find(name) == CurrSelectedEdgeVertNamesWithPrefix.end())
+        auto iter0 = std::find(CurrSelectedEdgeVertNamesWithPrefix.begin(),
+                  CurrSelectedEdgeVertNamesWithPrefix.end(), name);
+        if (iter0 == CurrSelectedEdgeVertNamesWithPrefix.end())
         { 
-            CurrSelectedEdgeVertNames.insert(name.substr(prefixLen));
-            CurrSelectedEdgeVertNamesWithPrefix.insert(name);
-            CurrSelectedEdgeVertHandles.insert(handle);
+            CurrSelectedEdgeVertNames.push_back(name.substr(prefixLen));
+            CurrSelectedEdgeVertNamesWithPrefix.push_back(name);
+            CurrSelectedEdgeVertHandles.push_back(handle);
         }
         else // it has already been selected, then deselect
         {
-            if (CurrSelectedEdgeVertNames.find(name.substr(prefixLen)) != CurrSelectedEdgeVertNames.end())
+            auto iter1 = std::find(CurrSelectedEdgeVertNames.begin(),
+                                   CurrSelectedEdgeVertNames.end(), name.substr(prefixLen));
+            if (iter1
+                != CurrSelectedEdgeVertNames.end())
             { // erase once
-                CurrSelectedEdgeVertNames.erase(name.substr(prefixLen));
+                CurrSelectedEdgeVertNames.erase(iter1);
             }
-            CurrSelectedEdgeVertNamesWithPrefix.erase(name);
-            CurrSelectedEdgeVertHandles.erase(handle);
+            auto iter2 = std::find(CurrSelectedEdgeVertNamesWithPrefix.begin(),
+                                   CurrSelectedEdgeVertNamesWithPrefix.end(), name);
+            CurrSelectedEdgeVertNamesWithPrefix.erase(iter2);
+            auto iter3 =
+                std::find(CurrSelectedEdgeVertHandles.begin(), CurrSelectedEdgeVertHandles.end(), handle);
+            CurrSelectedEdgeVertHandles.erase(iter3);
         }
     }
     GetSceneTreeNode()->SetEntityUpdated(true);
@@ -1081,25 +1098,28 @@ void CMeshInstance::MarkVertAsSelected(const std::set<std::string>& vertNames, b
         auto handle = iter->second;
         const auto& original = Mesh.color(handle);
         printf("Before: %d %d %d\n", original[0], original[1], original[2]);
-        if (CurrSelectedVertNamesWithPrefix.find(name) == CurrSelectedVertNamesWithPrefix.end())
+        if (std::find(CurrSelectedVertNamesWithPrefix.begin(), CurrSelectedVertNamesWithPrefix.end(), name) == CurrSelectedVertNamesWithPrefix.end())
         { // if hasn't been selected before
             if (bSel)
                 Mesh.set_color(handle, { VERT_SEL_COLOR });
             else
                 Mesh.set_color(handle, { VERT_COLOR });
-            CurrSelectedVertNames.insert(name.substr(prefixLen));
-            CurrSelectedVertNamesWithPrefix.insert(name);
-            CurrSelectedVertHandles.insert(handle);
+            CurrSelectedVertNames.push_back(name.substr(prefixLen));
+            CurrSelectedVertNamesWithPrefix.push_back(name);
+            CurrSelectedVertHandles.push_back(handle);
         }
         else // it has already been selected, then deselect
         {
             Mesh.set_color(handle, { VERT_COLOR });
-            if (CurrSelectedVertNames.find(name.substr(prefixLen)) != CurrSelectedVertNames.end())
+            auto iter1 = std::find(CurrSelectedVertNames.begin(), CurrSelectedVertNames.end(), name.substr(prefixLen));
+            if (iter1 != CurrSelectedVertNames.end())
             { // erase once
-                CurrSelectedVertNames.erase(name.substr(prefixLen));
+                CurrSelectedVertNames.erase(iter1);
             }
-            CurrSelectedVertNamesWithPrefix.erase(name);
-            CurrSelectedVertHandles.erase(handle);
+            auto iter2 = std::find(CurrSelectedVertNamesWithPrefix.begin(), CurrSelectedVertNamesWithPrefix.end(),name);
+            CurrSelectedVertNamesWithPrefix.erase(iter2);
+            auto iter3 = std::find(CurrSelectedVertHandles.begin(),CurrSelectedVertHandles.end(), handle);
+            CurrSelectedVertHandles.erase(iter3);
         }
     }
     GetSceneTreeNode()->SetEntityUpdated(true);

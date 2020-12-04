@@ -9,6 +9,7 @@
 #include <Qt3DRender/QAttribute>
 #include <Qt3DRender/QGeometry>
 #include <vector>
+#include <unordered_set>
 
 namespace Nome
 {
@@ -115,7 +116,7 @@ private:
 class CMeshToQGeometry
 {
 public:
-    explicit CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeometry = false);
+    explicit CMeshToQGeometry(const CMeshImpl& fromMesh, std::vector<CMeshImpl::FaceHandle> selectedFaceHandles, bool bGenPointGeometry = false);
 
     ~CMeshToQGeometry();
 

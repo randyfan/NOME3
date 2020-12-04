@@ -5,7 +5,7 @@
 namespace Nome
 {
 
-CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeometry)
+CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, std::vector<CMeshImpl::FaceHandle> selectedFaceHandles, bool bGenPointGeometry)
 {
 
     // Per face normal, thus no shared vertices between faces
@@ -42,16 +42,26 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeom
         CVertexData v0, vPrev, vCurr;
         int faceVCount = 0;
         CMeshImpl::FaceVertexIter fvIter = CMeshImpl::FaceVertexIter(fromMesh, *fIter);
+
+        // Check to see if this face handle was selected
+        int selected = 0; // 0 means it hasn't been selected and it will retain original color
+        auto iter = std::find(selectedFaceHandles.begin(), selectedFaceHandles.end(), fIter);
+        if (iter != selectedFaceHandles.end()) {
+            selected = 1;
+        }
+
+
         for (; fvIter.is_valid(); ++fvIter)
         {
             CMeshImpl::VertexHandle faceVert = *fvIter;
+            const auto& posVec = fromMesh.point(faceVert);
             if (faceVCount == 0) // first vert of triangle
             {
                 const auto& posVec = fromMesh.point(faceVert);
                 v0.Pos = { posVec[0], posVec[1], posVec[2] };
                 const auto& fnVec = fromMesh.normal(*fIter);
                 v0.Normal = { fnVec[0], fnVec[1], fnVec[2] };
-                v0.colorSelected = 0; // Randy added this to handle marking which things are selected. For testing purposes, mark it as selected
+                v0.colorSelected = selected; // Randy added this to handle marking which things are selected. For testing purposes, mark it as selected
             }
             else if (faceVCount == 1) // second vert of triangle 
             {
@@ -59,7 +69,7 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeom
                 vPrev.Pos = { posVec[0], posVec[1], posVec[2] };
                 const auto& fnVec = fromMesh.normal(*fIter);
                 vPrev.Normal = { fnVec[0], fnVec[1], fnVec[2] };
-                vPrev.colorSelected = 0; // Randy added this to handle marking which things are selected
+                vPrev.colorSelected = selected; // Randy added this to handle marking which things are selected
             }
             else // third vert of triangle
             {
@@ -67,7 +77,7 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, bool bGenPointGeom
                 vCurr.Pos = { posVec[0], posVec[1], posVec[2] };
                 const auto& fnVec = fromMesh.normal(*fIter);
                 vCurr.Normal = { fnVec[0], fnVec[1], fnVec[2] };
-                vCurr.colorSelected = 0; // Randy added this to handle marking which things are selected
+                vCurr.colorSelected = selected; // Randy added this to handle marking which things are selected
                 v0.SendToBuilder(builder);
                 vPrev.SendToBuilder(builder);
                 vCurr.SendToBuilder(builder);

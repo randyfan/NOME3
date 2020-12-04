@@ -92,7 +92,9 @@ void CInteractiveMesh::UpdatePointGeometries(bool PickVertexBool) {
     {
         auto* meshInstance = dynamic_cast<Scene::CMeshInstance*>(entity);
         auto openmesh = meshInstance->GetMeshImpl();
-        CMeshToQGeometry meshToQGeometry(meshInstance->GetMeshImpl(), true); // This may be causing bugs Randy 
+
+        auto selectedfacehandles = meshInstance->GetSelectedFaceHandles(); // Added on 12/2. Probably not needed for point geometry, but adding because it is a required argument
+        CMeshToQGeometry meshToQGeometry(meshInstance->GetMeshImpl(), selectedfacehandles, true); // This may be causing bugs Randy 
         if (!PointEntity || PickVertexBool)
         {
             std::string xmlPath = "";
@@ -231,7 +233,8 @@ void CInteractiveMesh::UpdateFaceGeometries(bool wireframe)
                 auto selectedfacehandles = meshInstance->GetSelectedFaceHandles();
 
                 // If this fH is selected, create a unique material for it
-                if (selectedfacehandles.find(fH) != selectedfacehandles.end()) {
+                auto iter = std::find(selectedfacehandles.begin(), selectedfacehandles.end(), fH);
+                if (iter != selectedfacehandles.end()) {
                     NomeFace::CFaceToQGeometry faceToQGeometry(openmesh, fH, false);// must set to false to avoid generating all mesh points for every face
                     auto* facegeometry = faceToQGeometry.GetGeometry();
                     facegeometries.push_back(facegeometry); // Randy added this so can keep track of facegeometry and clear at the end
@@ -309,7 +312,8 @@ void CInteractiveMesh::UpdateGeometry()
             delete GeometryRenderer; // Randy note: this may not be needed 
             delete Geometry; // Randy note: this may not be needed
             // A Qt3DRender::QGeometry class is used to group a list of Qt3DRender::QAttribute objects together to form a geometric shape Qt3D is able to render using Qt3DRender::QGeometryRenderer. 
-            CMeshToQGeometry meshToQGeometry(meshInstance->GetMeshImpl(), true);
+            auto selectedfacehandles = meshInstance->GetSelectedFaceHandles(); // Randy added on 12/3
+            CMeshToQGeometry meshToQGeometry(meshInstance->GetMeshImpl(), selectedfacehandles, true); // Randy added 2nd argument on 12/3
             Geometry = meshToQGeometry.GetGeometry();
             Geometry->setParent(this);
             GeometryRenderer = new Qt3DRender::QGeometryRenderer(this);
