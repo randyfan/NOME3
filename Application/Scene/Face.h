@@ -13,6 +13,9 @@ class CFace : public CEntity
     // Face points, in order
     DEFINE_INPUT_ARRAY(CVertexInfo*, Points) { MarkDirty(); }
 
+    DEFINE_INPUT(float, Width) { MarkDirty(); }
+    DEFINE_INPUT(float, Height) { MarkDirty(); }
+    DEFINE_INPUT(float, Flag) { MarkDirty(); }
     DEFINE_OUTPUT_WITH_UPDATE(CFace*, Face) { UpdateEntity(); }
 
 public:

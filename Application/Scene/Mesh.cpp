@@ -107,6 +107,152 @@ void CMesh::AddFace(const std::string& name, const std::vector<std::string>& fac
     AddFace(name, faceVHandles);
 }
 
+#undef M_PI
+
+float CMesh::getAngle(Vector3 vectorA, Vector3 vectorB)
+{
+    float value = vectorA.DotProduct(vectorB) / vectorA.Length() / vectorB.Length();
+    float epsilon = 1e-4;
+    if (fabs(value - 1) < epsilon) { return 0; }
+    if (fabs(value + 1) < epsilon) { return (float)tc::M_PI; }
+    if (fabs(value) < epsilon) {return (float)tc::M_PI / 2; }
+
+    return acosf(vectorA.DotProduct(vectorB) / vectorA.Length() / vectorB.Length()) ;
+}
+
+Vector3 CMesh::crossProduct(Vector3 vectorA, Vector3 vectorB)
+{
+    return Vector3(vectorA.y * vectorB.z - vectorA.z * vectorB.y,
+                   vectorA.z * vectorB.x - vectorA.x * vectorB.z,
+                   vectorA.x * vectorB.y - vectorA.y * vectorB.x);
+}
+
+void CMesh::AddOffsetFace(const std::string& name, const std::vector<std::string>& facePoints, const float width, const float height, const int flag)
+{
+    if (width == 0 && height == 0)
+    {
+        AddFace(name, facePoints);
+        return;
+    }
+
+    size_t length = facePoints.size();
+    for (size_t index = 0; index < length; index++)
+    {
+        std::string curName = facePoints[index];
+        std::string prevName = facePoints[(index - 1 + length) % length];
+        std::string nextName = facePoints[(index + 1) % length];
+
+        Vector3 curPoint = GetVertexPos(curName);
+        Vector3 offsetPoint;
+
+        Vector3 prevPath = GetVertexPos(prevName) - curPoint;
+        Vector3 curPath = GetVertexPos(nextName) - curPoint;
+
+        if (flag == 0)
+        {
+            prevPath.Normalize();
+            curPath.Normalize();
+        }
+
+        Vector3 sumVector = (prevPath + curPath).Normalized();
+        Vector3 normVector = crossProduct(prevPath, curPath).Normalized() * height / 2.0f;
+
+        float angle = getAngle(prevPath, curPath);
+        offsetPoint = curPoint + sumVector * width / sinf(angle / 2);
+
+        if (height != 0 && width != 0)
+        {
+            AddVertex(
+                curName + "_" + name + "_offset_1",
+                { offsetPoint.x + normVector.x, offsetPoint.y + normVector.y, offsetPoint.z + normVector.z }
+            );
+            AddVertex(
+                curName + "_" + name + "_offset_2",
+                { offsetPoint.x - normVector.x, offsetPoint.y - normVector.y, offsetPoint.z - normVector.z }
+            );
+            AddVertex(
+                curName + "_" + name + "_offset_3",
+                { curPoint.x + normVector.x, curPoint.y + normVector.y, curPoint.z + normVector.z }
+            );
+            AddVertex(
+                curName + "_" + name + "_offset_4",
+                { curPoint.x - normVector.x, curPoint.y - normVector.y, curPoint.z - normVector.z }
+            );
+        }
+        else if (height == 0)
+        {
+            AddVertex(
+                curName + "_" + name + "_offset",
+                { offsetPoint.x, offsetPoint.y, offsetPoint.z }
+            );
+        }
+        else
+        {
+            AddVertex(
+                curName + "_" + name + "_offset_1",
+                { curPoint.x + normVector.x, curPoint.y + normVector.y, curPoint.z + normVector.z }
+            );
+            AddVertex(
+                curName + "_" + name + "_offset_2",
+                { curPoint.x - normVector.x, curPoint.y - normVector.y, curPoint.z - normVector.z }
+            );
+        }
+
+
+    }
+
+    std::vector<std::string> topFace, bottomFace;
+    for (size_t index = 0; index < length; index++)
+    {
+        std::string curName = facePoints[index];
+        std::string nextName = facePoints[(index + 1) % length];
+
+        std::string curName1 = curName + "_" + name + "_offset_1";
+        std::string curName2 = curName + "_" + name + "_offset_2";
+        std::string nextName1 = nextName + "_" + name + "_offset_1";
+        std::string nextName2 = nextName + "_" + name + "_offset_2";
+
+        if (width == 0)
+        {
+            std::vector<std::string> face = { curName2, curName1, nextName1, nextName2 };
+            AddFace(name + "_offset_" + std::to_string(index), face);
+            topFace.push_back(facePoints[length - index - 1] + "_" + name + "_offset_1");
+            bottomFace.push_back(curName2);
+        }
+        else if (height == 0)
+        {
+            std::vector<std::string> face = { curName, nextName, nextName + "_" + name +"_offset", curName + "_" + name + "_offset" };
+            AddFace(name + "_offset_" + std::to_string(index), face);
+        }
+        else
+        {
+            std::string curName3 = curName + "_" + name + "_offset_3";
+            std::string curName4 = curName + "_" + name + "_offset_4";
+            std::string nextName3 = nextName + "_" + name + "_offset_3";
+            std::string nextName4 = nextName + "_" + name + "_offset_4";
+
+            std::vector<std::string> face;
+            face = { curName3, curName1, nextName1, nextName3 };
+            AddFace(name + "_offset_" + std::to_string(index) + "_1", face);
+
+            face = {  curName2, curName4, nextName4, nextName2 };
+            AddFace(name + "_offset_" + std::to_string(index) + "_2", face);
+
+            face = { curName1, curName2, nextName2, nextName1 };
+            AddFace(name + "_offset_" + std::to_string(index) + "_3", face);
+
+            face = { curName4, curName3, nextName3,  nextName4 };
+            AddFace(name + "_offset_" + std::to_string(index) + "_4", face);
+        }
+    }
+
+    if (width == 0)
+    {
+        AddFace(name + "_offset_" + std::to_string(length), topFace);
+        AddFace(name + "_offset_" + std::to_string(length + 1), bottomFace);
+    }
+}
+
 void CMesh::AddFace(const std::string& name, const std::vector<CMeshImpl::VertexHandle>& facePoints)
 {
     auto faceHandle = Mesh.add_face(facePoints);
@@ -238,7 +384,7 @@ void CMeshInstance::UpdateEntity()
     }
 
 
-    // Randy commented the below section on 10/10. i don't think it does anything ??? 
+    // Randy commented the below section on 10/10. i don't think it does anything ???
     // Construct interactive points
     //CScene* scene = GetSceneTreeNode()->GetOwner()->GetScene();
     //for (auto pair : PickingVerts)
@@ -422,7 +568,7 @@ void CMeshInstance::PreserveFace(const std::vector<std::string>& facePoints) // 
                     std::cout << "Found a permutation"
                               << std::endl;
                     auto fhiter =
-                        FaceVertsToFace.find(currfaceverthandles); 
+                        FaceVertsToFace.find(currfaceverthandles);
                     if (fhiter != FaceVertsToFace.end())
                     {
                         faceHandle = FaceVertsToFace.at(currfaceverthandles);
@@ -487,7 +633,7 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
         // Randy note: They all have the same position because the local ray is transformed differently
         auto testdist = localRay.HitDistance(*testplane);
         std::cout << testdist << std::endl;
-        //auto othertest = localRay.InsideGeometry(&points,4, 0, points.size()); 
+        //auto othertest = localRay.InsideGeometry(&points,4, 0, points.size());
 
        // std::cout << "other test: " + std::to_string(othertest) << std::endl;
 
@@ -497,15 +643,15 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
           //                Vector3* outNormal = nullptr, Vector3* outBary = nullptr) const;
 
         auto testdist1 = localRay.HitDistance(pos1, pos2, pos3);
-        
+
         std::cout << "other test #2: " + std::to_string(testdist1) << std::endl;
         //auto dist = (pos - projected).Length();
-       
-        //auto t = (localRay.Origin - projected).Length();
-      
 
-       
-        
+        //auto t = (localRay.Origin - projected).Length();
+
+
+
+
         //if (testdist < 10)//std::min(0.01f * t, 0.25f))
         //{
         //    //result.emplace_back(t, instPrefix + pair.first);

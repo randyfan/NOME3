@@ -45,6 +45,7 @@ public:
 
     Vector3 GetVertexPos(const std::string& name) const;
     void AddFace(const std::string& name, const std::vector<std::string>& facePoints);
+    void AddOffsetFace(const std::string& name, const std::vector<std::string>& facePoints, const float width, const float height, const int flag);
     void AddFace(const std::string& name, const std::vector<CMeshImpl::VertexHandle>& facePoints);
     void AddLineStrip(const std::string& name, const std::vector<CMeshImpl::VertexHandle>& points);
     void ClearMesh();
@@ -68,6 +69,8 @@ private:
     std::map<std::vector<CMeshImpl::VertexHandle>, CMeshImpl::FaceHandle>
         FaceVertsToFace; // Randy added
     std::vector<CMeshImpl::VertexHandle> LineStrip;
+    float getAngle(Vector3 vectorA, Vector3 vectorB);
+    Vector3 crossProduct(Vector3 vectorA, Vector3 vectorB);
 };
 
 class CMeshInstancePoint : public CInteractivePoint

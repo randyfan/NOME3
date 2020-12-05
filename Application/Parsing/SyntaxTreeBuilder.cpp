@@ -64,6 +64,27 @@ antlrcpp::Any CFileBuilder::visitArgMintorsion(NomParser::ArgMintorsionContext* 
     return arg;
 }
 
+antlrcpp::Any CFileBuilder::visitArgWidth(NomParser::ArgWidthContext* context)
+{
+    AST::ANamedArgument* arg = new AST::ANamedArgument(ConvertToken(context->getStart()));
+    arg->AddChild(visit(context->expression()).as<AST::AExpr*>());
+    return arg;
+}
+
+antlrcpp::Any CFileBuilder::visitArgHeight(NomParser::ArgHeightContext* context)
+{
+    AST::ANamedArgument* arg = new AST::ANamedArgument(ConvertToken(context->getStart()));
+    arg->AddChild(visit(context->expression()).as<AST::AExpr*>());
+    return arg;
+}
+
+antlrcpp::Any CFileBuilder::visitArgFlag(NomParser::ArgFlagContext* context)
+{
+    AST::ANamedArgument* arg = new AST::ANamedArgument(ConvertToken(context->getStart()));
+    arg->AddChild(visit(context->expression()).as<AST::AExpr*>());
+    return arg;
+}
+
 antlrcpp::Any CFileBuilder::visitArgBeginCap(NomParser::ArgBeginCapContext* context)
 {
     AST::ANamedArgument* arg = new AST::ANamedArgument(ConvertToken(context->getStart()));
@@ -191,6 +212,12 @@ antlrcpp::Any CFileBuilder::visitCmdIdListOne(NomParser::CmdIdListOneContext* co
     for (auto* arg : context->argSlices())
         cmd->AddNamedArgument(visit(arg));
     for (auto* arg : context->argSurface())
+        cmd->AddNamedArgument(visit(arg));
+    for (auto* arg : context->argWidth())
+        cmd->AddNamedArgument(visit(arg));
+    for (auto* arg : context->argHeight())
+        cmd->AddNamedArgument(visit(arg));
+    for (auto* arg : context->argFlag())
         cmd->AddNamedArgument(visit(arg));
     return cmd;
 }
@@ -321,6 +348,12 @@ antlrcpp::Any CFileBuilder::visitCmdSweep(NomParser::CmdSweepContext* context)
     for (auto* arg : context->argMintorsion())
         cmd->AddNamedArgument(visit(arg));
     for (auto* arg : context->argReverse())
+        cmd->AddNamedArgument(visit(arg));
+    for (auto* arg : context->argWidth())
+        cmd->AddNamedArgument(visit(arg));
+    for (auto* arg : context->argHeight())
+        cmd->AddNamedArgument(visit(arg));
+    for (auto* arg : context->argFlag())
         cmd->AddNamedArgument(visit(arg));
 
     return cmd;

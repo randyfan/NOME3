@@ -6,12 +6,28 @@
 namespace Nome::Scene
 {
 
+class CSweepMath
+{
+public:
+    Vector3 crossProduct(Vector3 vectorA, Vector3 vectorB);
+    float getAngle(Vector3 vectorA, Vector3 vectorB);
+    Vector3 getPerpendicularVector(Vector3 vectorA, Vector3 vectorB);
+    Vector3 vectorMultiplyMatrix(Vector3 vector, float matrix[3][3]);
+    float calculateRotateAngle(Vector3 vectorA, Vector3 vectorB, Vector3 T);
+    Vector3 getDefaultN(Vector3 T);
+    bool isAtSameLine(Vector3 vectorA, Vector3 vectorB);
+    bool isAtSameDirection(Vector3 vectorA, Vector3 vectorB);
+};
+
 class CSweep : public CMesh
 {
     DEFINE_INPUT(CSweepPathInfo *, Path) { MarkDirty(); }
     DEFINE_INPUT(CSweepPathInfo *, CrossSection) { MarkDirty(); }
     DEFINE_INPUT(float, Azimuth) { MarkDirty(); }
     DEFINE_INPUT(float, Twist) { MarkDirty(); }
+    DEFINE_INPUT(float, Width) { MarkDirty(); }
+    DEFINE_INPUT(float, Height) { MarkDirty(); }
+    DEFINE_INPUT(float, Flag) { MarkDirty(); }
 
 public:
     DECLARE_META_CLASS(CSweep, CMesh);
@@ -25,6 +41,7 @@ public:
     void UpdateEntity() override;
 
 private:
+    CSweepMath Math = CSweepMath();
     void drawCrossSection(std::vector<Vector3> crossSection, Vector3 center,
                           Vector3 T, Vector3 N, float rotateAngle, float angle,
                           Vector3 controlScale, int index, bool shouldReverse);

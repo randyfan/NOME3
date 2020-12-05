@@ -171,8 +171,8 @@ void CMainWindow::on_actionMerge_triggered()
     //PostloadSetup();
 
     Scene->AddEntity(tc::static_pointer_cast<Scene::CEntity>(merger)); // Merger now has all the vertices set, so we can add it into the scene as a new entity
-    auto* sn = Scene->GetRootNode()->FindOrCreateChildNode("globalMergeNode"); //Add it into the Scene Tree by creating a new node called globalMergeNode. Notice, this is the same name everytime you Merge. This means you can only have one merger mesh each time. It will override previous merger meshes with the new vertices. 
-    sn->SetEntity(merger.Get()); // Set sn, which is the scene node, to point to entity merger 
+    auto* sn = Scene->GetRootNode()->FindOrCreateChildNode("globalMergeNode"); //Add it into the Scene Tree by creating a new node called globalMergeNode. Notice, this is the same name everytime you Merge. This means you can only have one merger mesh each time. It will override previous merger meshes with the new vertices.
+    sn->SetEntity(merger.Get()); // Set sn, which is the scene node, to point to entity merger
 
 }
 
@@ -181,7 +181,7 @@ void CMainWindow::on_actionSubdivide_triggered()
 {
     // One shot merging, and add a new entity and its corresponding node
     Scene->Update();
-    tc::TAutoPtr<Scene::CMeshMerger> merger = new Scene::CMeshMerger("globalMerge"); 
+    tc::TAutoPtr<Scene::CMeshMerger> merger = new Scene::CMeshMerger("globalMerge");
     Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
         if (node->GetOwner()->GetName() == "globalMergeNode")
         {
@@ -195,13 +195,13 @@ void CMainWindow::on_actionSubdivide_triggered()
                 merger->Catmull(*mesh);
             }
         }
-        
+
     });
     Scene->AddEntity(tc::static_pointer_cast<Scene::CEntity>(
-        merger)); 
-    auto* sn = Scene->GetRootNode()->FindOrCreateChildNode("globalMergeNode"); 
-    sn->SetEntity(merger.Get());  
-    
+        merger));
+    auto* sn = Scene->GetRootNode()->FindOrCreateChildNode("globalMergeNode");
+    sn->SetEntity(merger.Get());
+
 }
 /* Randy temporarily commenting out. Point and Instance don't work.
 void CMainWindow::on_actionPoint_triggered() { }
@@ -385,8 +385,8 @@ void CMainWindow::PostloadSetup()
         Nome3DView->PostSceneUpdate();
         Scene->SetTime((float) elapsedRender->elapsed() / 1000);
         Scene->SetFrame(1);
-        std::cout << "time" << Scene->GetTime()->GetNumber() << std::endl;
-        std::cout << "frame" << Scene->GetFrame()->GetNumber() << std::endl;
+        // std::cout << "time" << Scene->GetTime()->GetNumber() << std::endl;
+        // std::cout << "frame" << Scene->GetFrame()->GetNumber() << std::endl;
     });
     SceneUpdateClock->start();
 
@@ -425,7 +425,7 @@ void CMainWindow::OnSliderAdded(Scene::CSlider& slider, const std::string& name)
         m_pMapInfoScrollArea->setWidgetResizable(true);
         m_pMapInfoScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
         m_pMapInfoScrollArea->setFrameStyle(QFrame::NoFrame);
- 
+
         m_pMapInfoScrollArea->setWidget(SliderWidget.get()); // SliderWidget.get()
         sliderDock->setWidget(m_pMapInfoScrollArea );
         SliderWidget.get()->setMinimumSize(280, 1200); //https://www.qtcentre.org/threads/55669-Scroll-Area-inside-Dock-Widget
@@ -440,7 +440,7 @@ void CMainWindow::OnSliderAdded(Scene::CSlider& slider, const std::string& name)
     auto* sliderBar = new QSlider();
     int numSteps = ceil((slider.GetMax() - slider.GetMin()) / slider.GetStep());
     int currTick = round((slider.GetValue() - slider.GetMin()) / slider.GetStep());
-    sliderBar->setMinimum(0); 
+    sliderBar->setMinimum(0);
     sliderBar->setMaximum(numSteps);
     sliderBar->setValue(currTick);
     sliderBar->setOrientation(Qt::Horizontal);

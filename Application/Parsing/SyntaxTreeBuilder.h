@@ -34,6 +34,9 @@ public:
     antlrcpp::Any visitArgTwist(NomParser::ArgTwistContext* context) override;
     antlrcpp::Any visitArgReverse(NomParser::ArgReverseContext* context) override;
     antlrcpp::Any visitArgMintorsion(NomParser::ArgMintorsionContext* context) override;
+    antlrcpp::Any visitArgWidth(NomParser::ArgWidthContext* context) override;
+    antlrcpp::Any visitArgHeight(NomParser::ArgHeightContext* context) override;
+    antlrcpp::Any visitArgFlag(NomParser::ArgFlagContext* context) override;
 
     antlrcpp::Any visitCmdExprListOne(NomParser::CmdExprListOneContext* context) override;
     antlrcpp::Any visitCmdIdListOne(NomParser::CmdIdListOneContext* context) override;

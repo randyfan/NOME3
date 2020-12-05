@@ -9,6 +9,9 @@ namespace Nome::Scene
 DEFINE_META_OBJECT(CFace)
 {
     BindPositionalArgument(&CFace::Points, 1);
+    BindNamedArgument(&CFace::Width, "width", 0);
+    BindNamedArgument(&CFace::Height, "height", 0);
+    BindNamedArgument(&CFace::Flag, "flag", 0);
     // Handle argSurface
     // Handle parent mesh connection
 }
@@ -82,7 +85,7 @@ bool CFace::AddFaceIntoMesh(CMesh* mesh) const
         mesh->AddVertex(newName, point->Position);
         nameList.push_back(newName);
     }
-    mesh->AddFace(GetName(), nameList);
+    mesh->AddOffsetFace(GetName(), nameList, Width.GetValue(0.0f), Height.GetValue(0.0f), Flag.GetValue(0));
     return true;
 }
 

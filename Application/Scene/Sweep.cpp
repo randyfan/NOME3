@@ -17,20 +17,99 @@ DEFINE_META_OBJECT(CSweep)
     BindNamedArgument(&CSweep::bEndCap, "endcap", 0);
     BindNamedArgument(&CSweep::bReverse, "reverse", 0);
     BindNamedArgument(&CSweep::bMintorsion, "mintorsion", 0);
+    BindNamedArgument(&CSweep::Width, "width", 0);
+    BindNamedArgument(&CSweep::Height, "height", 0);
+    BindNamedArgument(&CSweep::Flag, "flag", 0);
 }
 
 // do cross pruduct with vectorA and vectorB
-Vector3 crossProduct(Vector3 vectorA, Vector3 vectorB)
+Vector3 CSweepMath::crossProduct(Vector3 vectorA, Vector3 vectorB)
 {
     return Vector3(vectorA.y * vectorB.z - vectorA.z * vectorB.y,
                    vectorA.z * vectorB.x - vectorA.x * vectorB.z,
                    vectorA.x * vectorB.y - vectorA.y * vectorB.x);
 }
 
+// get the angle of two vectors (unsigned)
+float CSweepMath::getAngle(Vector3 vectorA, Vector3 vectorB)
+{
+    float value = vectorA.DotProduct(vectorB) / vectorA.Length() / vectorB.Length();
+    float epsilon = 1e-4;
+    if (fabs(value - 1) < epsilon) { return 0; }
+    if (fabs(value + 1) < epsilon) { return (float)tc::M_PI; }
+    if (fabs(value) < epsilon) {return (float)tc::M_PI / 2; }
+
+    return acosf(vectorA.DotProduct(vectorB) / vectorA.Length() / vectorB.Length()) ;
+}
+
+// get the perpendicular vector from vectorB to vectorA
+Vector3 CSweepMath::getPerpendicularVector(Vector3 vectorA, Vector3 vectorB)
+{
+    float epsilon = 1e-4;
+    float scale = cosf(getAngle(vectorA, vectorB));
+
+    if (fabs(scale) < epsilon) { return vectorA.Normalized(); }
+
+    return vectorA - vectorB.Normalized() * vectorA.Length() * cosf(getAngle(vectorA, vectorB));
+}
+
+// multiply a vector to a matrix
+Vector3 CSweepMath::vectorMultiplyMatrix(Vector3 vector, float matrix[3][3])
+{
+    float x = vector.x * matrix[0][0] + vector.y * matrix[1][0] + vector.z * matrix[2][0];
+    float y = vector.x * matrix[0][1] + vector.y * matrix[1][1] + vector.z * matrix[2][1];
+    float z = vector.x * matrix[0][2] + vector.y * matrix[1][2] + vector.z * matrix[2][2];
+
+    return Vector3(x, y, z);
+}
+
+// calculate the rotation angle from vectorA to vectorB (signed)
+float CSweepMath::calculateRotateAngle(Vector3 vectorA, Vector3 vectorB, Vector3 T)
+{
+    float angle = getAngle(vectorA, vectorB);
+    T.Normalize();
+
+    Vector3 perpendicular = getPerpendicularVector(vectorB, vectorA).Normalized();
+    Vector3 direction = crossProduct(T, vectorA).Normalized();
+
+    if (direction.DotProduct(perpendicular) >= 0)
+        return angle;
+    else
+        return -angle;
+}
+
+Vector3 CSweepMath::getDefaultN(Vector3 T)
+{
+    if (T.Normalized() != Vector3(1, 0, 0))
+        return crossProduct(T, Vector3(1, 0, 0));
+    else
+        return crossProduct(T, Vector3(0, 1, 0));
+}
+
+bool CSweepMath::isAtSameLine(Vector3 vectorA, Vector3 vectorB)
+{
+    Vector3 zero = Vector3(0, 0, 0);
+    if (vectorA == zero || vectorB == zero)
+        return true;
+
+    Vector3 normVA = vectorA.Normalized();
+    Vector3 normVB = vectorB.Normalized();
+
+    if (normVA == normVB || normVA == -normVB)
+        return true;
+    else
+        return false;
+}
+
+bool CSweepMath::isAtSameDirection(Vector3 vectorA, Vector3 vectorB)
+{
+    return vectorA.DotProduct(vectorB) >= 0;
+}
+
 void CSweep::drawCrossSection(std::vector<Vector3> crossSection, Vector3 center,
                         Vector3 T, Vector3 N, float rotateAngle, float angle,
                         Vector3 controlScale, int index, bool shouldReverse) {
-    Vector3 B = crossProduct(T, N);
+    Vector3 B = Math.crossProduct(T, N);
 
     N.Normalize();
     B.Normalize();
@@ -83,84 +162,9 @@ void CSweep::drawCap(std::vector<Vector3> crossSection, int crossIndex,
             );
         }
     }
-    AddFace("f" + std::to_string(faceIndex), capFace);
+    AddOffsetFace("f" + std::to_string(faceIndex), capFace, Width.GetValue(0.0f), Height.GetValue(0.0f), Flag.GetValue(0));
 }
 
-// get the angle of two vectors (unsigned)
-float getAngle(Vector3 vectorA, Vector3 vectorB)
-{
-    float value = vectorA.DotProduct(vectorB) / vectorA.Length() / vectorB.Length();
-    float epsilon = 1e-4;
-    if (fabs(value - 1) < epsilon) { return 0; }
-    if (fabs(value + 1) < epsilon) { return (float)tc::M_PI; }
-    if (fabs(value) < epsilon) {return (float)tc::M_PI / 2; }
-
-    return acosf(vectorA.DotProduct(vectorB) / vectorA.Length() / vectorB.Length()) ;
-}
-
-// get the perpendicular vector from vectorB to vectorA
-Vector3 getPerpendicularVector(Vector3 vectorA, Vector3 vectorB)
-{
-    float epsilon = 1e-4;
-    float scale = cosf(getAngle(vectorA, vectorB));
-
-    if (fabs(scale) < epsilon) { return vectorA.Normalized(); }
-
-    return vectorA - vectorB.Normalized() * vectorA.Length() * cosf(getAngle(vectorA, vectorB));
-}
-
-// multiply a vector to a matrix
-Vector3 vectorMultiplyMatrix(Vector3 vector, float matrix[3][3])
-{
-    float x = vector.x * matrix[0][0] + vector.y * matrix[1][0] + vector.z * matrix[2][0];
-    float y = vector.x * matrix[0][1] + vector.y * matrix[1][1] + vector.z * matrix[2][1];
-    float z = vector.x * matrix[0][2] + vector.y * matrix[1][2] + vector.z * matrix[2][2];
-
-    return Vector3(x, y, z);
-}
-
-// calculate the rotation angle from vectorA to vectorB (signed)
-float calculateRotateAngle(Vector3 vectorA, Vector3 vectorB, Vector3 T)
-{
-    float angle = getAngle(vectorA, vectorB);
-    T.Normalize();
-
-    Vector3 perpendicular = getPerpendicularVector(vectorB, vectorA).Normalized();
-    Vector3 direction = crossProduct(T, vectorA).Normalized();
-
-    if (direction.DotProduct(perpendicular) >= 0)
-        return angle;
-    else
-        return -angle;
-}
-
-Vector3 getDefaultN(Vector3 T)
-{
-    if (T.Normalized() != Vector3(1, 0, 0))
-        return crossProduct(T, Vector3(1, 0, 0));
-    else
-        return crossProduct(T, Vector3(0, 1, 0));
-}
-
-bool isAtSameLine(Vector3 vectorA, Vector3 vectorB)
-{
-    Vector3 zero = Vector3(0, 0, 0);
-    if (vectorA == zero || vectorB == zero)
-        return true;
-
-    Vector3 normVA = vectorA.Normalized();
-    Vector3 normVB = vectorB.Normalized();
-
-    if (normVA == normVB || normVA == -normVB)
-        return true;
-    else
-        return false;
-}
-
-bool isAtSameDirection(Vector3 vectorA, Vector3 vectorB)
-{
-    return vectorA.DotProduct(vectorB) >= 0;
-}
 
 void CSweep::UpdateEntity()
 {
@@ -222,21 +226,21 @@ void CSweep::UpdateEntity()
             // not mintorsion
             if (!bMintorsion)
             {
-                Ns.push_back(getDefaultN(prevVector));
+                Ns.push_back(Math.getDefaultN(prevVector));
                 angles.push_back(twist);
             }
             // Three points in a single line.
-            else if (isAtSameLine(prevVector, curVector))
+            else if (Math.isAtSameLine(prevVector, curVector))
             {
                 Vector3 N;
 
                 if (i == 2)
                 {
-                    N = getDefaultN(prevVector);
+                    N = Math.getDefaultN(prevVector);
                     Ns.push_back(N);
                 }
                 else
-                    N = getPerpendicularVector(Ns[i - 2], prevVector);
+                    N = Math.getPerpendicularVector(Ns[i - 2], prevVector);
 
                 angles.push_back(twist);
                 Ns.push_back(N);
@@ -244,15 +248,15 @@ void CSweep::UpdateEntity()
             else
             {
                 Vector3 sumVector = prevVector.Normalized() - curVector.Normalized();
-                Vector3 curPerpendicular = getPerpendicularVector(sumVector, prevVector);
-                Vector3 prevPerpendicular = getPerpendicularVector(sumVector, -curVector);
+                Vector3 curPerpendicular = Math.getPerpendicularVector(sumVector, prevVector);
+                Vector3 prevPerpendicular = Math.getPerpendicularVector(sumVector, -curVector);
 
                 /* let the normal vector be the prevPerpendicular vector
                  * in this case, the rotation angle is 0 */
                 if (i == 2) { Ns.push_back(prevPerpendicular); }
                 // calculate the rotation angle of each joint
-                angles.push_back(calculateRotateAngle(Ns[i - 2], prevPerpendicular,
-                                                      points[i - 1] - points[i - 2]) + twist);
+                angles.push_back(Math.calculateRotateAngle(Ns[i - 2], prevPerpendicular,
+                                                           points[i - 1] - points[i - 2]) + twist);
                 // set the current normal vector
                 Ns.push_back(curPerpendicular);
             }
@@ -262,7 +266,7 @@ void CSweep::UpdateEntity()
         controlReverses.push_back(false);
     }
 
-    if (numPoints == 2) { Ns.push_back(getDefaultN(points[1] - points[0])); }
+    if (numPoints == 2) { Ns.push_back(Math.getDefaultN(points[1] - points[0])); }
 
     if (isClosed)
     {
@@ -271,13 +275,13 @@ void CSweep::UpdateEntity()
 
         if (!bMintorsion)
         {
-            Ns.push_back(getDefaultN(prevVector));
+            Ns.push_back(Math.getDefaultN(prevVector));
             angles.push_back(twist);
         }
         // Three points in a single line.
-        else if (isAtSameLine(prevVector, curVector))
+        else if (Math.isAtSameLine(prevVector, curVector))
         {
-            Vector3 N = getPerpendicularVector(Ns[numPoints - 2], prevVector);
+            Vector3 N = Math.getPerpendicularVector(Ns[numPoints - 2], prevVector);
 
             angles.push_back(twist);
             Ns.push_back(N);
@@ -285,14 +289,14 @@ void CSweep::UpdateEntity()
         else
         {
             Vector3 sumVector = prevVector.Normalized() - curVector.Normalized();
-            Vector3 curPerpendicular = getPerpendicularVector(sumVector, prevVector);
-            Vector3 prevPerpendicular = getPerpendicularVector(sumVector, -curVector);
+            Vector3 curPerpendicular = Math.getPerpendicularVector(sumVector, prevVector);
+            Vector3 prevPerpendicular = Math.getPerpendicularVector(sumVector, -curVector);
 
-            angles.push_back(calculateRotateAngle(Ns[numPoints - 2], prevPerpendicular,
+            angles.push_back(Math.calculateRotateAngle(Ns[numPoints - 2], prevPerpendicular,
                                                   points[numPoints - 1] - points[numPoints - 2]));
             Ns.push_back(curPerpendicular);
             // add the rotation angle of the closed joint
-            angles[0] += calculateRotateAngle(curPerpendicular, Ns[0], prevVector);
+            angles[0] += Math.calculateRotateAngle(curPerpendicular, Ns[0], prevVector);
         }
     }
     angles.push_back(twist);
@@ -352,7 +356,7 @@ void CSweep::UpdateEntity()
         Vector3 curVector = (points[0] - points[numPoints - 2]).Normalized();
         float angle;
 
-        if (isAtSameLine(prevVector, curVector))
+        if (Math.isAtSameLine(prevVector, curVector))
         {
             N = Ns[Ns.size() - 1];
             T = curVector;
@@ -362,7 +366,7 @@ void CSweep::UpdateEntity()
         {
             N = prevVector - curVector;
             T = prevVector + curVector;
-            angle = getAngle(prevVector, curVector);
+            angle = Math.getAngle(prevVector, curVector);
         }
 
         drawCrossSection(crossSections[0], points[0], T, N, angles[0], angle,
@@ -378,10 +382,10 @@ void CSweep::UpdateEntity()
             {
                 Vector3 prevVector = (points[1] - points[0]).Normalized();
                 Vector3 curVector = (points[0] - points[numPoints - 2]).Normalized();
-                float angle = (isAtSameLine(prevVector, curVector)) ?
-                    0 : getAngle(prevVector, curVector);
+                float angle = (Math.isAtSameLine(prevVector, curVector)) ?
+                    0 : Math.getAngle(prevVector, curVector);
 
-                if (isAtSameLine(prevVector, curVector))
+                if (Math.isAtSameLine(prevVector, curVector))
                 {
                     N = Ns[i - 1];
                     T = curVector;
@@ -410,10 +414,10 @@ void CSweep::UpdateEntity()
         {
             Vector3 prevVector = (points[i + 1] - points[i]).Normalized();
             Vector3 curVector = (points[i] - points[i - 1]).Normalized();
-            float angle = (isAtSameLine(prevVector, curVector)) ?
-                0 : getAngle(prevVector, curVector);
+            float angle = (Math.isAtSameLine(prevVector, curVector)) ?
+                0 : Math.getAngle(prevVector, curVector);
 
-            if (isAtSameLine(prevVector, curVector))
+            if (Math.isAtSameLine(prevVector, curVector))
             {
                 N = Ns[i];
                 T = curVector;
@@ -429,6 +433,9 @@ void CSweep::UpdateEntity()
         }
     }
 
+    float width = Width.GetValue(0.0f);
+    float height = Height.GetValue(0.0f);
+    int flag = Flag.GetValue(0);
     // Create faces
     for (int k = 0; k < segmentCount - 1; k++)
     {
@@ -462,7 +469,7 @@ void CSweep::UpdateEntity()
                     "v" + std::to_string(k + 1) + "_" + std::to_string(next),
                 };
             }
-            AddFace("f" + std::to_string(k) + "_" + std::to_string(i), upperFace);
+            AddOffsetFace("f" + std::to_string(k) + "_" + std::to_string(i), upperFace, width, height, flag);
         }
     }
 
