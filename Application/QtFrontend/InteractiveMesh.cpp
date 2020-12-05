@@ -36,7 +36,7 @@ CInteractiveMesh::CInteractiveMesh(Scene::CSceneTreeNode* node)
 
 
     UpdateGeometry();
-    UpdateMaterial();
+    UpdateMaterial(false); // don't show facets by default
     InitInteractions();
 }
 
@@ -298,6 +298,8 @@ void CInteractiveMesh::UpdateTransform()
 
 void CInteractiveMesh::UpdateGeometry()
 {
+
+
     auto* entity = SceneTreeNode->GetInstanceEntity();
     if (!entity)
     {
@@ -356,7 +358,7 @@ void CInteractiveMesh::UpdateGeometry()
     }
 }
 
-void CInteractiveMesh::UpdateMaterial()
+void CInteractiveMesh::UpdateMaterial(bool showFacets)
 {
     QVector3D instanceColor { 1.0f, 0.5f, 0.1f }; // orange color
 
@@ -408,32 +410,15 @@ void CInteractiveMesh::UpdateMaterial()
     auto* mat = dynamic_cast<CXMLMaterial*>(Material);
 
     mat->FindParameterByName("kd")->setValue(instanceColor); 
+    if (showFacets) {
+        mat->FindParameterByName("showFacets")->setValue(1);
+    }
+    else
+    {
+        mat->FindParameterByName("showFacets")->setValue(0);
+    }
 
-    // Randy Work in progress: Use original implementation to speed up. It's really slow to create a new material for each face
 
-    //    auto* mesh = dynamic_cast<Scene::CMeshInstance*>(SceneTreeNode->GetInstanceEntity());
-    // auto selectedfacehandles = mesh->GetSelectedFaceHandles();
-    // Kd (the diffuse color) dominates the color. The difficult part with this solution is it undetermined which material will show up when overlapping.
-    //for (auto fH : selectedfacehandles)
-    //{
-    //    auto* interactiveface = new Qt3DCore::QEntity(this);
-    //    auto openmesh = mesh->GetMeshImpl();
-
-    //    openmesh.set_color(fH, { 0, 0, 255 }); // useless, this color gets overwriten by material color. can be used after it gets fixed
-    //    //mat->FindParameterByName("kd")->setValue(QVector3D(255, 0, 0));
-    //    NomeFace::CFaceToQGeometry faceToQGeometry( openmesh, fH, false); 
-    //    auto* facegeometry = faceToQGeometry.GetGeometry();
-    //    facegeometry->setParent(interactiveface);
-    //    auto* facerender = new Qt3DRender::QGeometryRenderer(interactiveface);
-    //    facerender->setGeometry(facegeometry);
-    //    facerender->setPrimitiveType(Qt3DRender::QGeometryRenderer::Triangles);
-    //    interactiveface->addComponent(facerender); // adding geometry data to interactive face
-    //    auto xmlPath = CResourceMgr::Get().Find("WireframeLit.xml");
-    //    auto* mat = new CXMLMaterial(QString::fromStdString(xmlPath));
-    //    interactiveface->addComponent(mat); 
-    //    mat->FindParameterByName("kd")->setValue(QVector3D(0, 0, 1)); 
-    //}
-    
     // Use non-default line color only if the instance has a surface
     auto surface = SceneTreeNode->GetOwner()->GetSurface();
     if (LineMaterial && surface)
@@ -506,7 +491,7 @@ void CInteractiveMesh::SetDebugDraw(const CDebugDraw* debugDraw)
         lineEntity->addComponent(LineMaterial); 
         // Randy added this on 11/21
         if (SceneTreeNode->GetOwner()->isSelected()) {
-            std::cout << "Selected a polyline/bspline" << std::endl;
+            std::cout << "You selected a polyline/bspline entity" << std::endl;
             QVector3D instanceColor;
             auto color = SceneTreeNode->GetOwner()->GetSelectSurface();
             std::cout << color.x + color.y + color.z << std::endl;

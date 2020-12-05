@@ -148,19 +148,21 @@ void CMeshMerger::MergeIn(const CMeshInstance& meshInstance)
         FaceCount++;
     }
 
-    std::vector<CMeshImpl::VertexHandle> vHandles;;
-    for (auto& Pair : NameToVert) {
-        auto vHandle = Pair.second;
-        std::cout << "Mergein vHandle index: " + std::to_string(vHandle.idx()) << std::endl;
-        vHandles.push_back(vHandle);
-    }
 
-    std::cout << "outside add line strip" << std::endl;
-    if (meshClass == "CPolyline")
-    {
-        std::cout << "adding line strip" << std::endl;
-        AddLineStrip("mergedpoly" , vHandles);
-    }
+    // For combining polylines/bsplines. Not needed for now. Comment back in when needed
+    //std::vector<CMeshImpl::VertexHandle> vHandles;;
+    //for (auto& Pair : NameToVert) {
+    //    auto vHandle = Pair.second;
+    //    std::cout << "Mergein vHandle index: " + std::to_string(vHandle.idx()) << std::endl;
+    //    vHandles.push_back(vHandle);
+    //}
+
+    //std::cout << "outside add line strip" << std::endl;
+    //if (meshClass == "CPolyline")
+    //{
+    //    std::cout << "adding line strip" << std::endl;
+    //    AddLineStrip("mergedpoly" , vHandles);
+    //}
 }
 
 //Find closest vertex in current mesh's vertices

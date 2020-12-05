@@ -132,7 +132,7 @@ void CNome3DView::PostSceneUpdate()
                     else
                     {
                         mesh->UpdateGeometry();
-                        mesh->UpdateMaterial();
+                        mesh->UpdateMaterial(WireFrameMode);
                         node->SetEntityUpdated(false);
                     }
                 }

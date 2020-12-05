@@ -2,7 +2,7 @@
 
 in vec3 vertexPosition;
 in vec3 vertexNormal;
-in int colorSelected;  // Added on 12/3 0 = not marked. 1 = marked
+in int colorSelected;  // Added on 12/3 0 = not selected. 1 = selected
 
 out EyeSpaceVertex {
     vec3 position;

@@ -50,7 +50,6 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, std::vector<CMeshI
             selected = 1;
         }
 
-
         for (; fvIter.is_valid(); ++fvIter)
         {
             CMeshImpl::VertexHandle faceVert = *fvIter;

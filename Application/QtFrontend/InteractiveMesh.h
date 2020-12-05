@@ -24,7 +24,7 @@ public:
     void UpdateFaceMaterials(); // Randy added this. NOT USED
     void UpdateTransform();
     void UpdateGeometry();
-    void UpdateMaterial();
+    void UpdateMaterial(bool showFacets);
     void InitInteractions();
     void SetDebugDraw(const CDebugDraw* debugDraw);
 

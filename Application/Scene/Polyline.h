@@ -10,6 +10,7 @@ class CPolyline : public CSweepPath
     DEFINE_INPUT_ARRAY(CVertexInfo*, Points) { MarkDirty(); }
 
     DEFINE_OUTPUT_WITH_UPDATE(CSweepPathInfo*, Polyline) { UpdateEntity(); }
+    DEFINE_OUTPUT_WITH_UPDATE(CPolyline*, PolylineObject) { UpdateEntity(); } // Randy added this on 12/4
 
 public:
     DECLARE_META_CLASS(CPolyline, CSweepPath);

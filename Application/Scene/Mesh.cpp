@@ -637,15 +637,6 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
             + GetSceneTreeNode()->GetOwner()->GetEntity()->GetMetaObject().ClassName()
               << std::endl;
     auto meshClass = GetSceneTreeNode()->GetOwner()->GetEntity()->GetMetaObject().ClassName();
-    //if (meshClass == "CPolyline" || meshClass == "CBSpline") // Randy added the second bool on 11/21
-    //{
-    //    std::cout << "Pick edges in Mesh.cpp: found entity: " + meshClass << std::endl;
-    //    GetSceneTreeNode()->GetOwner()->SelectNode();
-    //    MarkDirty();
-    //}
-
-    // added on 11/6. TODO: Clean up asap!!!!!! Also, we want to eventually add a separate feature to select all edges on a polyline
-
     auto meshName = GetSceneTreeNode()->GetOwner()->GetName();
 
     // If it's not a selected edge and is a bspline/polyline
@@ -708,7 +699,7 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
             {
 
                 auto firstpoint = edgeVertsOnly[i];
-                auto secondpoint = edgeVertsOnly[i + 1];
+                auto secondpoint = edgeVertsOnly[i+1];
                 const auto& posArr1 = Mesh.point(firstpoint);
                 tc::Vector3 pos1 { posArr1[0], posArr1[1], posArr1[2] };
                 const auto& posArr2 = Mesh.point(secondpoint);

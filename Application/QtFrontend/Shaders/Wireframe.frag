@@ -14,7 +14,7 @@ uniform vec3 ka;            // Ambient reflectivity
 uniform vec3 kd;            // Diffuse reflectivity
 uniform vec3 ks;            // Specular reflectivity
 uniform float shininess;    // Specular shininess factor
-
+uniform int showFacets; // binary int. 0 = don't show facets (face edges), 1 = show facets
 in WireframeVertex { // these variables are outputted from Wireframe.geom
     vec3 position;
     vec3 normal;
@@ -106,7 +106,12 @@ void main()
     // Calculate the color from the phong model
     vec4 color = vec4( adsModel( fs_in.position, normalize( fs_in.normal ) ), 1.0 );
     if (fs_in.colorSelected == 0) { // Randy added this on 12/3
-      fragColor = shadeLine( color );
+      if (showFacets == 1) {
+        fragColor = shadeLine( color );
+      }
+      else {
+        fragColor = color;
+      }
     }
     else { // Randy added this on 12/3
       vec4 selectedCol = vec4(1.0, 0.0, 1.0, 1.0);
