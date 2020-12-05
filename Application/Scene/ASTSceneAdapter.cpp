@@ -170,6 +170,8 @@ void CASTSceneAdapter::VisitCommandSyncScene(AST::ACommand* cmd, CScene& scene, 
         if (auto* mesh = dynamic_cast<CMesh*>(ParentEntity))
             if (auto* face = dynamic_cast<CFace*>(entity.Get()))
                 mesh->Faces.Connect(face->Face);
+            else if (auto* point = dynamic_cast<CPoint*>(entity.Get()))
+                mesh->Points.Connect(point->Point); // Randy added on 12/5
 
         // Added insubMesh bool to allow Meshes to process multiple subcommands (more than one face).
         if (insubMesh == false)

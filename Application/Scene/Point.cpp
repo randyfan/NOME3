@@ -20,7 +20,6 @@ void CPoint::MarkDirty()
 void CPoint::UpdateEntity()
 {
     Super::UpdateEntity();
-
     std::vector<CControlPointInfo*> controlPoints;
     for (size_t i = 0; i < ControlPoints.GetSize(); i++)
     {

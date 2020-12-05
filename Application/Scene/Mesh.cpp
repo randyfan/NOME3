@@ -55,6 +55,12 @@ void CMesh::UpdateEntity()
         }
     }
 
+    // Randy added below loop on 12/5. Should add a point->AddPointIntoMesh(this) probably
+    for (size_t i = 0; i < Points.GetSize(); i++) {
+        auto* point = Points.GetValue(i, nullptr);
+        this->AddVertex(point->Name, point->Position);
+    }
+
     Super::UpdateEntity();
     SetValid(isValid);
 }

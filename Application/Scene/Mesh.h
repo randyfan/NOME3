@@ -26,6 +26,7 @@ class CVertexSelector;
 class CMesh : public CEntity
 {
     DEFINE_INPUT_ARRAY(CFace*, Faces) { MarkDirty(); }
+    DEFINE_INPUT_ARRAY(CVertexInfo*, Points) { MarkDirty(); } // Randy added this on 12/5. CVertexInfo completely specifies a vertex.
 
 public:
     DECLARE_META_CLASS(CMesh, CEntity);
