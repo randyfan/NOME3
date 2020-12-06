@@ -303,7 +303,6 @@ AST::CToken* CFileBuilder::ConvertToken(antlr4::tree::TerminalNode* token)
     auto start = token->getSymbol()->getStartIndex();
     auto len = token->getSymbol()->getStopIndex() - start + 1;
     return new AST::CToken(token->getText(), 0, start);
-    
 }
 
 }
