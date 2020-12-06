@@ -47,7 +47,6 @@ public:
     CToken* MakeToken(std::string identifier);
     AIdent* MakeIdent(std::string identifier);
     AVector* MakeVector(const std::vector<AExpr*>& children);
-    //AString* MakeString(std::string string); // Randy added this on 11/26
     [[nodiscard]] AFile* GetAstRoot() const { return ASTRoot; }
     void SetAstRoot(AFile* astRoot) { ASTRoot = astRoot; }
 

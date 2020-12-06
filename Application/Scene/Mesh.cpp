@@ -120,7 +120,13 @@ void CMesh::AddFace(const std::string& name, const std::vector<std::string>& fac
 
 void CMesh::AddFace(const std::string& name, const std::vector<CMeshImpl::VertexHandle>& facePoints)
 {
+    std::cout << "vision" << std::endl;
+    for (auto fP : facePoints) {
+        std::cout << fP.idx() << std::endl;
+    }
+   
     auto faceHandle = Mesh.add_face(facePoints);
+    std::cout << faceHandle.idx() << std::endl;
     if (!faceHandle.is_valid())
         printf("Could not add face %s into mesh %s\n", name.c_str(), GetName().c_str());
     FaceVertsToFace.emplace(facePoints,

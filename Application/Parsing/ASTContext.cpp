@@ -29,9 +29,4 @@ AVector* CASTContext::MakeVector(const std::vector<AExpr*>& children)
     return vec;
 }
 
-// Randy added this on 11/26. Useful in the future when when we want to create strings and save those changes
-//AString* CASTContext::MakeString(std::string string)
-//{
-//    return Make<AString>(MakeString(std::move(string)));
-//}
 }

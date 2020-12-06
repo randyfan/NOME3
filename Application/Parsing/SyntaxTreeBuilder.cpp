@@ -7,11 +7,7 @@ antlrcpp::Any CFileBuilder::visitFile(NomParser::FileContext* context)
 {
     AST::AFile* file = new AST::AFile();
     for (auto* command : context->command())
-    {
-        auto a = this->visit(command);
-        auto b = a.as<AST::ACommand*>(); // THIS IS THE LINE CAUSING THE CRASH
-        file->AddChild(b);
-    }
+        file->AddChild(this->visit(command).as<AST::ACommand*>());
     return file;
 }
 
@@ -279,11 +275,7 @@ antlrcpp::Any CFileBuilder::visitScientific(NomParser::ScientificContext* contex
 
 antlrcpp::Any CFileBuilder::visitIdent(NomParser::IdentContext* context)
 {
-    auto a = context->IDENT();
-    auto b = ConvertToken(a);
-    auto c = new AST::AIdent(b);
-    auto d = static_cast<AST::AExpr*>(c);
-    return d;
+    return static_cast<AST::AExpr*>(new AST::AIdent(ConvertToken(context->IDENT())));
 }
 
 
@@ -310,8 +302,8 @@ AST::CToken* CFileBuilder::ConvertToken(antlr4::tree::TerminalNode* token)
 {
     auto start = token->getSymbol()->getStartIndex();
     auto len = token->getSymbol()->getStopIndex() - start + 1;
-    auto a = new AST::CToken(token->getText(), 0, start);
-    return a;
+    return new AST::CToken(token->getText(), 0, start);
+    
 }
 
 }

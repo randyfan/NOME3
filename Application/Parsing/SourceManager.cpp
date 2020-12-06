@@ -52,9 +52,11 @@ bool CSourceManager::ParseMainSource()
     CMyErrorListener errorListener;
     parser.addErrorListener(&errorListener);
     auto* tree = parser.file();
+
     CFileBuilder builder(MainSourceBuffer);
     ASTRoot = builder.visitFile(tree);
     ASTContext.SetAstRoot(ASTRoot);
+
     std::cout << "====== Debug Print AST ======" << std::endl;
     std::cout << *ASTRoot;
     std::cout << "====== End Debug Print AST ======" << std::endl;

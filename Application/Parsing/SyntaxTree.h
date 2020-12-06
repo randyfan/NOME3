@@ -55,7 +55,6 @@ enum class EKind : uint16_t
     ExprPost,
     NodePost,
     LastKind,
-    String // Randy added this on 11/26
 };
 
 class ANode
@@ -104,26 +103,6 @@ protected:
     {
     }
 };
-
-// Randy added this on 11/26
-//class AString : public AExpr
-//{
-//public:
-//    AString(CToken* token)
-//        : AExpr(EKind::String, token)
-//    {
-//    }
-//
-//    std::string ToString() const { return Token->ToString(); }
-//
-//    void CollectTokens(std::vector<CToken*>& tokenList) const { tokenList.push_back(Token); }
-//    friend std::ostream& operator<<(std::ostream& os, const AString& node)
-//    {
-//        os << node.ToString();
-//        return os;
-//    }
-//};
-
 
 class AIdent : public AExpr
 {
@@ -322,7 +301,6 @@ public:
     virtual std::any VisitCall(ACall* call) = 0;
     virtual std::any VisitVector(AVector* vector) = 0;
     virtual std::any VisitWrappedExpr(AWrappedExpr* vector) = 0;
-    // virtual std::any VisitString(AString* string) = 0; Randy added this on 11/26
 };
 
 //============================== File ==============================
@@ -376,7 +354,6 @@ public:
     std::string GetCommand() const { return Token->ToString(); }
     std::string GetName() const { return GetPositionalIdentAsString(0); }
     std::string GetPositionalIdentAsString(size_t index) const;
-    // std::string GetPositionalStringAsString(size_t index) const; // Randy added this on 11/26 to help w/ ASTSCeneAdapter
     AExpr* GetPositionalArgument(size_t index) const;
     ANamedArgument* GetNamedArgument(const std::string& name) const;
     const std::vector<ANamedArgument*>& GetTransforms() const { return Transforms; }
