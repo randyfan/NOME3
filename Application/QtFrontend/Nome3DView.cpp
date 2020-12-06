@@ -111,30 +111,10 @@ void CNome3DView::PostSceneUpdate()
                 if (node->WasEntityUpdated())
                 {
                     printf("Geom regen for %s\n", node->GetPath().c_str());
+                    mesh->UpdateGeometry();
+                    mesh->UpdateMaterial(WireFrameMode);
+                    node->SetEntityUpdated(false);
                     
-                    
-                    if (false)// Commented out on 12/2. PickFaceBool) // if we are picking faces, faces need to be colored TODO: 11/26. First, fix face selection
-                    {
-                        mesh->CreateInteractiveFaces(); // Randy added this even alter 10/12
-                                                        // afternoon. Noticed needed for
-                                                        // subdivisoin. USE. This was accidently
-                                                        // left commented on 10/14, was causing bugs
-                                                        // on 10/15
-          
-                        mesh->UpdateFaceGeometries(WireFrameMode); // Randy added this on 10/12. USE
-
-                        mesh->UpdatePointGeometries(PickVertexBool); // Randy added this on 10/12 afternoon. Fixed
-                                                           // point coloring issue. USE
-                        // mesh->UpdateFaceMaterials(); // Randy added this on 10/12. DONT USE
-                        mesh->InitInteractions(); // Randy added 10/15 night. wait this didnt fix the crash bug... do we still need it?
-                        node->SetEntityUpdated(false);
-                    }
-                    else
-                    {
-                        mesh->UpdateGeometry();
-                        mesh->UpdateMaterial(WireFrameMode);
-                        node->SetEntityUpdated(false);
-                    }
                 }
             }
             else
