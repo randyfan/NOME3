@@ -38,11 +38,6 @@ private:
     Qt3DRender::QGeometry* PointGeometry;
     Qt3DRender::QGeometryRenderer* PointRenderer;
 
-    std::vector<Qt3DCore::QEntity*> interactivefaces;
-    std::vector<Qt3DRender::QGeometry*> facegeometries;
-    std::vector<Qt3DRender::QGeometryRenderer*> facerenderers;
-    std::vector<Qt3DRender::QMaterial*> facematerials;
-
 };
 
 }
