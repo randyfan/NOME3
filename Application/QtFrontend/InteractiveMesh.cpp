@@ -152,14 +152,10 @@ void CInteractiveMesh::UpdateMaterial(bool showFacets)
     auto* mat = dynamic_cast<CXMLMaterial*>(Material);
 
     mat->FindParameterByName("kd")->setValue(instanceColor); 
-    if (showFacets) {
+    if (showFacets) 
         mat->FindParameterByName("showFacets")->setValue(1);
-    }
     else
-    {
         mat->FindParameterByName("showFacets")->setValue(0);
-    }
-
 
     // Use non-default line color only if the instance has a surface
     auto surface = SceneTreeNode->GetOwner()->GetSurface();
@@ -182,24 +178,19 @@ void CInteractiveMesh::InitInteractions()
     connect(picker, &Qt3DRender::QObjectPicker::pressed, [](Qt3DRender::QPickEvent* pick) {
         if (pick->button() == Qt3DRender::QPickEvent::LeftButton)
         {
-            //if (pick->modifiers() & Qt::ShiftModifier)
-            //{
-                const auto& wi = pick->worldIntersection();
-                const auto& origin = GFrtCtx->NomeView->camera()->position();
-                auto dir = wi - origin;
+            const auto& wi = pick->worldIntersection();
+            const auto& origin = GFrtCtx->NomeView->camera()->position();
+            auto dir = wi - origin;
 
-                tc::Ray ray({ origin.x(), origin.y(), origin.z() }, { dir.x(), dir.y(), dir.z() });
+            tc::Ray ray({ origin.x(), origin.y(), origin.z() }, { dir.x(), dir.y(), dir.z() });
      
-                if (GFrtCtx->NomeView->PickVertexBool)
-                    GFrtCtx->NomeView->PickVertexWorldRay(ray);
-                if (GFrtCtx->NomeView->PickEdgeBool)
-                    GFrtCtx->NomeView->PickEdgeWorldRay(ray); // Randy added on 10/29 for edge selection
-                if (GFrtCtx->NomeView->PickFaceBool)
-                    GFrtCtx->NomeView->PickFaceWorldRay(
-                    ray); // Randy added on 10/10 for face selection. 
-                //Warning, order affects display messages. Fix later.
-            //}
-
+            if (GFrtCtx->NomeView->PickVertexBool)
+                GFrtCtx->NomeView->PickVertexWorldRay(ray);
+            if (GFrtCtx->NomeView->PickEdgeBool)
+                GFrtCtx->NomeView->PickEdgeWorldRay(ray); // Randy added on 10/29 for edge selection
+            if (GFrtCtx->NomeView->PickFaceBool)
+                GFrtCtx->NomeView->PickFaceWorldRay(ray); // Randy added on 10/10 for face selection. 
+            //Warning, order affects display messages. Fix later.
         }
     });
     this->addComponent(picker);
@@ -207,7 +198,6 @@ void CInteractiveMesh::InitInteractions()
 
 void CInteractiveMesh::SetDebugDraw(const CDebugDraw* debugDraw)
 {
-    //std::cout << "inside set debug draw" << std::endl;
     // Check for existing lineEntity and delete
     auto* oldEntity = this->findChild<Qt3DCore::QEntity*>(QStringLiteral("lineEntity"));
     if (oldEntity && !SceneTreeNode->GetOwner()->isSelected()) // Randy added the second boolean on 11/21
@@ -233,7 +223,7 @@ void CInteractiveMesh::SetDebugDraw(const CDebugDraw* debugDraw)
         lineEntity->addComponent(LineMaterial); 
         // Randy added this on 11/21
         if (SceneTreeNode->GetOwner()->isSelected()) {
-            std::cout << "You selected a polyline/bspline entity" << std::endl;
+            std::cout << "You have selected a polyline/bspline entity" << std::endl;
             QVector3D instanceColor;
             auto color = SceneTreeNode->GetOwner()->GetSelectSurface();
             std::cout << color.x + color.y + color.z << std::endl;
