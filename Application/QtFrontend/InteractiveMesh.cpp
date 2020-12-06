@@ -2,7 +2,6 @@
 #include "FrontendContext.h"
 #include "MaterialParser.h"
 #include "MeshToQGeometry.h"
-#include "FaceToQGeometry.h" // Randy added on 10/12
 #include "Nome3DView.h"
 #include "ResourceMgr.h"
 #include <Matrix3x4.h>
