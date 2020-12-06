@@ -43,8 +43,6 @@ void CInteractiveMesh::UpdateTransform()
 
 void CInteractiveMesh::UpdateGeometry()
 {
-
-
     auto* entity = SceneTreeNode->GetInstanceEntity();
     if (!entity)
     {
@@ -56,8 +54,8 @@ void CInteractiveMesh::UpdateGeometry()
         auto* meshInstance = dynamic_cast<Scene::CMeshInstance*>(entity);
         if (meshInstance)
         {
-            delete GeometryRenderer; // Randy note: this may not be needed 
-            delete Geometry; // Randy note: this may not be needed
+            delete GeometryRenderer; 
+            delete Geometry; 
             // A Qt3DRender::QGeometry class is used to group a list of Qt3DRender::QAttribute objects together to form a geometric shape Qt3D is able to render using Qt3DRender::QGeometryRenderer. 
             auto selectedfacehandles = meshInstance->GetSelectedFaceHandles(); // Randy added on 12/3
             CMeshToQGeometry meshToQGeometry(meshInstance->GetMeshImpl(), selectedfacehandles, true); // Randy added 2nd argument on 12/3
@@ -72,7 +70,6 @@ void CInteractiveMesh::UpdateGeometry()
             if (!PointEntity) 
             {
                 PointEntity = new Qt3DCore::QEntity(this);
-
                 auto xmlPath = CResourceMgr::Get().Find("DebugDrawLine.xml"); //this uses instanceColor, and also uses LineShading.frag (which is used for polylines) for final color
                 auto* lineMat = new CXMLMaterial(QString::fromStdString(xmlPath));
                 PointMaterial = lineMat;

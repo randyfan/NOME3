@@ -278,7 +278,6 @@ antlrcpp::Any CFileBuilder::visitIdent(NomParser::IdentContext* context)
     return static_cast<AST::AExpr*>(new AST::AIdent(ConvertToken(context->IDENT())));
 }
 
-
 // Randy added this on 12/1 to include files
 antlrcpp::Any CFileBuilder::visitCmdInclude(NomParser::CmdIncludeContext* context) {
     auto* cmd = new AST::ACommand(ConvertToken(context->open), ConvertToken(context->end));

@@ -87,7 +87,6 @@ CWireframeEffect::CWireframeEffect(Qt3DCore::QNode* parent)
         QShaderProgram::loadSource(QUrl(QStringLiteral("qrc:/Shaders/Wireframe.frag"))));
     GL3RenderPass->setShaderProgram(GL3Shader);
     GL3Technique->addRenderPass(GL3RenderPass);
-
     this->addTechnique(GL3Technique);*/
 }
 
