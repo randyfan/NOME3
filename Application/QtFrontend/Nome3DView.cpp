@@ -111,7 +111,7 @@ void CNome3DView::PostSceneUpdate()
                 if (node->WasEntityUpdated())
                 {
                     printf("Geom regen for %s\n", node->GetPath().c_str());
-                    mesh->UpdateGeometry();
+                    mesh->UpdateGeometry(PickVertexBool);
                     mesh->UpdateMaterial(WireFrameMode);
                     node->SetEntityUpdated(false);
                 }

@@ -24,7 +24,7 @@ CInteractiveMesh::CInteractiveMesh(Scene::CSceneTreeNode* node)
 {
     
     UpdateTransform();
-    UpdateGeometry();
+    UpdateGeometry(false); // don't show vert boxes by default
     UpdateMaterial(false); // don't show facets by default
     InitInteractions();
 }
@@ -41,7 +41,7 @@ void CInteractiveMesh::UpdateTransform()
     Transform->setMatrix(qtf);
 }
 
-void CInteractiveMesh::UpdateGeometry()
+void CInteractiveMesh::UpdateGeometry(bool showVertBox)
 {
     auto* entity = SceneTreeNode->GetInstanceEntity();
     if (!entity)
@@ -66,21 +66,22 @@ void CInteractiveMesh::UpdateGeometry()
             GeometryRenderer->setPrimitiveType(Qt3DRender::QGeometryRenderer::Triangles);
             this->addComponent(GeometryRenderer); // adding geometry data to interactive mesh
 
-            // Update or create the entity for drawing vertices
-            if (!PointEntity) 
-            {
-                PointEntity = new Qt3DCore::QEntity(this);
-                auto xmlPath = CResourceMgr::Get().Find("DebugDrawLine.xml"); //this uses instanceColor, and also uses LineShading.frag (which is used for polylines) for final color
-                auto* lineMat = new CXMLMaterial(QString::fromStdString(xmlPath));
-                PointMaterial = lineMat;
-                PointMaterial->setParent(this);
-                PointEntity->addComponent(PointMaterial);
-            }
+            std::string xmlPath = ""; 
+            if (!showVertBox)
+                xmlPath = CResourceMgr::Get().Find("DebugDrawLine.xml");
             else
-            {
-                delete PointRenderer;
-                delete PointGeometry;
-            }
+                xmlPath = CResourceMgr::Get().Find("DebugDrawLineWITHVERTBOX.xml");
+
+            // May need to optimize this in the future. Cause we're parsing the file everytime the node is marked dirty, even though we could keep the material the same if that was not changed
+            PointEntity = new Qt3DCore::QEntity(this);
+            auto* lineMat = new CXMLMaterial(QString::fromStdString(xmlPath));
+            PointMaterial = lineMat;
+            PointMaterial->setParent(this);
+            PointEntity->addComponent(PointMaterial);
+
+            delete PointRenderer;
+            delete PointGeometry;
+                         
             PointGeometry = meshToQGeometry.GetPointGeometry();
             PointGeometry->setParent(PointEntity);
             PointRenderer = new Qt3DRender::QGeometryRenderer(PointEntity);
