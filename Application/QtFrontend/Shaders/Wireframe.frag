@@ -15,6 +15,7 @@ uniform vec3 kd;            // Diffuse reflectivity
 uniform vec3 ks;            // Specular reflectivity
 uniform float shininess;    // Specular shininess factor
 uniform int showFacets; // binary int. 0 = don't show facets (face edges), 1 = show facets
+
 in WireframeVertex { // these variables are outputted from Wireframe.geom
     vec3 position;
     vec3 normal;
