@@ -59,8 +59,11 @@ build_script:
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/install
     -DANTLR_EXECUTABLE=%APPVEYOR_BUILD_FOLDER%/antlr.jar
+
     type CMakeCache.txt
+
     cmake --build . --target install
+
     cd ..
 after_build:
 - cmd: del /f install\opengl32sw.dll
