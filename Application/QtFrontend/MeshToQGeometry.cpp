@@ -1,5 +1,4 @@
 #include "MeshToQGeometry.h"
-
 #include <Qt3DRender/QBuffer>
 #include <iostream>
 namespace Nome
@@ -7,19 +6,18 @@ namespace Nome
 
 CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, std::vector<CMeshImpl::FaceHandle> selectedFaceHandles, bool bGenPointGeometry)
 {
-
     // Per face normal, thus no shared vertices between faces
     struct CVertexData
     {
         std::array<float, 3> Pos; // a float is 4 bytes
         std::array<float, 3> Normal;
-        int colorSelected; // Randy added this to handle marking which things are selected
+        int colorSelected; // Randy added this to color faces that are selected
 
         void SendToBuilder(CGeometryBuilder& builder) const // Randy note: I think here it's just decomposing it into a list of triangles with the correct normals
         {
             builder.Ingest(Pos[0], Pos[1], Pos[2]);
             builder.Ingest(Normal[0], Normal[1], Normal[2]);
-            builder.IngestInt(colorSelected); // Randy added this to handle marking which things are selected
+            builder.IngestInt(colorSelected); 
         }
     };
     const uint32_t stride = sizeof(CVertexData);
@@ -30,7 +28,7 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, std::vector<CMeshI
     CAttribute attrNor { bufferArray, offsetof(CVertexData, Normal), stride,
                          Qt3DRender::QAttribute::Float, 3 };
     CAttribute attrcolorSelected { bufferArray, offsetof(CVertexData, colorSelected), stride,
-                                   Qt3DRender::QAttribute::Int, 1 }; // Randy added this to handle marking which things are selected
+                                   Qt3DRender::QAttribute::Int, 1 }; 
     CGeometryBuilder builder;
     builder.AddAttribute(&attrPos);
     builder.AddAttribute(&attrNor);
@@ -49,7 +47,6 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, std::vector<CMeshI
         if (iter != selectedFaceHandles.end()) {
             selected = 1;
         }
-
         for (; fvIter.is_valid(); ++fvIter)
         {
             CMeshImpl::VertexHandle faceVert = *fvIter;
@@ -60,7 +57,7 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, std::vector<CMeshI
                 v0.Pos = { posVec[0], posVec[1], posVec[2] };
                 const auto& fnVec = fromMesh.normal(*fIter);
                 v0.Normal = { fnVec[0], fnVec[1], fnVec[2] };
-                v0.colorSelected = selected; // Randy added this to handle marking which things are selected. For testing purposes, mark it as selected
+                v0.colorSelected = selected; // Randy added this to handle marking which things are selected. 
             }
             else if (faceVCount == 1) // second vert of triangle 
             {
@@ -68,7 +65,7 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, std::vector<CMeshI
                 vPrev.Pos = { posVec[0], posVec[1], posVec[2] };
                 const auto& fnVec = fromMesh.normal(*fIter);
                 vPrev.Normal = { fnVec[0], fnVec[1], fnVec[2] };
-                vPrev.colorSelected = selected; // Randy added this to handle marking which things are selected
+                vPrev.colorSelected = selected; 
             }
             else // third vert of triangle
             {
@@ -76,7 +73,7 @@ CMeshToQGeometry::CMeshToQGeometry(const CMeshImpl& fromMesh, std::vector<CMeshI
                 vCurr.Pos = { posVec[0], posVec[1], posVec[2] };
                 const auto& fnVec = fromMesh.normal(*fIter);
                 vCurr.Normal = { fnVec[0], fnVec[1], fnVec[2] };
-                vCurr.colorSelected = selected; // Randy added this to handle marking which things are selected
+                vCurr.colorSelected = selected; 
                 v0.SendToBuilder(builder);
                 vPrev.SendToBuilder(builder);
                 vCurr.SendToBuilder(builder);
