@@ -90,7 +90,6 @@ void CMainWindow::on_actionOpen_triggered()
     QSettings appSettings;
     const QString kDefaultDir("DefaultDir");
 
-
     // https://doc.qt.io/qt-5/qfiledialog.html#getOpenFileName 
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Nome File"),
                                                     appSettings.value(kDefaultDir).toString(),
@@ -157,7 +156,6 @@ void CMainWindow::on_actionMerge_triggered()
     Scene->Update();
     tc::TAutoPtr<Scene::CMeshMerger> merger = new Scene::CMeshMerger("globalMerge"); //CmeshMerger is basically a CMesh, but with a MergeIn method. Merger will contain ALL the merged vertices (from various meshes)
     Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
-       
         if (node->GetOwner()->GetName() == "globalMergeNode") // If the node owner is a globalMergeNode, skip as that was a previously merger mesh (from a previous Merge process). We only want to merge vertices from our actual (non-merged) meshes.
             return;
         auto* entity = node->GetInstanceEntity(); // Else, get the instance
@@ -208,15 +206,6 @@ void CMainWindow::on_actionSubdivide_triggered()
             if (auto* mesh = dynamic_cast<Scene::CMeshInstance*>(entity))
                 merger->Catmull(*mesh);
         }
-        else if (node->GetOwner()->GetName().find("Sharp") != std::string::npos) {
-            auto* entity = node->GetInstanceEntity(); 
-            if (!entity) 
-                entity = node->GetOwner()->GetEntity();
-            if (auto* mesh = dynamic_cast<Scene::CMeshInstance*>(entity))
-                merger->Catmull(*mesh);
-            node->GetOwner()->SetEntity(nullptr); //10/22 added. This deletes the temp Preserved mesh cause that mesh has no changes
-        }
-        
     });
     Scene->AddEntity(tc::static_pointer_cast<Scene::CEntity>(merger)); 
     auto* sn = Scene->GetRootNode()->FindOrCreateChildNode("globalMergeNode"); 
@@ -271,7 +260,6 @@ void CMainWindow::on_actionRemoveFace_triggered()
 // Randy temporarily commenting out because Reloading serves the same purpose as this.
 //void CMainWindow::on_actionResetTempMesh_triggered() { TemporaryMeshManager->ResetTemporaryMesh(); }
 
-
 void CMainWindow::on_actionCommitChanges_triggered()
 {
     TemporaryMeshManager->CommitChanges(SourceMgr->GetASTContext());
@@ -281,7 +269,7 @@ void CMainWindow::on_actionCommitChanges_triggered()
     this->setWindowModified(true);
 }
 
-// Randy added this to swap between colored edges and uncolored
+// Toggle on/off Face facets/edges coloring
 void CMainWindow::on_actionShowFacets_triggered()
 {
     Nome3DView->WireFrameMode = !(Nome3DView->WireFrameMode);
@@ -346,7 +334,6 @@ void CMainWindow::SetupUI()
     // Initialize 3D view
     Nome3DView = std::make_unique<CNome3DView>();
     GFrtCtx->NomeView = Nome3DView.get();
-
     if (true)// (!bDetached3DView) Temporarily changing this to True to avoid overlapping windows
     {
         auto* viewContainer = QWidget::createWindowContainer(Nome3DView.get());
@@ -386,7 +373,6 @@ void CMainWindow::LoadEmptyNomeFile()
     PostloadSetup();
 }
 
-
 void CMainWindow::LoadNomeFile(const std::string& filePath)
 {
     setWindowFilePath(QString::fromStdString(filePath));
@@ -411,7 +397,6 @@ void CMainWindow::LoadNomeFile(const std::string& filePath)
     Scene = new Scene::CScene();
     Scene::GEnv.Scene = Scene.Get();
     Scene::CASTSceneAdapter adapter;
-
     try
     {
         auto includeFileNames = adapter.TraverseFile(SourceMgr->GetASTContext().GetAstRoot(), *Scene); // randy added includeFileNames variable on 11/30. Currently assumes included file names are in same directory as original
@@ -419,9 +404,7 @@ void CMainWindow::LoadNomeFile(const std::string& filePath)
             auto nofileNamepath = filePath.substr(0, filePath.find_last_of("/") + 1);
             auto testSourceMgr = std::make_shared<CSourceManager>(nofileNamepath + fileName); // TODO: TMRW 12/1, GENERALIZE THIS TO ANY PATH
             bool testparseSuccess = testSourceMgr->ParseMainSource();
-
             adapter.TraverseFile(testSourceMgr->GetASTContext().GetAstRoot(), *Scene);
-  
         }
         // TODO: In the future, allow included files to be in different directories
 
@@ -438,8 +421,6 @@ void CMainWindow::LoadNomeFile(const std::string& filePath)
             return;
         }
     }
-
-
     PostloadSetup();
 }
 
@@ -454,11 +435,9 @@ void CMainWindow::PostloadSetup()
     connect(SceneUpdateClock, &QTimer::timeout, [this]() {
         Scene->Update();
         Nome3DView->PostSceneUpdate();
-
         // Randy added this on 11/5 for edge selection
         if (!Nome3DView->GetSelectedEdgeVertices().empty())
         {
-            std::cout << "selected edge vertices not empty" << std::endl;
             std::cout << "Here are the edge vertex names right before creating poly: "
                     + Nome3DView->GetSelectedEdgeVertices()[0]
                     + " " + Nome3DView->GetSelectedEdgeVertices()[1]
@@ -483,9 +462,11 @@ void CMainWindow::UnloadNomeFile()
     Scene = nullptr;
 }
 
-    void CMainWindow::OnSliderAdded(Scene::CSlider& slider, const std::string& name) // adding a single widget at a time
+// Adding a single slider widget at a time
+void CMainWindow::OnSliderAdded(Scene::CSlider& slider, const std::string& name) 
 {
-    if (!SliderWidget)  // Initialize slider widget if it hasn't been initialized before
+    // Initialize slider widget if it hasn't been initialized before
+    if (!SliderWidget)  
     { 
         auto* sliderDock = new QDockWidget("Scene Parameter Sliders", this);
 
@@ -495,7 +476,6 @@ void CMainWindow::UnloadNomeFile()
 
         this->addDockWidget(Qt::LeftDockWidgetArea, sliderDock);
         ui->menubar->addAction(sliderDock->toggleViewAction());
-
 
         // Create scroll area for the widget
         QScrollArea* m_pMapInfoScrollArea = new QScrollArea();
@@ -511,7 +491,6 @@ void CMainWindow::UnloadNomeFile()
     else
     {
         auto bankname = name.substr(0, name.find_last_of(".") + 1);
-
         // Check if bank has already been added 
         auto alreadyAdded = false;
         for (auto& Pair : SliderNameToWidget) {
@@ -519,7 +498,6 @@ void CMainWindow::UnloadNomeFile()
                 alreadyAdded = true;
             }
         }
-
         // If it hasn't been added, add a blank row
         if (!alreadyAdded) {
             auto* sliderName = new QLabel();
@@ -527,7 +505,6 @@ void CMainWindow::UnloadNomeFile()
             QFont f("Arial", 13);
             sliderName->setFont(f);
             auto* sliderLayout = new QHBoxLayout();
-
             SliderLayout->addRow(sliderName, sliderLayout);
             SliderNameToWidget.emplace(name, sliderLayout);
         }
