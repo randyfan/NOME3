@@ -56,12 +56,10 @@ private slots:
     */
     // void on_actionAbout_triggered(); commeting out with new developments
 
-
     void on_actionAddFace_triggered();
     void on_actionAddPolyline_triggered(); 
 
     void on_actionRemoveFace_triggered(); // Randy added this
-    
     // void on_actionSharpenFace_triggered(); // Randy added this. Not currently used.
 
     /* Randy temporarily commenting out due to temporarymeshmanager changes
@@ -70,7 +68,6 @@ private slots:
     void on_actionCommitChanges_triggered();
 
     void on_actionShowFacets_triggered(); // Randy added this
-
     void on_actionToggleVertexSelection_triggered(); // Randy added this on 11/5
     void on_actionToggleEdgeSelection_triggered(); // Randy added this on 11/5
     void on_actionToggleFaceSelection_triggered(); // Randy added this on 11/5
@@ -92,6 +89,7 @@ private:
     // Slider panel management
     void OnSliderAdded(Scene::CSlider& slider, const std::string& name) override;
     void OnSliderRemoving(Scene::CSlider& slider, const std::string& name) override;
+
     Ui::MainWindow* ui;
     std::unique_ptr<CNome3DView> Nome3DView;
     //QLineEdit* InstName; // Randy decided not to use this for now. This was originally intended to allow users to name their added faces/polylines
