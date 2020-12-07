@@ -114,7 +114,6 @@ void CNome3DView::PostSceneUpdate()
                     mesh->UpdateGeometry();
                     mesh->UpdateMaterial(WireFrameMode);
                     node->SetEntityUpdated(false);
-                    
                 }
             }
             else
@@ -124,6 +123,7 @@ void CNome3DView::PostSceneUpdate()
                 aliveSet.insert(mesh);
                 InteractiveMeshes.insert(mesh);
             }
+
             // Create a DebugDraw for the CEntity if not already
             auto eIter = EntityDrawData.find(entity);
             if (eIter == EntityDrawData.end())
@@ -226,7 +226,6 @@ void CNome3DView::ClearSelectedEdges()
 
 void CNome3DView::PickFaceWorldRay(const tc::Ray& ray)
 {
-
     std::vector<std::tuple<float, Scene::CMeshInstance*, std::string>> hits;
     Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
         // Obtain either an instance entity or a shared entity from the scene node
@@ -325,8 +324,8 @@ void CNome3DView::PickFaceWorldRay(const tc::Ray& ray)
                     GFrtCtx->MainWindow->statusBar()->showMessage(
                         QString::fromStdString("Deselected " + faceName));
                 }
-
                 float selected_dist = round(dist * 100);
+                
                 // mark all those that share the same location
                 for (int i = 0; i < hits.size(); i++)
                 {
@@ -349,11 +348,9 @@ void CNome3DView::PickFaceWorldRay(const tc::Ray& ray)
     }
     else
     {
-
         GFrtCtx->MainWindow->statusBar()->showMessage("No face hit.");
     }
 }
-
 
 // Used for picking edges
 void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
@@ -384,13 +381,9 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
     std::vector<std::tuple<float, Scene::CMeshInstance*, std::vector<std::string>>> temp; 
     for (auto hit : hits) {
         auto [dist, meshInst, edgeVertNames] = hit;
-        std::cout << "WOWZER" << std::endl;
-        std::cout << edgeVertNames[0] << std::endl;
-        std::cout << meshInst->GetName() << std::endl;
         if (edgeVertNames[0].find("SELECTED") != std::string::npos) {
             temp.push_back(hit);
         }
-
     }
 
     if (!temp.empty()) 
@@ -418,13 +411,12 @@ void CNome3DView::PickEdgeWorldRay(const tc::Ray& ray)
     }
     // If you need to implement multiple edge intersection, please see the below line at: https://github.com/randyfan/NOME3/commit/55ab6d81140d09f1725e261ed810c1a15646ab5c
     else
-        GFrtCtx->MainWindow->statusBar()->showMessage("No edge hit.");
+        GFrtCtx->MainWindow->statusBar()->showMessage("No edge hit or more than one edge hit. Please select again");
 }
 
 
 void CNome3DView::PickVertexWorldRay(const tc::Ray& ray)
 {
-
     std::vector<std::tuple<float, Scene::CMeshInstance*, std::string>> hits;
     Scene->ForEachSceneTreeNode([&](Scene::CSceneTreeNode* node) {
         // Obtain either an instance entity or a shared entity from the scene node
@@ -547,7 +539,6 @@ void CNome3DView::PickVertexWorldRay(const tc::Ray& ray)
     }
     else
     {
-
         GFrtCtx->MainWindow->statusBar()->showMessage("No point hit.");
     }
 }
