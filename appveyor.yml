@@ -62,6 +62,7 @@ build_script:
     -DCMAKE_BUILD_TYPE=Release
     -DCMAKE_INSTALL_PREFIX=%APPVEYOR_BUILD_FOLDER%/install
     -DANTLR_EXECUTABLE=%APPVEYOR_BUILD_FOLDER%/antlr.jar
+    -Dpugixml_DIR:PATH=C:/Tools/vcpkg/installed/x64-windows/share/pugixml
 
     type CMakeCache.txt
 
