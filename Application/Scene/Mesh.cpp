@@ -92,8 +92,7 @@ CMeshImpl::VertexHandle CMesh::AddVertex(const std::string& name, tc::Vector3 po
     CMeshImpl::VertexHandle vertex;
     vertex = Mesh.add_vertex(CMeshImpl::Point(pos.x, pos.y, pos.z));
     NameToVert.emplace(name, vertex);
-    VertToName.emplace(
-        vertex, name); // Randy added on 10/15. This data structure may be useful in the future
+    VertToName.emplace(vertex, name); // Randy added on 10/15. This data structure may be useful in the future
     return vertex;
 }
 
@@ -226,13 +225,14 @@ void CMeshInstance::UpdateEntity()
     Mesh.request_edge_status();
     Mesh.request_face_status();
     Mesh.request_face_colors(); // Randy added on 10/10 for face selection. May be useful in the
-                                // future for flat coloring. Currently doesn't do anything I think
+                                // future for flat coloring. Currently doesn't do anything
     for (auto vH : Mesh.vertices())
     {
         Mesh.set_color(vH, { VERT_COLOR });
     }
     // don't need to set face color because it gets overwritten by material's instancecolor (shader)
 
+    // IMPORTANT NOTE: This for loop is very messy. Fix this and RemoveFace later. If you're not working on RemoveFace, feel free to ignore it for now
     for (const std::string& face : FacesToDelete)
     {
         auto iter = NameToFace.find(face);
@@ -259,21 +259,12 @@ void CMeshInstance::UpdateEntity()
 
             for (auto facevert : faceverts)
             { // facevert is not sorted by index
-                auto temp = VertToName.at(facevert);
-                std::cout << temp << std::endl;
-                std::cout << facevert << std::endl;
-                bool isolated = std::count(vflattened.begin(), vflattened.end(), facevert)
-                    == 1; // if this vertex is not shared by any other face
-                if (isolated) // only delete if there is no other face on the mesh that shares the
-                              // vertex
-                {
-                    std::cout << "isolated, so deleting vert" << std::endl;
+                bool isolated = std::count(vflattened.begin(), vflattened.end(), facevert) == 1; // if this vertex is not shared by any other face
+                if (isolated) 
                     deleted.push_back(facevert.idx());
-                }
             }
 
             // map for new vert handle index to new vert handle
-
             std::map<int, CMeshImpl::VertexHandle> temp;
             for (auto newverthandle : Mesh.vertices())
             {
@@ -286,9 +277,7 @@ void CMeshInstance::UpdateEntity()
             int displacement = 0;
 
             // sort nametovert using sorted vector consisting of its key, value pairs
-            std::vector<std::pair<std::string, CMeshImpl::VertexHandle>> v(NameToVert.begin(),
-                                                                           NameToVert.end());
-
+            std::vector<std::pair<std::string, CMeshImpl::VertexHandle>> v(NameToVert.begin(), NameToVert.end());
             sort(v.begin(), v.end(),
                  [=](std::pair<std::string, CMeshImpl::VertexHandle>& a,
                      std::pair<std::string, CMeshImpl::VertexHandle>& b) {
@@ -300,7 +289,6 @@ void CMeshInstance::UpdateEntity()
                 int i = pair.second.idx();
                 if (std::find(deleted.begin(), deleted.end(), i) == deleted.end())
                 {
-                    std::cout << i - displacement << std::endl;
                     auto newhandle = temp.at(i - displacement);
                     tempVertToVert.try_emplace(std::move(pair.second), std::move(newhandle));
                 }
@@ -329,20 +317,12 @@ void CMeshInstance::UpdateEntity()
             VertToName = newVertToName;
             NameToVert = newNameToVert;
 
-            for (auto& pair : VertToName)
-            {
-                std::cout << pair.second << std::endl;
-            }
-
             // map for new face handle index to new face handle
-
             std::map<int, CMeshImpl::FaceHandle> facetemp;
             for (auto newfacehandle : Mesh.faces())
                 facetemp.try_emplace(newfacehandle.idx(), std::move(newfacehandle));
 
-            std::vector<std::pair<std::string, CMeshImpl::FaceHandle>> f(NameToFace.begin(),
-                                                                         NameToFace.end());
-
+            std::vector<std::pair<std::string, CMeshImpl::FaceHandle>> f(NameToFace.begin(), NameToFace.end());
             sort(f.begin(), f.end(),
                  [=](std::pair<std::string, CMeshImpl::FaceHandle>& a,
                      std::pair<std::string, CMeshImpl::FaceHandle>& b) {
@@ -351,10 +331,6 @@ void CMeshInstance::UpdateEntity()
             std::map<CMeshImpl::FaceHandle, CMeshImpl::FaceHandle> tempFaceToFace;
             int facedisplacement = 0;
 
-            for (auto ex : f)
-            {
-                std::cout << ex.second.idx() << std::endl;
-            }
             for (auto& pair : f)
             {
 
@@ -372,7 +348,6 @@ void CMeshInstance::UpdateEntity()
             std::map<std::string, CMeshImpl::FaceHandle> newNameToFace;
             std::map<CMeshImpl::FaceHandle, std::string> newFaceToName; // Randy added on 10/11
 
-
             for (auto& pair : FaceToName)
             {
                 if (pair.second != face) // if this face is not that one we want to delete
@@ -382,16 +357,12 @@ void CMeshInstance::UpdateEntity()
                     newNameToFace.emplace(pair.second, updatedFacehandle);
                 }
             }
+
             // Maybe I need to clear them before reassigning?
             FaceToName = newFaceToName;
             NameToFace = newNameToFace;
 
-            // std::map<CMeshImpl::FaceHandle, std::vector<CMeshImpl::VertexHandle>>
-            // tempFaceToFaceVerts;
-            //  std::map<std::vector<CMeshImpl::VertexHandle>, CMeshImpl::FaceHandle>
-            //  tempFaceVertsToFace;
-
-            // Update: Here, since none of them use Name, we can just rebuild it
+            //  Here, since none of them use Name, we can just rebuild it
             FaceToFaceVerts.clear();
             FaceVertsToFace.clear();
             for (auto& realface : Mesh.faces())
@@ -440,7 +411,6 @@ void CMeshInstance::UpdateEntity()
 
     // Since the handle only contains an index, we can just copy
 
-    // Randy added this on 10/18 to ensure this gets updated as well
 
     // Randy commented the below section on 10/10. i don't think it does anything ???
     // Construct interactive points
@@ -497,28 +467,12 @@ void CMeshInstance::CopyFromGenerator()
     FaceToFaceVerts = MeshGenerator->FaceToFaceVerts; // Randy added
 }
 
-std::vector<std::string>
-CMeshInstance::RemoveFace(const std::vector<std::string>& faceNames) // Randy added
+
+// Warning: Still buggy. Use with caution. 
+std::vector<std::string> CMeshInstance::RemoveFace(const std::vector<std::string>& faceNames) // Randy added
 {
     std::vector<std::string> removedVertName;
-    for (auto fP : faceNames)
-    {
-        std::cout << fP << std::endl;
-    }
-    std::cout << "Entered Remove Face" << std::endl;
-
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
-    std::cout << "inst prefix: " + instPrefix << std::endl;
-
-    // Below for loop is for debugging, can remove in the future
-    for (const auto& myPair :
-         NameToFace) // mesh vert name to vert handle. The issue is they all have the exact same
-                     // mesh vert name and vert handle. Transformation is applied to each
-    {
-        auto test = myPair.first;
-        std::cout << "example mesh face name: " + test << std::endl;
-    }
-    // if faceName contains instprefix
 
     for (auto faceName : faceNames)
     {
@@ -528,42 +482,26 @@ CMeshInstance::RemoveFace(const std::vector<std::string>& faceNames) // Randy ad
             // the mesh's face name is the faceName - instprefix
             auto start_position_to_erase = faceName.find(instPrefix);
             auto meshfaceName = faceName.erase(start_position_to_erase, instPrefix.length());
-            std::cout << meshfaceName << std::endl;
 
             // if meshfaceName is actually a face within this mesh
             if (NameToFace.find(meshfaceName) != NameToFace.end())
             {
-                std::cout << "found match, adding to faces to delete: " + meshfaceName << std::endl;
+                std::cout << "found face, adding to faces to delete: " + meshfaceName << std::endl;
                 FacesToDelete.insert(meshfaceName);
                 this->MarkDirty();
                 std::vector<std::string> temp;
                 temp.push_back(meshfaceName);
                 auto temp2 = GetFaceVertexNames(temp);
-                for (auto debug : temp2)
-                {
-                    std::cout << "yuti: " + debug << std::endl;
-                }
                 removedVertName.insert(removedVertName.end(), temp2.begin(), temp2.end());
-                /*  auto fH = NameToFace.at(meshfaceName);
-                  auto fVerts = FaceToFaceVerts.at(fH);
-                  for (auto fVert : fVerts) {
-                      auto fVertName = VertToName.at(fVert);
-                      removedVertName.push_back(fVertName);
-                  }*/
-                // removed.push_back()
             }
         }
     }
-
-    GetSceneTreeNode()->SetEntityUpdated(
-        true); // Randy added this on 10/18. Didn't seem to fix bug?
-    std::cout << "end of remove face" << std::endl;
+    GetSceneTreeNode()->SetEntityUpdated(true); // Randy added this on 10/18. Didn't seem to fix bug?
     return removedVertName;
 }
 
 std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ray& localRay)
 {
-
     std::vector<std::pair<float, std::string>> result;
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
     for (const auto& pair : FaceVertsToFace)
@@ -571,9 +509,6 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
         auto points = pair.first;
 
         std::string facename = FaceToName.at(pair.second);
-        std::cout << "We are currently in " + GetSceneTreeNode()->GetPath() + "'s Pick Faces. "
-                  << std::endl;
-        std::cout << facename << std::endl;
         auto firstpoint = points[0];
         auto secondpoint = points[1];
         auto thirdpoint = points[2];
@@ -968,7 +903,6 @@ std::vector<std::string> CMeshInstance::GetFaceVertexNames(std::vector<std::stri
             std::vector<std::string> temp2;
             for (auto vert : temp1)
             {
-                std::cout << "Storing vert: " + VertToName[vert] << std::endl;
                 auto vertname = VertToName[vert];
                 auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
                 auto instVertName = instPrefix + vertname;

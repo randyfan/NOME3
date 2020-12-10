@@ -63,8 +63,8 @@ private:
     std::set<CMeshInstance*> InstanceSet;
 
     CMeshImpl Mesh;
-    std::map<std::string, CMeshImpl::VertexHandle> NameToVert;
-    std::map<CMeshImpl::VertexHandle, std::string> VertToName; // Randy added on 10/11
+    std::map<std::string, CMeshImpl::VertexHandle> NameToVert; // required. For example,  used in AddVertex
+    std::map<CMeshImpl::VertexHandle, std::string> VertToName; // Randy added on 10/11.  used in PickEdges and GetFaceVertexNames
     std::map<std::string, CMeshImpl::FaceHandle> NameToFace;
     std::map<CMeshImpl::FaceHandle, std::string> FaceToName; // Randy added
     std::map<std::vector<CMeshImpl::VertexHandle>, CMeshImpl::FaceHandle>FaceVertsToFace; // Randy added
