@@ -79,7 +79,6 @@ public:
     // Hierarchy management
     void AddParent(CSceneNode* newParent);
     void RemoveParent(CSceneNode* parent);
-    // void RemoveNode(); // Randy added this on 11/12/2020
     CSceneNode* CreateChildNode(const std::string& name);
     CSceneNode* FindChildNode(const std::string& name);
     CSceneNode* FindOrCreateChildNode(const std::string& name);

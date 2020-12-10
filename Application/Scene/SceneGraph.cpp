@@ -167,19 +167,6 @@ void CSceneNode::RemoveParent(CSceneNode* parent)
     }
 }
 
-/*
-// Randy added on 11/12 to remove node. Doesn't work. TODO: Fix
-void CSceneNode::RemoveNode()
-{
-    
-    // Destroy the associated sub-trees
-    for (CSceneTreeNode* myTreeNode : this->TreeNodes)
-    {
-        CSceneTreeNode* myTree = myTreeNode->FindChildOfOwner(this);
-        myTree->RemoveTree();
-    }
-}*/
-
 CSceneNode* CSceneNode::CreateChildNode(const std::string& name)
 {
     auto* child = new CSceneNode(Scene, name);
@@ -197,13 +184,9 @@ CSceneNode* CSceneNode::FindChildNode(const std::string& name)
 
 CSceneNode* CSceneNode::FindOrCreateChildNode(const std::string& name)
 {
-    std::cout << "find or create child node" << std::endl;
     auto* result = FindChildNode(name);
     if (!result)
-    {
-        std::cout << "create child node" << std::endl;
         return CreateChildNode(name);
-    }
     return result;
 }
 
