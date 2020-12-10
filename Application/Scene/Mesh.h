@@ -65,10 +65,10 @@ private:
     CMeshImpl Mesh;
     std::map<std::string, CMeshImpl::VertexHandle> NameToVert; // required. For example,  used in AddVertex
     std::map<CMeshImpl::VertexHandle, std::string> VertToName; // Randy added on 10/11.  used in PickEdges and GetFaceVertexNames
-    std::map<std::string, CMeshImpl::FaceHandle> NameToFace;
-    std::map<CMeshImpl::FaceHandle, std::string> FaceToName; // Randy added
-    std::map<std::vector<CMeshImpl::VertexHandle>, CMeshImpl::FaceHandle>FaceVertsToFace; // Randy added
-    std::map<CMeshImpl::FaceHandle, std::vector<CMeshImpl::VertexHandle>> FaceToFaceVerts; // Randy added on 10/11 
+    std::map<std::string, CMeshImpl::FaceHandle> NameToFace; // used in FacestoDelete
+    std::map<CMeshImpl::FaceHandle, std::string> FaceToName; // used in PickFaces
+    std::map<std::vector<CMeshImpl::VertexHandle>, CMeshImpl::FaceHandle>FaceVertsToFace; // Randy added. used in PickFaces
+    std::map<CMeshImpl::FaceHandle, std::vector<CMeshImpl::VertexHandle>> FaceToFaceVerts; // Randy added on 10/11 . Used in FacesToDelete and GetFaceVertexNames
     std::vector<CMeshImpl::VertexHandle> LineStrip;
 };
 

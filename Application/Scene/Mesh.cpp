@@ -891,15 +891,10 @@ std::vector<std::string> CMeshInstance::GetFaceVertexNames(std::vector<std::stri
     std::cout << "this mesh contains the face that needs to be preserved" << std::endl;
     for (auto facename : facenames)
     {
-        // auto suffix = facename.substr(facename.find_last_of('.')+1);
-        // std::cout << "here is the suffix: " + suffix + ", which is hopefully the face name" << std::endl; // wrong, this shouldnt need to suffix unless you're passing in instPRefix + facename
         if (NameToFace.find(facename) != NameToFace.end())
         {
-            std::cout << "found the face handle, now lets store its verts" << std::endl;
             auto tempfh = NameToFace[facename];
-            std::cout <<tempfh.idx() << std::endl;
             auto temp1 = FaceToFaceVerts[tempfh];
-            std::cout << temp1.size() << std::endl;
             std::vector<std::string> temp2;
             for (auto vert : temp1)
             {
