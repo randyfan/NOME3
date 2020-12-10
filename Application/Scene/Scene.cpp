@@ -94,12 +94,6 @@ TAutoPtr<CSceneNode> CScene::FindGroup(const std::string& name) const
 
 Flow::TOutput<CVertexInfo*>* CScene::FindPointOutput(const std::string& id) const
 {
-    //std::cout << id << std::endl;
-    //std::cout << "debug1" << std::endl;
-    //for (auto temp : EntityLibrary) {
-    //    std::cout << temp.first << std::endl;
-    //}
-    //std::cout << "debug2" << std::endl;
 
     // Make sure there is not a mesh point with the same name. Inefficient O(n) lookup. Optimize in
     // the future. Randy added on 12/9
