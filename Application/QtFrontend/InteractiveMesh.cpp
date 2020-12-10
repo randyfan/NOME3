@@ -92,6 +92,10 @@ void CInteractiveMesh::UpdateGeometry(bool showVertBox)
         else
         {
             // The entity is not a mesh instance, we don't know how to handle it. For example, if you try to instanciate a face, it'll generate this placeholder sphere.
+            std::cout << "The entity is not a mesh instance, we don't know how to handle it. For "
+                         "example, if you try to instanciate a face, it'll generate this "
+                         "placeholder sphere."
+                      << std::endl;
             auto* vPlaceholder = new Qt3DExtras::QSphereMesh(this);
             vPlaceholder->setRadius(1.0f);
             vPlaceholder->setRings(16);

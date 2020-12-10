@@ -163,6 +163,7 @@ void CASTSceneAdapter::VisitCommandSyncScene(AST::ACommand* cmd, CScene& scene, 
     }
     else if (kind == ECommandKind::Entity)
     {
+
         TAutoPtr<CEntity> entity = MakeEntity(cmd->GetCommand(), EntityNamePrefix + cmd->GetName());
         entity->GetMetaObject().DeserializeFromAST(*cmd, *entity); 
          // All entities are added to the EntityLibrary dictionary
@@ -180,8 +181,18 @@ void CASTSceneAdapter::VisitCommandSyncScene(AST::ACommand* cmd, CScene& scene, 
             EntityNamePrefix = cmd->GetName() + ".";
         }
 
-        for (auto* sub : cmd->GetSubCommands())
+        auto subCommands = cmd->GetSubCommands();
+        for (size_t i = 0; i < subCommands.size(); i++)
+        {
+            auto* sub = subCommands[i];
             VisitCommandSyncScene(sub, scene, true);
+            
+            // if done visiting mesh, mark it as visited. Randy added this on 12/9
+            if (i == subCommands.size() - 1) {
+                auto meshNameNoPeriod = EntityNamePrefix.substr(0, EntityNamePrefix.size() - 1);
+                GEnv.Scene->DoneVisitingMesh(meshNameNoPeriod);
+            }
+        }
 
         // Added insubMesh bool to allow Meshes to process multiple faces.
         if (insubMesh == false)

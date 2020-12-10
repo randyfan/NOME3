@@ -233,39 +233,6 @@ bool TBindingTranslator<Flow::TInputArray<CVertexInfo*>>::FromASTToValue(
     }
     return true;
 }
-//// TODO: Implement object. Do I need to do this?
-//template <>
-//bool TBindingTranslator<Flow::TInputArray<CPolyline*>>::FromASTToValue(
-//    AST::ACommand* command, const CCommandSubpart& subpart, Flow::TInputArray<CPolyline*>& value)
-//{
-//    auto* vec = subpart.GetExpr(command);
-//    if (vec == NULL)
-//    {
-//        return false;
-//    }
-//
-//    if (vec->GetKind() != AST::EKind::Vector)
-//        throw AST::CSemanticError("TInputArray<CPolyline*> is not matched with a vector",
-//                                  command);
-//    for (const auto* ident : static_cast<AST::AVector*>(vec)->GetItems())
-//    {
-//        if (ident->GetKind() != AST::EKind::Ident)
-//            throw AST::CSemanticError("Identifier required", ident);
-//        std::string identVal = static_cast<const AST::AIdent*>(ident)->ToString();
-//        Flow::TOutput<CPolyline*>* polylineOutput = GEnv.Scene->FindPointOutput(identVal);
-//        if (!polylineOutput)
-//        {
-//            throw AST::CSemanticError(tc::StringPrintf("Cannot find polyline %s", identVal.c_str()),
-//                                      ident);
-//        }
-//        value.Connect(*pointOutput);
-//    }
-//    return true;
-//}
-//
-//
-
-
 
 template <>
 bool TBindingTranslator<Flow::TInput<CSweepPathInfo*>>::FromASTToValue(

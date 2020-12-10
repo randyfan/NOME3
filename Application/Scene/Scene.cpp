@@ -40,6 +40,11 @@ void CScene::RemoveEntity(const std::string& name, bool bAlsoRemoveChildren)
     }
 }
 
+void CScene::DoneVisitingMesh(std::string meshName) 
+{ 
+    orderedMeshNames.push_front(meshName); // first element is always the most recently added mesh's name
+}
+
 bool CScene::RenameEntity(const std::string& oldName, const std::string& newName)
 {
     // New name already exists
@@ -89,6 +94,34 @@ TAutoPtr<CSceneNode> CScene::FindGroup(const std::string& name) const
 
 Flow::TOutput<CVertexInfo*>* CScene::FindPointOutput(const std::string& id) const
 {
+    //std::cout << id << std::endl;
+    //std::cout << "debug1" << std::endl;
+    //for (auto temp : EntityLibrary) {
+    //    std::cout << temp.first << std::endl;
+    //}
+    //std::cout << "debug2" << std::endl;
+
+    // Make sure there is not a mesh point with the same name. Inefficient O(n) lookup. Optimize in
+    // the future. Randy added on 12/9
+    for (const auto& NameEntity : EntityLibrary)
+    {
+        auto idWithPeriod = "." + id;
+        auto entityName = NameEntity.first;
+        if (entityName.find(idWithPeriod) != std::string::npos) // meshName.pointName is the convention for mesh points
+        {
+            auto meshName = entityName.substr(0, entityName.find(idWithPeriod));
+
+            // Check if the mesh has already been fully visited. If it HASN'T, then we are currently in the process of visiting its subcommands
+            // so we would use the mesh's point 
+            if (std::find(orderedMeshNames.begin(), orderedMeshNames.end(), meshName) == orderedMeshNames.end())
+            {
+                std::cout << "DEBUG MESSAGE (remove later): Found matching point: " + meshName << std::endl;
+                return FindPointOutput(entityName); // Find point output using the desired mesh point
+            }
+        }
+    }
+
+
     auto iter = EntityLibrary.find(id);
     
     if (iter != EntityLibrary.end())
@@ -99,6 +132,7 @@ Flow::TOutput<CVertexInfo*>* CScene::FindPointOutput(const std::string& id) cons
         {
             return &point->Point;
         }
+        
     }
 
     size_t charsToIgnore = 0;
