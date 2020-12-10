@@ -10,7 +10,6 @@ class CPolyline : public CSweepPath
     DEFINE_INPUT_ARRAY(CVertexInfo*, Points) { MarkDirty(); }
 
     DEFINE_OUTPUT_WITH_UPDATE(CSweepPathInfo*, Polyline) { UpdateEntity(); }
-    DEFINE_OUTPUT_WITH_UPDATE(CPolyline*, PolylineObject) { UpdateEntity(); } // Randy added this on 12/4
 
 public:
     DECLARE_META_CLASS(CPolyline, CSweepPath);
@@ -25,7 +24,7 @@ public:
     void UpdateEntity() override;
     void SetPointSourceNames(const TAutoPtr<CScene>& scene, std::vector<std::string> points);
     void SetClosed(bool closed);
-    AST::ACommand* SyncToAST(AST::CASTContext& ctx, bool createNewNode) override; // Randy in progress
+    AST::ACommand* SyncToAST(AST::CASTContext& ctx, bool createNewNode) override; // Randy added this
 
 private:
     bool bClosed = false;
