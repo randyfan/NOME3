@@ -86,7 +86,6 @@ void CBSpline::UpdateEntity() {
         for (int i = 0; i < howMany; i++) {
             float weight = NFactor(i+1,order,t);
             ret += weight * ControlPoints.GetValue(i, nullptr)->Position;
-  
         }
         SamplePositions.emplace_back(ret.x, ret.y, ret.z);
     }

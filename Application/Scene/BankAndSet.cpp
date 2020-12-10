@@ -35,7 +35,6 @@ void CBankAndSet::AddSlider(const std::string& name, AST::ACommand* cmd, float v
         observer->OnSliderAdded(*slider, name);
 }
 
-
 CSlider* CBankAndSet::GetSlider(const std::string& name)
 {
     std::map<std::string, tc::TAutoPtr<CSlider>>::iterator iter;
