@@ -16,9 +16,6 @@ DEFINE_META_OBJECT(CMesh)
 #define VERT_COLOR 255, 255, 255
 #define VERT_SEL_COLOR 0, 255, 0
 
-#define FACE_COLOR 255, 255, 255
-#define FACE_SEL_COLOR 0, 0, 255
-
 CMesh::CMesh() = default;
 
 CMesh::CMesh(std::string name)
@@ -229,7 +226,7 @@ void CMeshInstance::UpdateEntity()
     Mesh.request_edge_status();
     Mesh.request_face_status();
     Mesh.request_face_colors(); // Randy added on 10/10 for face selection. May be useful in the
-                                // future for flat coloring.
+                                // future for flat coloring. Currently doesn't do anything I think
     for (auto vH : Mesh.vertices())
     {
         Mesh.set_color(vH, { VERT_COLOR });
@@ -1138,13 +1135,6 @@ void CMeshInstance::DeselectAll()
 
     // added below on 10/10 for face deselection
 
-    // this for loop doesn't do anything as color is dominated by material. should be able to comment it out in the future
-    for (const auto& name : CurrSelectedFaceNames)
-    {
-        auto handle = NameToFace[name];
-        Mesh.set_color(handle, { FACE_COLOR }); 
-        GetSceneTreeNode()->SetEntityUpdated(true);
-    }
     CurrSelectedFaceNames.clear();
     CurrSelectedFaceNamesWithPrefix.clear(); 
 }
