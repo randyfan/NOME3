@@ -22,7 +22,6 @@ CInteractiveMesh::CInteractiveMesh(Scene::CSceneTreeNode* node)
     , PointGeometry {}
     , PointRenderer {}
 {
-    
     UpdateTransform();
     UpdateGeometry(false); // don't show vert boxes by default
     UpdateMaterial(false); // don't show facets by default
@@ -91,7 +90,6 @@ void CInteractiveMesh::UpdateGeometry(bool showVertBox)
         }
         else
         {
-            // The entity is not a mesh instance, we don't know how to handle it. For example, if you try to instanciate a face, it'll generate this placeholder sphere.
             std::cout << "The entity is not a mesh instance, we don't know how to handle it. For "
                          "example, if you try to instanciate a face, it'll generate this "
                          "placeholder sphere."
@@ -195,7 +193,6 @@ void CInteractiveMesh::InitInteractions()
                 GFrtCtx->NomeView->PickEdgeWorldRay(ray); // Randy added on 10/29 for edge selection
             if (GFrtCtx->NomeView->PickFaceBool)
                 GFrtCtx->NomeView->PickFaceWorldRay(ray); // Randy added on 10/10 for face selection. 
-            //Warning, order affects display messages. Fix later.
         }
     });
     this->addComponent(picker);
