@@ -44,9 +44,8 @@ install:
   - cd C:\Tools\vcpkg
   - git pull
   - .\bootstrap-vcpkg.bat
-  - vcpkg install openmesh pugixml
-  # - vcpkg --triplet x64-windows install openmesh
-  # - vcpkg --triplet x64-windows install pugixml
+  - vcpkg --triplet x64-windows install openmesh
+  - vcpkg --triplet x64-windows install pugixml
 
 build_script:
 - cmd: >-
