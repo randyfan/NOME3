@@ -92,7 +92,7 @@ CMeshImpl::VertexHandle CMesh::AddVertex(const std::string& name, tc::Vector3 po
     CMeshImpl::VertexHandle vertex;
     vertex = Mesh.add_vertex(CMeshImpl::Point(pos.x, pos.y, pos.z));
     NameToVert.emplace(name, vertex);
-    VertToName.emplace(vertex, name); // Randy added on 10/15. This data structure may be useful in the future
+    VertToName.emplace(vertex, name); // Randy added on 10/15
     return vertex;
 }
 
@@ -119,10 +119,8 @@ void CMesh::AddFace(const std::string& name, const std::vector<CMeshImpl::Vertex
     auto faceHandle = Mesh.add_face(facePoints);
     if (!faceHandle.is_valid())
         printf("Could not add face %s into mesh %s\n", name.c_str(), GetName().c_str());
-    FaceVertsToFace.emplace(facePoints,
-                            faceHandle); // Key: vertex handle, Value: faceHandle. Randy Added
-    FaceToFaceVerts.emplace(faceHandle,
-                            facePoints); // Key: vertex handle, Value: faceHandle. Randy Added
+    FaceVertsToFace.emplace(facePoints,faceHandle); // Key: vertex handle, Value: faceHandle. Randy added
+    FaceToFaceVerts.emplace(faceHandle,facePoints); // Key: vertex handle, Value: faceHandle. Randy added
     NameToFace.emplace(name, faceHandle);
     FaceToName.emplace(faceHandle, name); // Randy added
 }
@@ -132,7 +130,7 @@ void CMesh::AddLineStrip(const std::string& name,
 {
     if (LineStrip.empty())
         LineStrip = points;
-    else // Added this to allow line strips to be merged I think
+    else // Added this to allow line strips to be merged I think. RANDY TODO: this is not utilized in merge currently. Implement a merge polyline command in the future
         LineStrip.insert(LineStrip.end(), points.begin(), points.end());
 }
 
@@ -312,8 +310,8 @@ void CMeshInstance::UpdateEntity()
                     newNameToVert.emplace(pair.second, updatedverthandle);
                 }
             }
-            // Maybe I need to clear them before reassigning?
 
+            // Maybe I need to clear them before reassigning?
             VertToName = newVertToName;
             NameToVert = newNameToVert;
 
@@ -333,7 +331,6 @@ void CMeshInstance::UpdateEntity()
 
             for (auto& pair : f)
             {
-
                 int i = pair.second.idx();
                 std::cout << i << std::endl;
                 if (pair.first != face) // if the name is not the one that needs to be deleted
@@ -403,14 +400,9 @@ void CMeshInstance::UpdateEntity()
     {
         // std::cout << "no faces left in mesh. handle this else condition in the future" << std::endl;
         // should probably implement this logic in the future OR else may be further bugs cause this
-        // mesh has no faces
-        // GetSceneTreeNode()->GetEntity()->Release();
-        // GetSceneTreeNode()->Release();
+        // mesh has no faces after removing
     }
     FacesToDelete.clear(); // Randy added this on 10/18. Clear it, we have finished deleting them.
-
-    // Since the handle only contains an index, we can just copy
-
 
     // Randy commented the below section on 10/10. i don't think it does anything ???
     // Construct interactive points
