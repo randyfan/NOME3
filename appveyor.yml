@@ -36,7 +36,7 @@ install:
 
 # pacman -U msys2-keyring-r21.b39fb11-1-any.pkg.tar.xz
   # setup envionment
-  - set PATH=C:\Qt\5.13\msvc2019_64\bin;%PATH%
+  - set PATH=C:\Qt\5.13\msvc2017_64\bin;%PATH%
   - call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
   # Download Antlr 4 jar
   - curl -fsSL -o antlr.jar https://www.antlr.org/download/antlr-4.7.2-complete.jar
