@@ -515,10 +515,12 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
 
         // tc::Vector3 projected = localRay.Project(pos);
         // Randy note: They all have the same position because the local ray is transformed
-        // differently
+        // based on the instance scene node
+
         auto testdist = localRay.HitDistance(*testplane);
 
         // WARNING: Doesn't give all combinations. Naive method only works with convex polygons
+        // TODO: Optimize this to handle concave polygons
         std::vector<float> hitdistances;
 
         for (int i = 0; i < points.size(); i++)
@@ -559,13 +561,12 @@ std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ra
 }
 
 // Pick edges return a vector containing hit distance and the pair of edge vertex names
+// NOTE: PickEdges is the buggiest among Pick functions (because it currently handles edge selection AND polyline/bspline entity selection). Randy will optimize this in the future.
 std::vector<std::pair<float, std::vector<std::string>>>
 CMeshInstance::PickEdges(const tc::Ray& localRay)
 {
     std::vector<std::pair<float, std::vector<std::string>>> result;
-    std::cout << "mesh class: "
-            + GetSceneTreeNode()->GetOwner()->GetEntity()->GetMetaObject().ClassName()
-              << std::endl;
+
     auto meshClass = GetSceneTreeNode()->GetOwner()->GetEntity()->GetMetaObject().ClassName();
     auto meshName = GetSceneTreeNode()->GetOwner()->GetName();
 
@@ -582,7 +583,7 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
         for (int i = 0; i < edgeVertsOnly.size(); i++) // adjacent elements are the edge verts
         {
             auto point = edgeVertsOnly[i];
-            std::cout << "edgeVertsOnly: We are currently in " + GetSceneTreeNode()->GetPath() + "'s Pick Edges. " << std::endl;
+            // std::cout << "edgeVertsOnly: We are currently in " + GetSceneTreeNode()->GetPath() + "'s Pick Edges. " << std::endl;
             // WARNING: Doesn't give all combinations. Naive method only works with convex polygons
             std::vector<float> hitdistances;
             std::map<float, std::vector<std::string>> distToNames;
@@ -667,26 +668,17 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
             auto mindist = *std::min_element(hitdistances.begin(), hitdistances.end());
             std::cout << "Triangle hit distance for edge:  " + std::to_string(mindist) << std::endl;
 
-            // This is outside of the for loop! incorrect!!
             if (mindist < 100)
             {
-                std::cout << "adding two hitpoint names" << std::endl;
                 auto hitpointnames = distToNames.at(mindist); // Guaranteed to be two names
                 auto name1withoutinstprefix = hitpointnames[0].substr(instPrefix.length());
                 auto name2withoutinstprefix = hitpointnames[1].substr(instPrefix.length());
-                std::cout << "YUQI: " + hitpointnames[0].substr(instPrefix.length()) << std::endl;
-                std::cout << "ZUQI: " + std::to_string(NameToVert.at(name1withoutinstprefix).idx())
-                          << std::endl;
 
                 auto point1 = NameToVert.at(name1withoutinstprefix);
                 auto point2 = NameToVert.at(name2withoutinstprefix);
-                std::cout << "yoqi: " + std::to_string(Mesh.find_halfedge(point1, point2).idx())
-                          << std::endl;
-                ;
 
-                std::cout << mindist << std::endl;
                 // result.emplace_back(mindist, hitpointnames); // Commented this out on 11/22.
-                // Purposely don't want to include those results. COmment it back out
+                // Purposely don't want to include those results.
 
                 // Randy added this on 11/21. Key to selecting entire polylines and bsplines
                 std::cout << "Pick edges in Mesh.cpp: found entity: " + meshClass << std::endl;
@@ -706,17 +698,9 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
         }
     }
 
-
     // Else, for entities other than Polyline or BSpline...
     auto instPrefix = GetSceneTreeNode()->GetPath() + ".";
     
-    
-    //for (auto ei = Mesh.halfedges_begin(); ei != Mesh.halfedges_end(); ++ei) {
-    //    std::cout << ei.handle().idx() << std::endl;
-    //    std::cout << Mesh.point(Mesh.to_vertex_handle(ei.handle())) << std::endl;
-    //    std::cout << Mesh.to_vertex_handle(ei.handle()) << std::endl;
-    //    std::cout << "clive purely for debugging." << std::endl;
-    //}
     for (const auto& pair : FaceVertsToFace) // if CPolyline or CBspline, this will silently get skipped
     {
         auto points = pair.first;
@@ -740,7 +724,7 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
                  tc::Vector3 pos1 { posArr1[0], posArr1[1], posArr1[2] };
                  tc::Vector3 pos2 { posArr2[0], posArr2[1], posArr2[2] };
 
-                 // naive method, extend the plane out of the line in 6 directions a little
+                 // TODO: Fix this naive method. Naive method extend the plane out of the line in 6 directions 
                  tc::Vector3 dummy1 = (pos1 + pos2) / 2;
                  dummy1.y += 0.350; // used to be 0.350
                  tc::Vector3 dummy2 = (pos1 + pos2) / 2;
@@ -760,7 +744,6 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
                  testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy5));
                  testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy6));
                  hitdistances.push_back(testdist1);
-                 std::cout << "testdist1a: " + std::to_string(testdist1) << std::endl;
                  auto vertname1 = instPrefix + VertToName.at(firstpoint);
                  auto vertname2 = instPrefix + VertToName.at(secondpoint);
                  std::vector<std::string> names;
@@ -779,7 +762,7 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
                 tc::Vector3 pos2 { posArr2[0], posArr2[1], posArr2[2] };
                  
                 
-                 // naive method, extend the plane out of the line in 6 directions a little
+                 // TODO: Fix this naive method. Naive method extend the plane out of the line in 6 directions
                 tc::Vector3 dummy1 = (pos1 + pos2) / 2;
                 dummy1.y += 0.350;
                 tc::Vector3 dummy2 = (pos1 + pos2) / 2;
@@ -799,7 +782,6 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
                 testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy5));
                 testdist1 = std::min(testdist1, localRay.HitDistance(pos1, pos2, dummy6));
                 hitdistances.push_back(testdist1);
-                std::cout << "testdist1b: " + std::to_string(testdist1) << std::endl;
                 auto vertname1 = instPrefix + VertToName.at(firstpoint);
                 auto vertname2 = instPrefix + VertToName.at(secondpoint);
                 std::vector<std::string> names;
@@ -818,22 +800,18 @@ CMeshInstance::PickEdges(const tc::Ray& localRay)
             auto hitpointnames = distToNames.at(mindist); // Guaranteed to be two names
             auto name1withoutinstprefix = hitpointnames[0].substr(instPrefix.length()); 
             auto name2withoutinstprefix = hitpointnames[1].substr(instPrefix.length()); 
-            std::cout << "YUQI: " + hitpointnames[0].substr(instPrefix.length()) << std::endl;
-            std::cout << "ZUQI: " + std::to_string(NameToVert.at(name1withoutinstprefix).idx()) << std::endl;
 
             auto point1 = NameToVert.at(name1withoutinstprefix);
             auto point2 = NameToVert.at(name2withoutinstprefix);
-            std::cout <<"yoqi: " + std::to_string(Mesh.find_halfedge(point1, point2).idx()) << std::endl;;
+
 
             std::cout << mindist << std::endl;
             result.emplace_back(mindist, hitpointnames);
-            std::cout << "added two hitpoint names" << std::endl;
         }
     }
     // std::sort(result.begin(), result.end());
     for (const auto& sel : result)
     {
-        std::cout << "added" << std::endl;
         printf("t=%.3f v1=%s v2 =%s\n", sel.first, sel.second[0].c_str(), sel.second[1].c_str());
     }
     return result;
