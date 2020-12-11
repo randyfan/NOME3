@@ -95,6 +95,7 @@ TAutoPtr<CSceneNode> CScene::FindGroup(const std::string& name) const
 Flow::TOutput<CVertexInfo*>* CScene::FindPointOutput(const std::string& id) const
 {
 
+    // The for loop below is used to determine if a point is a referencing a mesh point vs a global point
     // Make sure there is not a mesh point with the same name. Inefficient O(n) lookup. Optimize in
     // the future. Randy added on 12/9
     for (const auto& NameEntity : EntityLibrary)
@@ -109,7 +110,6 @@ Flow::TOutput<CVertexInfo*>* CScene::FindPointOutput(const std::string& id) cons
             // so we would use the mesh's point 
             if (std::find(orderedMeshNames.begin(), orderedMeshNames.end(), meshName) == orderedMeshNames.end())
             {
-                std::cout << "DEBUG MESSAGE (remove later): Found matching point: " + meshName << std::endl;
                 return FindPointOutput(entityName); // Find point output using the desired mesh point
             }
         }
@@ -153,10 +153,7 @@ Flow::TOutput<CVertexInfo*>* CScene::FindPointOutput(const std::string& id) cons
                 auto* point =
                     meshInstance->CreateVertexSelector(id.substr(charsToIgnore), idTurnedVertName);
                 if (point)
-                {
-                    std::cout << "found an actual point, not null ptr" << std::endl;
                     return &point->Point;
-                }
                 else
                     return nullptr;
             }
