@@ -22,7 +22,6 @@ DEFINE_META_OBJECT(CTorus)
     BindPositionalArgument(&CTorus::phi_max, 1, 4);
     BindPositionalArgument(&CTorus::theta_segs, 1, 5);
     BindPositionalArgument(&CTorus::phi_segs, 1, 6);
-    // BindPositionalArgument(&CTorus::phi_segs, 1, 6);
 }
 void CTorus::UpdateEntity()
 {

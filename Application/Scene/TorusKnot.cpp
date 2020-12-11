@@ -15,10 +15,8 @@ typedef struct
 
 DEFINE_META_OBJECT(CTorusKnot)
 {
-    BindPositionalArgument(&CTorusKnot::P_Val, 1,
-                           0); // equivalent to "symm" in the language reference
-    BindPositionalArgument(&CTorusKnot::Q_Val, 1,
-                           1); // equivalent to "turns" in the language reference
+    BindPositionalArgument(&CTorusKnot::P_Val, 1, 0); // equivalent to "symm" in the language reference
+    BindPositionalArgument(&CTorusKnot::Q_Val, 1, 1); // equivalent to "turns" in the language reference
     BindPositionalArgument(&CTorusKnot::MajorRadius, 1, 2);
     BindPositionalArgument(&CTorusKnot::MinorRadius, 1, 3);
     BindPositionalArgument(&CTorusKnot::TubeRadius, 1, 4); // equivalent to "minor radius"
