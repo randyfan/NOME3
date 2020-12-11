@@ -1,5 +1,4 @@
 #include "MeshMerger.h"
-#include "Environment.h" // may be useful in the future to add faces as entities
 #include <unordered_map>
 
 namespace Nome::Scene
@@ -14,7 +13,6 @@ void CMeshMerger::UpdateEntity()
 
     // Update is manual, so this entity has a dummy update method
 
-    std::cout << "Mesh Merger's face size is here: " + std::to_string(Faces.GetSize()) << std::endl;
     CEntity::UpdateEntity();
     SetValid(true);
 }
@@ -131,7 +129,7 @@ void CMeshMerger::MergeIn(const CMeshInstance& meshInstance)
     // Add faces and create a face mesh for each 
     for (auto fi = otherMesh.faces_begin(); fi != otherMesh.faces_end(); ++fi) //Iterate through all the faces in the mesh (that is, the non-merger mesh, aka the one you're trying to copy faces from)
     {
-      // Need to add vertices to scene. PAUSED HERE
+      // TODO: Need to add vertices to scene if want to save changes back into .nom file I think 
         //auto newface = new CFace("placeholder" + fi.handle().idx());  // TODO: may be useful in the future to add faces as entities
         //GEnv.Scene->AddEntity(newface);  // TODO: may be useful in the future to add faces as entities
         //Faces.Connect(newface->Face); // TODO: may be useful in the future to add faces as entities
@@ -149,7 +147,7 @@ void CMeshMerger::MergeIn(const CMeshInstance& meshInstance)
     }
 
 
-    // For combining polylines/bsplines. Not needed for now. Comment back in when needed
+    // For combining/merging disjoint polylines/bsplines. Not needed for now. Comment back in when needed
     //std::vector<CMeshImpl::VertexHandle> vHandles;;
     //for (auto& Pair : NameToVert) {
     //    auto vHandle = Pair.second;
