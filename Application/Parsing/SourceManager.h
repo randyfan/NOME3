@@ -43,6 +43,7 @@ public:
                         AST::ACommand* newCommand);
     bool AppendCmdEndOfFile(AST::ACommand* newCommand);
 
+    bool AppendText(const std::string& text); // Steven's Add Point 
     void CommitASTChanges();
     void SaveFile() const;
 

@@ -29,6 +29,8 @@ public:
     vector<Vertex*> vertList;
     /* A list of all facets in this mesh.*/
     vector<Face*> faceList;
+    /* A list of all edges in this mesh. Randy added this one because edgeTable was behaving weirdly*/ 
+    vector<Edge*> edgeList;
 
     // Randy added these two. Easy way to access Vertex objects in Mesh.cpp. Don't need to traverse vertList
     unordered_map<string, Vertex*> nameToVert;
@@ -37,6 +39,10 @@ public:
 
     /* This is an auxillary table to build a mesh, matching edge to vertex.*/
     unordered_map<Vertex*, vector<Edge*>> edgeTable;
+    unordered_map<Vertex*, vector<Edge*>>
+        randyedgeTable; // the above edgeTable one from Nome2 is buggy. for some reason one vertex always
+                   // maps to only one edge. Was that intended?
+
     Mesh(int type = 0);
     /**
      * @brief addVertex: Add one vertex to this Mesh.
@@ -149,7 +155,7 @@ public:
     /**
      * @brief clear: clear the current mesh and delete the vertices and faces.
      */
-    void clearAndDelete();
+    //void clearAndDelete();
     /* Indicator of whether user sets the color of this mesh.*/
     bool user_set_color;
     /* transformation matrix to go up one level.*/

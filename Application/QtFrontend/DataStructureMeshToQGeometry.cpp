@@ -9,7 +9,7 @@ namespace Nome
     // Project SwitchDS
 CDataStructureMeshToQGeometry::CDataStructureMeshToQGeometry(
     const DSMesh& fromMesh, bool bGenPointGeometry)
-{
+{ 
     // Per face normal, thus no shared vertices between faces
     struct CVertexData
     {

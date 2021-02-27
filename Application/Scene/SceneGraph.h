@@ -84,6 +84,25 @@ public:
     CSceneNode* FindChildNode(const std::string& name);
     CSceneNode* FindOrCreateChildNode(const std::string& name);
 
+
+     // For subdivision merge // Project AddOffset
+    template <typename TFunc> void ForEachTreeNode(const TFunc& func) const
+    {
+        for (auto treeNode : TreeNodes)
+        {
+            std::queue<CSceneTreeNode*> q;
+            q.push(treeNode);
+            while (!q.empty())
+            {
+                func(q.front());
+                const auto& childNodes = q.front()->GetChildren();
+                for (CSceneTreeNode* child : childNodes)
+                    q.push(child);
+                q.pop();
+            }
+        }
+    }
+
     // Returns the number of associated tree nodes, i.e. the number of ways from the root to this
     // graph node
     size_t CountTreeNodes() const;
@@ -105,6 +124,9 @@ public:
     AST::ACommand* BuildASTCommand(Nome::AST::CASTContext& ctx) const;
     void SyncToAST(AST::CASTContext& ctx);
 
+
+    const std::set<TAutoPtr<CSceneNode>>& GetSceneNodeChildren() { return Children; } // Project AddOffset 
+    
     void SelectNode() { SelectBool = true; } // Randy added this on 11/21 for selection coloring
     void DoneSelecting()
     {

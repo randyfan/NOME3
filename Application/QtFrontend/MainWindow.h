@@ -57,7 +57,7 @@ private slots:
     void on_actionInstance_triggered();
     */
     // void on_actionAbout_triggered(); commeting out with new developments
-
+    void on_actionAddPoint_triggered(); // Steven's Add Point
 
     void on_actionAddFace_triggered();
     void on_actionAddPolyline_triggered(); 
@@ -68,6 +68,8 @@ private slots:
     /* Randy temporarily commenting out due to temporarymeshmanager changes
     void on_actionResetTempMesh_triggered(); */
 
+    void on_actionRenderRay_triggered(); // Randy added this on 2/26
+
     void on_actionCommitChanges_triggered();
 
     void on_actionShowFacets_triggered(); // Randy added this
@@ -75,6 +77,7 @@ private slots:
     void on_actionToggleEdgeSelection_triggered(); // Randy added this on 11/5
     void on_actionTogglePolylineSelection_triggered(); // Randy added this on 12/22
     void on_actionToggleFaceSelection_triggered(); // Randy added this on 11/5
+    void on_actionToggleRenderRay_triggered(); // Randy added this on 2/26 for adding points via ray
 
 private:
     // Load nome files into the current window, only call one of them

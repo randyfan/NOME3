@@ -79,8 +79,11 @@ public:
         frame->SetNumber(frame->GetNumber() + x);
     }
 
+private:
+    void DFSTreeNodeUpdate(CSceneTreeNode* treeNode, bool markDirty); // project AddOffset
 
 private:
+    bool markedDirty = true; // Project AddOffset
     CBankAndSet BankAndSet;
 
     // This is the root node of the scene tree
@@ -94,7 +97,7 @@ private:
     // The following two maps enable looking up objects by their names
     std::map<std::string, TAutoPtr<CEntity>> EntityLibrary;
     std::map<std::string, TAutoPtr<CSceneNode>> Groups;
-    std::map<std::string, TAutoPtr<CSceneNode>> Merges;
+    std::map<std::string, TAutoPtr<CSceneNode>> Merges; // Project AddOffset
 
     // Used to help figure out which scope to use when using points. Useful, for example, for
     // defining and using points in a mesh

@@ -255,6 +255,8 @@ std::vector<std::string> CMeshInstance::RemoveFace(const std::vector<std::string
     return removedVertName;
 }
 
+
+
 std::vector<std::pair<float, std::string>> CMeshInstance::PickFaces(const tc::Ray& localRay)
 {
     std::vector<std::pair<float, std::string>> result;

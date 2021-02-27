@@ -297,7 +297,7 @@ void CASTSceneAdapter::VisitCommandSyncScene(AST::ACommand* cmd, CScene& scene, 
     else if (cmd->GetCommand() == "subdivision" || cmd->GetCommand() == "offset")
     {
         // 1.read all instances to a merged mesh
-        InstanciateUnder = GEnv.Scene->CreateMerge(cmd->GetName());
+        InstanciateUnder = GEnv.Scene->CreateMerge(cmd->GetName()); // conceptually similar to CreateGroup
         InstanciateUnder->SyncFromAST(cmd, scene);
         // cmd->GetLevel();
 
@@ -315,8 +315,7 @@ void CASTSceneAdapter::VisitCommandSyncScene(AST::ACommand* cmd, CScene& scene, 
             if (flag)
             {
                 auto flagName = flag->GetArgument( 0)[0]; 
-                auto flagIdentifier = static_cast<AST::AIdent*>(&flagName)
-                                          ->ToString(); // Downcast it back to an AIdent
+                auto flagIdentifier = static_cast<AST::AIdent*>(&flagName)->ToString(); // Downcast it back to an AIdent
                 if (flagIdentifier == "NOME_SD_CC_sharp")
                     merger->SetSharp(true);
                 else

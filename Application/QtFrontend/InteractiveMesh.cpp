@@ -207,7 +207,15 @@ void CInteractiveMesh::InitInteractions()
             const auto& origin = GFrtCtx->NomeView->camera()->position();
             auto dir = wi - origin;
 
+            std::cout << wi.x() << " " << wi.y() <<" " << wi.z() << "DEBUG WI/INTERSECTION POSITION" << std::endl;
             tc::Ray ray({ origin.x(), origin.y(), origin.z() }, { dir.x(), dir.y(), dir.z() });
+            
+            // Randy's Render Ray
+            if (GFrtCtx->NomeView->RenderRayBool)
+            {
+                std::cout << "Ray was just cast-> click on Render Ray button to visualize it" << std::endl;
+                GFrtCtx->NomeView->RenderRay(ray, wi); // Randy added this on 2/26
+            }
 
             if (GFrtCtx->NomeView->PickVertexBool)
                 GFrtCtx->NomeView->PickVertexWorldRay(ray);

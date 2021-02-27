@@ -75,6 +75,7 @@ Edge* Mesh::createEdge(Vertex* v1, Vertex* v2)
     {
         // cout<<"Creating new Edge from vertex "<<v1 -> ID<<" to vertex "<<v2 -> ID<<"."<<endl;
         edge = new Edge(v1, v2);
+        edgeList.push_back(edge); // Randy added this on 2/21!
         if (v1->oneEdge == NULL)
         {
             v1->oneEdge = edge;
@@ -85,6 +86,7 @@ Edge* Mesh::createEdge(Vertex* v1, Vertex* v2)
         }
         unordered_map<Vertex*, vector<Edge*>>::iterator vIt;
         vIt = edgeTable.find(v1);
+
         if (vIt != edgeTable.end())
         {
             (vIt->second).push_back(edge);
@@ -95,6 +97,30 @@ Edge* Mesh::createEdge(Vertex* v1, Vertex* v2)
             currEdges.push_back(edge);
             edgeTable[v1] = currEdges;
         }
+
+        if (randyedgeTable.count(v1) > 0)
+        {
+            randyedgeTable[v1].push_back(edge);
+        }
+        else
+        {
+            vector<Edge*> currEdges;
+            currEdges.push_back(edge);
+            randyedgeTable[v1] = currEdges;
+        }
+
+        
+        if (randyedgeTable.count(v2) > 0)
+        {
+            randyedgeTable[v2].push_back(edge);
+        }
+        else
+        {
+            vector<Edge*> currEdges;
+            currEdges.push_back(edge);
+            randyedgeTable[v2] = currEdges;
+        }
+
     }
     // cout<<"The va of edge is "<<edge -> va -> ID<<" . The vb is "<< edge -> vb -> ID<<" ."<<endl;
     return edge;
@@ -250,7 +276,7 @@ Face * Mesh::addPolygonFace(vector<Vertex*> vertices, bool reverseOrder)
     vector<Edge*> edgesInFace;
     vector<Edge*>::iterator eIt;
     Edge* currEdge;
-
+    
     if (!reverseOrder)
     {
         for (vIt = vertices.begin(); vIt < vertices.end(); vIt++)
@@ -275,9 +301,10 @@ Face * Mesh::addPolygonFace(vector<Vertex*> vertices, bool reverseOrder)
             }
             else
             {
-                cout << "addPolygonFace ERROR: Try to create a Non-Manifold at edge with vertex1 : "
-                     << currEdge->va->position.x << " " << currEdge->va->position.y << "  "
-                     << currEdge->va->position.z << " and vertex2 :"
+                cout << "addPolygonFace ERROR: Try to create a Non-Manifold at edge with "
+                     << currEdge->va->name << " :"
+                     << currEdge->va->position.x << " " << currEdge->va->position.y << "  " << currEdge->va->position.z << " and "
+                     << currEdge->vb->name << " :"
                     << currEdge->vb->position.x << " " << currEdge->vb->position.y << "  "
                                                      << currEdge->vb->position.z
                   << endl;
@@ -607,20 +634,20 @@ void Mesh::clear()
     edgeTable.clear();
 }
 
-void Mesh::clearAndDelete()
-{
-    for (Vertex*& v : vertList)
-    {
-        delete v;
-    }
-    for (Face*& f : faceList)
-    {
-        delete f;
-    }
-    vertList.clear();
-    faceList.clear();
-    edgeTable.clear();
-}
+//void Mesh::clearAndDelete()
+//{
+//    for (Vertex*& v : vertList)
+//    {
+//        delete v;
+//    }
+//    for (Face*& f : faceList)
+//    {
+//        delete f;
+//    }
+//    vertList.clear();
+//    faceList.clear();
+//    edgeTable.clear();
+//}
 
 //void Mesh::setColor(QColor color) { this->color = color; }
 
@@ -643,10 +670,12 @@ Mesh Mesh::randymakeCopy(string copy_mesh_name, bool isPolyline)
     vector<Vertex*>::iterator vIt;
     for (vIt = vertList.begin(); vIt < vertList.end(); vIt++)
     {
+
         Vertex* vertCopy = new Vertex;
         vertCopy->ID = (*vIt)->ID;
         vertCopy->name = (*vIt)->name;
         vertCopy->position = (*vIt)->position;
+       // std::cout << "randymakecopy() debug: " << "ID: "<<  vertCopy->ID << "name: " << vertCopy->name << "position: " << vertCopy->position.x << " " << vertCopy->position.y << " " << vertCopy->position.z << std::endl;
         newMesh.addVertex(vertCopy);
     }
     vector<Face*>::iterator fIt;
