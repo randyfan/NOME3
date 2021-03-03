@@ -7,6 +7,7 @@
 #include <set>
 #include <string>
 #include <utility>
+#include <queue>
 
 namespace Nome::Scene
 {
